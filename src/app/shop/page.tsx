@@ -3,6 +3,8 @@ import { prisma } from "@/lib/db";
 import ProductCard from "@/components/shop/ProductCard";
 import HeroBanner from "@/components/shop/HeroBanner";
 import FlashSale from "@/components/shop/FlashSale";
+
+export const dynamic = "force-dynamic";
 import CategoryStrip from "@/components/shop/CategoryStrip";
 import PromoBanners from "@/components/shop/PromoBanners";
 import Link from "next/link";

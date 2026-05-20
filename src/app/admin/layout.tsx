@@ -3,7 +3,8 @@ import { type Metadata } from "next";
 import type { Session } from "next-auth";
 import { auth } from "@/lib/auth";
 import AdminSidebar from "@/components/admin/AdminSidebar";
-import { AlertCircle } from "lucide-react";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard | IYOSIOLA GROUP",

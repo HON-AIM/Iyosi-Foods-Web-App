@@ -26,6 +26,8 @@ import {
   BarChart3,
 } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Dashboard | Admin - Iyosi Foods",
   description: "Complete store management dashboard",

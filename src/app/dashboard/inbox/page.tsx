@@ -2,6 +2,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { format } from "date-fns";
 
+export const dynamic = "force-dynamic";
+
 export default async function InboxPage() {
   const session = await auth();
 

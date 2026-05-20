@@ -2,6 +2,8 @@ import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default async function VerifyPage({
   searchParams,
 }: {

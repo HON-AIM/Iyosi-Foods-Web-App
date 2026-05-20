@@ -2,6 +2,8 @@ import { auth } from "@/lib/auth";
 import Link from "next/link";
 import { PenSquare } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardPage() {
   const session = await auth();
 

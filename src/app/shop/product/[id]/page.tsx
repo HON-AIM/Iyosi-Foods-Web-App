@@ -5,6 +5,8 @@ import ProductActions from "@/components/shop/ProductActions";
 import { ShieldCheck, Truck, RotateCcw, Package, Star, Heart, Share2, Check } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default async function ProductDetailPage({
   params,
 }: {
@@ -20,7 +22,7 @@ export default async function ProductDetailPage({
   }
 
   const reviews = await prisma.review.findMany({
-    where: { productId: params.id },
+    where: { productId: id },
     include: { user: { select: { name: true } } },
     orderBy: { createdAt: "desc" },
     take: 5,

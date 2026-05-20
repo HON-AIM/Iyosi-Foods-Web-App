@@ -3,22 +3,7 @@ import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { format } from "date-fns";
 
-type OrderItem = {
-  id: string;
-  quantity: number;
-  product: {
-    name: string;
-    image: string | null;
-  };
-};
-
-type Order = {
-  id: string;
-  createdAt: Date;
-  totalAmount: number;
-  status: string;
-  items: OrderItem[];
-};
+export const dynamic = "force-dynamic";
 
 export default async function OrdersPage() {
   const session = await auth();
