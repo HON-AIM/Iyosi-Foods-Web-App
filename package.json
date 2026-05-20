@@ -16,7 +16,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@auth/core": "^0.41.0",
+    "@auth/core": "0.41.2",
     "@auth/prisma-adapter": "^2.7.0",
     "@prisma/client": "^6.19.2",
     "@types/nodemailer": "^7.0.11",
@@ -31,6 +31,9 @@
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.6.0",
     "zod": "^3.23.8"
+  },
+  "overrides": {
+    "@auth/core": "0.41.2"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
