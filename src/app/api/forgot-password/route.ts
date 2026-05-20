@@ -4,6 +4,7 @@ import { sendPasswordResetEmail } from "@/lib/email";
 import { type NextRequest } from "next/server";
 import crypto from "crypto";
 import { z } from "zod";
+import { passwordResetLimiter, createRateLimitResponse, setRateLimitHeaders } from "@/lib/rate-limiter";
 
 const ForgotPasswordSchema = z.object({
   email: z.string().email("Invalid email format").toLowerCase().trim(),
@@ -15,6 +16,22 @@ export async function POST(request: NextRequest) {
   try {
     if (request.method !== "POST") {
       return NextResponse.json({ message: "Method Not Allowed" }, { status: 405 });
+    }
+
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+               request.headers.get("x-real-ip") ||
+               "unknown";
+    const isAllowed = await passwordResetLimiter.check(ip);
+    if (!isAllowed) {
+      const remaining = passwordResetLimiter.getRemaining(ip);
+      const resetTime = passwordResetLimiter.getResetTime(ip);
+      const response = NextResponse.json(
+        createRateLimitResponse(remaining, resetTime),
+        { status: 429 }
+      );
+      setRateLimitHeaders(response, remaining, resetTime);
+      return response;
     }
 
     const body = await request.text();

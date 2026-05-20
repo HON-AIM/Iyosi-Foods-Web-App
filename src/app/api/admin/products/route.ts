@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { type NextRequest } from "next/server";
 import { z } from "zod";
+import { adminLimiter } from "@/lib/admin-rate-limiter";
 
 const ProductSchema = z.object({
   name: z.string().min(2, "Product name must be at least 2 characters").max(200).trim(),
@@ -18,6 +19,18 @@ const MAX_LIMIT = 100;
 
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        request.headers.get("x-real-ip") ||
+        "unknown";
+    const allowed = await adminLimiter.check(ip);
+    if (!allowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const session = await auth();
 
     if (!session?.user) {
@@ -90,6 +103,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        request.headers.get("x-real-ip") ||
+        "unknown";
+    const allowed = await adminLimiter.check(ip);
+    if (!allowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const session = await auth();
 
     if (!session?.user) {

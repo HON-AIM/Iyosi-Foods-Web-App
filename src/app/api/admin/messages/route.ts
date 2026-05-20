@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { sendAdminDirectMessage } from "@/lib/email";
 import { type NextRequest } from "next/server";
+import { adminLimiter } from "@/lib/admin-rate-limiter";
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
@@ -21,6 +22,18 @@ const MAX_CONTENT_LENGTH = 5000;
  */
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        request.headers.get("x-real-ip") ||
+        "unknown";
+    const allowed = await adminLimiter.check(ip);
+    if (!allowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const session = await auth();
 
     // ✅ Check if user is authenticated
@@ -141,6 +154,18 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        request.headers.get("x-real-ip") ||
+        "unknown";
+    const allowed = await adminLimiter.check(ip);
+    if (!allowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const session = await auth();
 
     // ✅ Check if user is authenticated

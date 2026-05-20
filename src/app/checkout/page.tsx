@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Loader2,
   Package,
+  AlertTriangle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -23,6 +24,30 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [validating, setValidating] = useState(true);
+  const [validationError, setValidationError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function validateCart() {
+      try {
+        const res = await fetch("/api/shop/cart/validate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ items: items.map((i) => ({ productId: i.id, quantity: i.quantity })) }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          setValidationError(data.message || "Some items in your cart have changed.");
+        }
+      } catch {
+        setValidationError("Could not validate cart. Please refresh and try again.");
+      } finally {
+        setValidating(false);
+      }
+    }
+    if (items.length > 0) validateCart();
+    else setValidating(false);
+  }, [items]);
 
   const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,9 +68,8 @@ export default function CheckoutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: items.map((item) => ({
-            id: item.id,
+            productId: item.id,
             quantity: item.quantity,
-            price: item.price,
           })),
           shippingAddress: shippingAddress.trim(),
         }),
@@ -58,7 +82,7 @@ export default function CheckoutPage() {
         return;
       }
 
-      setOrderId(data.orderId);
+      setOrderId(data.id);
       setOrderPlaced(true);
       clearCart();
     } catch {
@@ -166,6 +190,19 @@ export default function CheckoutPage() {
               </h2>
             </div>
 
+            {validating && (
+              <div className="flex items-center gap-2 text-sm text-gray-500 mb-4 p-3 bg-gray-50 rounded-lg">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Validating your cart…
+              </div>
+            )}
+            {validationError && (
+              <div className="flex items-start gap-2 text-sm text-amber-700 mb-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                <AlertTriangle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <span>{validationError}</span>
+              </div>
+            )}
+
             <form onSubmit={handlePlaceOrder} className="space-y-5">
               <div>
                 <label
@@ -191,7 +228,7 @@ export default function CheckoutPage() {
 
               <button
                 type="submit"
-                disabled={isSubmitting}
+                disabled={isSubmitting || validating}
                 className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white py-3.5 rounded-lg font-bold text-sm tracking-wide transition-colors flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (

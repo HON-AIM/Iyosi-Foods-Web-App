@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { type NextRequest } from "next/server";
 import { z } from "zod";
+import { adminLimiter } from "@/lib/admin-rate-limiter";
 
 // ✅ Define store settings schema for validation
 const StoreSettingsSchema = z.object({
@@ -74,6 +75,18 @@ type StoreSettings = z.infer<typeof StoreSettingsSchema>;
  */
 export async function GET(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        request.headers.get("x-real-ip") ||
+        "unknown";
+    const allowed = await adminLimiter.check(ip);
+    if (!allowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     // ✅ Fetch settings from database
     const settings = await prisma.storeSettings.findFirst({
       where: { id: "global" },
@@ -144,6 +157,18 @@ export async function GET(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        request.headers.get("x-real-ip") ||
+        "unknown";
+    const allowed = await adminLimiter.check(ip);
+    if (!allowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const session = await auth();
 
     // ✅ Correct status code: 401 for missing session, 403 for insufficient permissions
@@ -284,6 +309,18 @@ export async function POST(request: NextRequest) {
  */
 export async function PATCH(request: NextRequest) {
   try {
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        request.headers.get("x-real-ip") ||
+        "unknown";
+    const allowed = await adminLimiter.check(ip);
+    if (!allowed) {
+      return NextResponse.json(
+        { message: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const session = await auth();
 
     if (!session?.user) {

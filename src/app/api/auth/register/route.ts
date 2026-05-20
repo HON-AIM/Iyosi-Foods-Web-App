@@ -5,6 +5,7 @@ import { sendVerificationEmail } from "@/lib/email";
 import crypto from "crypto";
 import { z } from "zod";
 import { type NextRequest } from "next/server";
+import { registrationLimiter, createRateLimitResponse, setRateLimitHeaders } from "@/lib/rate-limiter";
 
 const RegisterSchema = z.object({
   name: z
@@ -39,6 +40,22 @@ export async function POST(request: NextRequest) {
   try {
     if (request.method !== "POST") {
       return NextResponse.json({ message: "Method Not Allowed" }, { status: 405 });
+    }
+
+    // Rate limiting
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+               request.headers.get("x-real-ip") ||
+               "unknown";
+    const isAllowed = await registrationLimiter.check(ip);
+    if (!isAllowed) {
+      const remaining = registrationLimiter.getRemaining(ip);
+      const resetTime = registrationLimiter.getResetTime(ip);
+      const response = NextResponse.json(
+        createRateLimitResponse(remaining, resetTime),
+        { status: 429 }
+      );
+      setRateLimitHeaders(response, remaining, resetTime);
+      return response;
     }
 
     const body = await request.text();
