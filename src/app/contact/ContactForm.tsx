@@ -76,7 +76,7 @@ export default function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [submissionResponse, setSubmissionResponse] = useState<SubmissionResponse | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
-  const submitTimeoutRef = useRef<NodeJS.Timeout>();
+  const submitTimeoutRef = useRef<NodeJS.Timeout>(undefined);
   const formRef = useRef<HTMLFormElement>(null);
 
   const handleInputChange = useCallback(
