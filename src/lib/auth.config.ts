@@ -21,8 +21,8 @@ export const authConfig = {
     },
     async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id
-        token.email = user.email
+        token.id = user.id ?? ""
+        token.email = user.email ?? ""
         token.role = (user as { role?: string }).role
       }
       if (account?.type === "credentials") {
