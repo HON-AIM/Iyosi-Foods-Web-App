@@ -198,7 +198,7 @@ function LoginForm() {
           email: formData.email.trim().toLowerCase(),
           password: formData.password,
           rememberMe: formData.rememberMe,
-        });
+        }) as { error?: string; ok: boolean } | undefined;
 
         if (res?.error) {
           // ✅ Track failed attempts

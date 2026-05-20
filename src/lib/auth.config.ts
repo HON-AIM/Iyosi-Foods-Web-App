@@ -23,7 +23,7 @@ export const authConfig = {
       if (user) {
         token.id = user.id ?? ""
         token.email = user.email ?? ""
-        token.role = (user as { role?: string }).role
+        token.role = (user as { role?: "USER" | "ADMIN" }).role ?? "USER"
       }
       if (account?.type === "credentials") {
         token.maxAge = 30 * 24 * 60 * 60

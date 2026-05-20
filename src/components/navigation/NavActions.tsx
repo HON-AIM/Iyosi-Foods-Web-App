@@ -90,7 +90,7 @@ export default function NavActions({ mobileMenuOpen, onMobileMenuToggle }: NavAc
         >
           <User className="h-5 w-5 text-surface-600" />
           <span className="hidden lg:block text-sm font-medium text-surface-700 max-w-[80px] truncate">
-            {session ? session.user.name?.split(" ")[0] : "Account"}
+            {session?.user ? session.user.name?.split(" ")[0] : "Account"}
           </span>
           <ChevronDown className="w-3.5 h-3.5 text-surface-400" />
         </button>
@@ -108,8 +108,8 @@ export default function NavActions({ mobileMenuOpen, onMobileMenuToggle }: NavAc
             {session ? (
               <>
                 <div className="py-3 px-4 border-b border-surface-100 bg-surface-50">
-                  <p className="text-sm font-semibold text-surface-900 truncate">{session.user.name}</p>
-                  <p className="text-xs text-surface-500 truncate">{session.user.email}</p>
+                  <p className="text-sm font-semibold text-surface-900 truncate">{session.user?.name}</p>
+                  <p className="text-xs text-surface-500 truncate">{session.user?.email}</p>
                 </div>
                 <div className="py-2">
                   <Link

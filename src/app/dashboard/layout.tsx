@@ -21,6 +21,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     redirect("/login");
   }
 
+  const user = session.user;
+
   return (
     <div className="bg-gray-100 min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row gap-6">
@@ -30,11 +32,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
           <div className="bg-white shadow rounded-lg overflow-hidden flex flex-col">
             <div className="p-4 border-b border-gray-100 flex items-center gap-3">
                <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 font-bold text-lg">
-                  {session.user.name?.charAt(0) || "U"}
+                  {user.name?.charAt(0) || "U"}
                </div>
                <div className="flex flex-col min-w-0">
-                  <span className="font-semibold text-gray-800 truncate">{session.user.name || "User"}</span>
-                  <span className="text-xs text-gray-500 truncate">{session.user.email}</span>
+                  <span className="font-semibold text-gray-800 truncate">{user.name || "User"}</span>
+                  <span className="text-xs text-gray-500 truncate">{user.email}</span>
                </div>
             </div>
             

@@ -89,7 +89,7 @@ export default function ShopHeader() {
               <div className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-50 rounded-md transition-colors text-gray-700 font-medium">
                 <User className="h-6 w-6" />
                 <span className="hidden lg:block text-sm">
-                  {session ? `Hi, ${session.user.name?.split(' ')[0]}` : 'Account'}
+                  {session?.user ? `Hi, ${session.user.name?.split(' ')[0]}` : 'Account'}
                 </span>
                 <ChevronDown className="h-4 w-4 hidden lg:block" />
               </div>
@@ -113,8 +113,8 @@ export default function ShopHeader() {
                     </div>
                   ) : (
                     <div className="py-2 border-b border-gray-100 px-4 mb-2">
-                      <p className="text-sm font-semibold text-gray-900 truncate">{session.user.name}</p>
-                      <p className="text-xs text-gray-500 truncate">{session.user.email}</p>
+                      <p className="text-sm font-semibold text-gray-900 truncate">{session.user?.name}</p>
+                      <p className="text-xs text-gray-500 truncate">{session.user?.email}</p>
                     </div>
                   )}
 

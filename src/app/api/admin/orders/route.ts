@@ -337,7 +337,7 @@ export async function POST(request: NextRequest) {
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
       select: { id: true, price: true, stock: true },
-    });
+    }) as Array<{ id: string; price: number; stock: number }>;
 
     if (products.length !== productIds.length) {
       return NextResponse.json(
