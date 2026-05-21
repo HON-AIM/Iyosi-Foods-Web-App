@@ -27,7 +27,7 @@ const CredentialsSchema = z.object({
     .trim()
     .toLowerCase(),
   password: z.string().min(1),
-  rememberMe: z.boolean().optional(),
+  rememberMe: z.coerce.boolean().optional(),
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
