@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import crypto from "crypto";
 
 export const dynamic = "force-dynamic";
 
@@ -25,9 +26,12 @@ export default async function VerifyPage({
     );
   }
 
-  // Find token in db
+  // Hash the raw token to match the stored hash (register API stores SHA-256 hashed tokens)
+  const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+  // Find token in db using the hash
   const verificationRecord = await prisma.verificationToken.findUnique({
-    where: { token },
+    where: { token: tokenHash },
   });
 
   if (!verificationRecord) {
@@ -46,7 +50,7 @@ export default async function VerifyPage({
   // Check Expiry
   if (new Date() > verificationRecord.expires) {
     // Optional: Delete expired token here
-    await prisma.verificationToken.delete({ where: { token } });
+    await prisma.verificationToken.delete({ where: { token: tokenHash } });
     
     return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -66,7 +70,7 @@ export default async function VerifyPage({
     data: { emailVerified: new Date() },
   });
 
-  await prisma.verificationToken.delete({ where: { token } });
+  await prisma.verificationToken.delete({ where: { token: tokenHash } });
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

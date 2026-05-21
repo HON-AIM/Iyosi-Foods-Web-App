@@ -228,7 +228,7 @@ export default function CheckoutPage() {
 
               <button
                 type="submit"
-                disabled={isSubmitting || validating}
+                disabled={isSubmitting || validating || !!validationError}
                 className="w-full bg-primary-600 hover:bg-primary-700 disabled:bg-primary-300 text-white py-3.5 rounded-lg font-bold text-sm tracking-wide transition-colors flex items-center justify-center gap-2"
               >
                 {isSubmitting ? (

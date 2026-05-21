@@ -74,14 +74,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             throw new Error("TooManyAttempts");
           }
 
-          if (!user?.emailVerified) {
+          // Check if user exists at all before other checks
+          if (!user || !user.password) {
+            throw new Error("InvalidCredentials");
+          }
+
+          if (!user.emailVerified) {
             console.warn("[SECURITY] Login attempt with unverified email:", {
               email,
               ip,
             });
             await prisma.loginAttempt.create({
               data: {
-                userId: user?.id || email,
+                userId: user.id,
                 ipAddress: ip,
                 userAgent: req?.headers?.get("user-agent"),
                 success: false,
@@ -90,14 +95,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             throw new Error("EmailNotVerified");
           }
 
-          if (user && !user.isActive) {
+          if (!user.isActive) {
             console.warn("[SECURITY] Login attempt on disabled account:", {
               email,
               ip,
             });
             await prisma.loginAttempt.create({
               data: {
-                userId: user?.id || email,
+                userId: user.id,
                 ipAddress: ip,
                 userAgent: req?.headers?.get("user-agent"),
                 success: false,
@@ -106,10 +111,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             throw new Error("AccountDisabled");
           }
 
-          if (!user?.password || !(await bcrypt.compare(password, user.password))) {
+          if (!(await bcrypt.compare(password, user.password))) {
             await prisma.loginAttempt.create({
               data: {
-                userId: user?.id || email,
+                userId: user.id,
                 ipAddress: ip,
                 userAgent: req?.headers?.get("user-agent"),
                 success: false,

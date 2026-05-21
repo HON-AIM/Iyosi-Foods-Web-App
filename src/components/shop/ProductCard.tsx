@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
-import { Star, ShoppingCart, BadgeCheck } from "lucide-react";
+import { ShoppingCart, BadgeCheck } from "lucide-react";
 
 type ProductCardProps = {
   product: {
@@ -26,14 +26,7 @@ export default function ProductCard({ product }: ProductCardProps) {
     }).format(amount);
   };
 
-  // Simulated original price and discount
-  const originalPrice = product.price * 1.15;
-  const discount = Math.round(((originalPrice - product.price) / originalPrice) * 100);
-
-  // Deterministic fake rating based on product id hash
-  const hash = product.id.split("").reduce((a, c) => a + c.charCodeAt(0), 0);
-  const rating = 3.5 + (hash % 4) * 0.5; // 3.5 to 5.0
-  const reviewCount = 20 + (hash % 180);
+  const inStock = product.stock > 0;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -55,17 +48,17 @@ export default function ProductCard({ product }: ProductCardProps) {
       href={`/shop/product/${product.id}`}
       className="group bg-white rounded-lg border border-gray-100 hover:border-orange-200 hover:shadow-lg transition-all duration-200 flex flex-col h-full overflow-hidden relative"
     >
-      {/* Discount Badge */}
-      {discount > 0 && (
-        <div className="absolute top-2 left-2 z-10 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded">
-          -{discount}%
-        </div>
-      )}
-
       {/* Low Stock Badge */}
       {product.stock <= 5 && product.stock > 0 && (
         <div className="absolute top-2 right-2 z-10 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded animate-pulse">
          {product.stock} left!
+        </div>
+      )}
+
+      {/* Out of Stock Badge */}
+      {product.stock === 0 && (
+        <div className="absolute top-2 left-2 z-10 bg-gray-600 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+          Out of Stock
         </div>
       )}
 
@@ -98,35 +91,11 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.name}
         </h3>
 
-        {/* Rating */}
-        <div className="flex items-center gap-1 mb-2">
-          <div className="flex">
-            {[1, 2, 3, 4, 5].map((s) => (
-              <Star
-                key={s}
-                className={`w-3 h-3 ${
-                  s <= Math.floor(rating)
-                    ? "text-orange-400 fill-orange-400"
-                    : s - 0.5 <= rating
-                    ? "text-orange-400 fill-orange-400/50"
-                    : "text-gray-200 fill-gray-200"
-                }`}
-              />
-            ))}
-          </div>
-          <span className="text-[10px] text-gray-400">({reviewCount})</span>
-        </div>
-
         {/* Price Block */}
         <div className="mt-auto">
           <p className="font-bold text-sm md:text-base text-gray-900">
             {formatMoney(product.price)}
           </p>
-          {discount > 0 && (
-            <p className="text-[10px] text-gray-400 line-through">
-              {formatMoney(originalPrice)}
-            </p>
-          )}
         </div>
 
         {/* Free delivery indicator */}

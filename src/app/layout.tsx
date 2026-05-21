@@ -108,6 +108,9 @@ export default function RootLayout({
                   <Image
                     src="/logo.jpg"
                     alt="Iyosi Foods Logo"
+                    width={40}
+                    height={40}
+                    className="rounded-md"
                   />
                   <h3 className="font-bold text-xl text-accent-500">
                     Iyosi Foods
