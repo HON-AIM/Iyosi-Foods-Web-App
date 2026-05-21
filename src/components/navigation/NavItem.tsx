@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronDown } from "lucide-react";
@@ -88,8 +88,14 @@ export default function NavItem({ item, isOpen, onOpen, onClose }: NavItemProps)
       )}
 
       {/* Desktop dropdown */}
-      {hasChildren && isHovered && (
-        <div className="absolute left-0 pt-1 z-50">
+      {hasChildren && (
+        <div
+          className={`absolute left-0 pt-1 z-50 transition-all duration-200 ease-out ${
+            isHovered
+              ? "opacity-100 translate-y-0 pointer-events-auto"
+              : "opacity-0 -translate-y-2 pointer-events-none"
+          }`}
+        >
           <DropdownMenu items={item.children!} id={dropdownId} />
         </div>
       )}

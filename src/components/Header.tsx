@@ -10,9 +10,9 @@ export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: "/", label: "Group Overview" },
-    { href: "/businesses", label: "Our Businesses" },
-    { href: "/about", label: "About the Group" },
+    { href: "/", label: "Home" },
+    { href: "/about", label: "About Us" },
+    { href: "/products", label: "Our Products" },
     { href: "/shop", label: "Online Store", highlight: true },
     { href: "/contact", label: "Contact" },
   ];
@@ -20,11 +20,8 @@ export default function Header() {
   return (
     <header className="w-full bg-white shadow-sm sticky top-0 z-50 h-20 flex items-center justify-between px-4 md:px-8 border-b border-surface-200">
       {/* Logo */}
-      <Link href="/" className="flex items-center gap-3 shrink-0">
-        <Image src="/logo.jpg" alt="Iyosiola Group Logo" width={50} height={50} className="object-contain" />
-        <div className="font-bold text-2xl text-primary-900 tracking-tight hidden sm:block">
-          IYOSIOLA GROUP
-        </div>
+      <Link href="/" className="flex items-center shrink-0">
+        <Image src="/logo.jpg" alt="Iyosi Foods Logo" width={55} height={55} className="object-contain" />
       </Link>
 
       {/* Desktop Nav */}

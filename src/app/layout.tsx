@@ -4,36 +4,36 @@ import { Inter } from "next/font/google";
 import Image from "next/image";
 import Link from "next/link";
 import { Providers } from "@/components/Providers";
-import Header from "@/components/Header";
+import Navbar from "@/components/navigation/Navbar";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://iyosiolagroup.com";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://iyosifoods.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
   title: {
-    default: "Iyosiola Group | Premium Flour Millers & Agro-Allied Products in Nigeria",
-    template: "%s | Iyosiola Group",
+    default: "Iyosi Foods | Premium Food & Agro-Allied Products in Nigeria",
+    template: "%s | Iyosi Foods",
   },
   description:
-    "Iyosiola Group is a premier Nigerian conglomerate delivering premium flour products, integrated logistics, and sustainable agro-allied solutions. Shop online for quality baking flour, semolina, and wheat products.",
+    "Iyosi Foods is a premier Nigerian food company delivering premium flour, sugar, rice, edible oils, and tomato paste. Shop online for quality food products delivered across Nigeria.",
   keywords: [
-    "Iyosiola Group",
+    "Iyosi Foods",
     "flour Nigeria",
     "baking flour",
     "semolina Nigeria",
     "wheat flour",
     "buy flour online Nigeria",
-    "flour millers Nigeria",
-    "agro-allied Nigeria",
-    "food distribution Nigeria",
-    "premium flour brand",
+    "food products Nigeria",
+    "sugar Nigeria",
+    "rice Nigeria",
+    "premium food brand",
   ],
-  authors: [{ name: "Iyosiola Group", url: BASE_URL }],
-  creator: "Iyosiola Group",
-  publisher: "Iyosiola Group",
+  authors: [{ name: "Iyosi Foods", url: BASE_URL }],
+  creator: "Iyosi Foods",
+  publisher: "Iyosi Foods",
   formatDetection: {
     email: false,
     address: false,
@@ -43,26 +43,26 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_NG",
     url: BASE_URL,
-    siteName: "Iyosiola Group",
-    title: "Iyosiola Group | Premium Flour Millers & Agro-Allied Products",
+    siteName: "Iyosi Foods",
+    title: "Iyosi Foods | Premium Food & Agro-Allied Products",
     description:
-      "Premier Nigerian conglomerate delivering premium flour products, integrated logistics, and sustainable agro-allied solutions.",
+      "Premier Nigerian food company delivering premium flour, sugar, rice, edible oils, and tomato paste.",
     images: [
       {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Iyosiola Group - Quality You Can Trust",
+        alt: "Iyosi Foods - Quality You Can Trust",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Iyosiola Group | Premium Flour & Agro Products",
+    title: "Iyosi Foods | Premium Food & Agro Products",
     description:
-      "Shop premium flour, semolina, and wheat products. Quality flour millers and distributors in Nigeria.",
+      "Shop premium flour, sugar, rice, and more. Quality food products delivered in Nigeria.",
     images: ["/og-image.jpg"],
-    creator: "@iyosiolagroup",
+    creator: "@iyosifoods",
   },
   robots: {
     index: true,
@@ -95,7 +95,7 @@ export default function RootLayout({
         className={`${inter.className} min-h-screen flex flex-col antialiased bg-surface-50 text-surface-900`}
       >
         <Providers>
-          <Header />
+          <Navbar />
 
           <main className="flex-grow flex flex-col" id="main-content" tabIndex={-1}>
             {children}
@@ -107,18 +107,15 @@ export default function RootLayout({
                 <div className="flex items-center gap-3 mb-4">
                   <Image
                     src="/logo.jpg"
-                    alt="Iyosiola Group Logo"
-                    width={40}
-                    height={40}
-                    className="object-contain bg-white rounded p-1"
+                    alt="Iyosi Foods Logo"
                   />
                   <h3 className="font-bold text-xl text-accent-500">
-                    Iyosiola Group
+                    Iyosi Foods
                   </h3>
                 </div>
                 <p className="text-sm text-surface-200 leading-relaxed">
-                  A diversified conglomerate driving growth and agricultural
-                  excellence across Africa.
+                  A premier Nigerian food company delivering quality products
+                  and agricultural excellence across the nation.
                 </p>
                 <div className="flex gap-3 mt-4">
                   <a
@@ -151,13 +148,13 @@ export default function RootLayout({
                 </h4>
                 <ul className="space-y-2 text-sm text-surface-200">
                   <li>
-                    <Link href="/businesses" className="hover:text-white transition-colors">
-                      Our Businesses
+                    <Link href="/about" className="hover:text-white transition-colors">
+                      About Us
                     </Link>
                   </li>
                   <li>
-                    <Link href="/about" className="hover:text-white transition-colors">
-                      About the Group
+                    <Link href="/products" className="hover:text-white transition-colors">
+                      Our Products
                     </Link>
                   </li>
                   <li>
@@ -230,7 +227,7 @@ export default function RootLayout({
 
             <div className="border-t border-primary-800 mt-10 pt-6 flex flex-col sm:flex-row items-center justify-between text-sm text-surface-300 gap-2">
               <span>
-                &copy; {new Date().getFullYear()} Iyosiola Group. All rights reserved.
+                &copy; {new Date().getFullYear()} Iyosi Foods. All rights reserved.
               </span>
               <span className="text-xs">
                 Registered in Nigeria &middot; RC: 0000000
