@@ -5,6 +5,20 @@ import { prisma } from "./db";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { authConfig } from "./auth.config";
+import { CredentialsSignin } from "@auth/core/errors";
+
+class InvalidCredentialsError extends CredentialsSignin {
+  constructor() { super(); this.code = "InvalidCredentials"; }
+}
+class TooManyAttemptsError extends CredentialsSignin {
+  constructor() { super(); this.code = "TooManyAttempts"; }
+}
+class EmailNotVerifiedError extends CredentialsSignin {
+  constructor() { super(); this.code = "EmailNotVerified"; }
+}
+class AccountDisabledError extends CredentialsSignin {
+  constructor() { super(); this.code = "AccountDisabled"; }
+}
 
 const CredentialsSchema = z.object({
   email: z
@@ -41,7 +55,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const validation = CredentialsSchema.safeParse(credentials);
 
         if (!validation.success) {
-          throw new Error("InvalidCredentials");
+          throw new InvalidCredentialsError();
         }
 
         const { email, password, rememberMe } = validation.data;
@@ -71,12 +85,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               attempts: user.loginAttempts.length,
               ip,
             });
-            throw new Error("TooManyAttempts");
+            throw new TooManyAttemptsError();
           }
 
-          // Check if user exists at all before other checks
           if (!user || !user.password) {
-            throw new Error("InvalidCredentials");
+            throw new InvalidCredentialsError();
           }
 
           if (!user.emailVerified) {
@@ -92,7 +105,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 success: false,
               },
             });
-            throw new Error("EmailNotVerified");
+            throw new EmailNotVerifiedError();
           }
 
           if (!user.isActive) {
@@ -108,7 +121,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 success: false,
               },
             });
-            throw new Error("AccountDisabled");
+            throw new AccountDisabledError();
           }
 
           if (!(await bcrypt.compare(password, user.password))) {
@@ -126,7 +139,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
               ip,
             });
 
-            throw new Error("InvalidCredentials");
+            throw new InvalidCredentialsError();
           }
 
           await prisma.loginAttempt.deleteMany({
@@ -170,9 +183,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             role: user.role,
           };
         } catch (error) {
+          if (error instanceof CredentialsSignin) throw error;
           const errorMessage =
             error instanceof Error ? error.message : "AuthenticationError";
-          throw new Error(errorMessage);
+          throw new InvalidCredentialsError();
         }
       },
     }),

@@ -198,7 +198,7 @@ function LoginForm() {
           email: formData.email.trim().toLowerCase(),
           password: formData.password,
           rememberMe: formData.rememberMe,
-        }) as { error?: string; ok: boolean } | undefined;
+        }) as { error?: string; code?: string; ok: boolean } | undefined;
 
         if (res?.error) {
           // ✅ Track failed attempts
@@ -223,20 +223,21 @@ function LoginForm() {
             return;
           }
 
-          // ✅ Provide specific error messages
-          if (res.error === "EmailNotVerified") {
+          // ✅ Provide specific error messages (NextAuth v5 uses `code` for CredentialsSignin subtypes)
+          const errCode = res.code || res.error;
+          if (errCode === "EmailNotVerified") {
             setError(
               "❌ Email not verified. Please check your inbox for the verification link."
             );
-          } else if (res.error === "InvalidCredentials") {
+          } else if (errCode === "InvalidCredentials") {
             setError(
               `❌ Invalid email or password. ${5 - newAttemptCount} attempt(s) remaining.`
             );
-          } else if (res.error === "AccountDisabled") {
+          } else if (errCode === "AccountDisabled") {
             setError(
               "❌ Your account has been disabled. Please contact support."
             );
-          } else if (res.error === "TooManyAttempts") {
+          } else if (errCode === "TooManyAttempts") {
             setError("❌ Too many login attempts. Please try again later.");
           } else {
             setError("❌ Login failed. Please try again.");

@@ -32,23 +32,39 @@ export const metadata: Metadata = {
 };
 
 export default async function ShopHomePage() {
-  const flashProducts = await prisma.product.findMany({
-    where: { stock: { gt: 0 }, isActive: true },
-    take: 8,
-    orderBy: { createdAt: "asc" },
-  });
+  let flashProducts: Awaited<ReturnType<typeof prisma.product.findMany>> = [];
+  let topProducts: Awaited<ReturnType<typeof prisma.product.findMany>> = [];
+  let recommendedProducts: Awaited<ReturnType<typeof prisma.product.findMany>> = [];
 
-  const topProducts = await prisma.product.findMany({
-    where: { stock: { gt: 0 }, isActive: true },
-    take: 12,
-    orderBy: { createdAt: "desc" },
-  });
+  try {
+    flashProducts = await prisma.product.findMany({
+      where: { stock: { gt: 0 }, isActive: true },
+      take: 8,
+      orderBy: { createdAt: "asc" },
+    });
+  } catch (err) {
+    console.error("[Shop] Failed to fetch flash products:", err);
+  }
 
-  const recommendedProducts = await prisma.product.findMany({
-    where: { isActive: true },
-    orderBy: { updatedAt: "desc" },
-    take: 18,
-  });
+  try {
+    topProducts = await prisma.product.findMany({
+      where: { stock: { gt: 0 }, isActive: true },
+      take: 12,
+      orderBy: { createdAt: "desc" },
+    });
+  } catch (err) {
+    console.error("[Shop] Failed to fetch top products:", err);
+  }
+
+  try {
+    recommendedProducts = await prisma.product.findMany({
+      where: { isActive: true },
+      orderBy: { updatedAt: "desc" },
+      take: 18,
+    });
+  } catch (err) {
+    console.error("[Shop] Failed to fetch recommended products:", err);
+  }
 
   const categories = [
     { name: "Flour", icon: "🌾", link: "/shop?category=flour" },

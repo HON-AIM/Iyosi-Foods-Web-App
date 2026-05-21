@@ -13,20 +13,30 @@ export default async function ProductDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const product = await prisma.product.findUnique({
-    where: { id },
-  });
+
+  let product: Awaited<ReturnType<typeof prisma.product.findUnique>>;
+  try {
+    product = await prisma.product.findUnique({ where: { id } });
+  } catch (err) {
+    console.error("[Product] Database error fetching product:", err);
+    product = null;
+  }
 
   if (!product) {
     notFound();
   }
 
-  const reviews = await prisma.review.findMany({
-    where: { productId: id },
-    include: { user: { select: { name: true } } },
-    orderBy: { createdAt: "desc" },
-    take: 5,
-  });
+  let reviews: Awaited<ReturnType<typeof prisma.review.findMany>> = [];
+  try {
+    reviews = await prisma.review.findMany({
+      where: { productId: id },
+      include: { user: { select: { name: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+    });
+  } catch (err) {
+    console.error("[Product] Database error fetching reviews:", err);
+  }
 
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat("en-NG", {
