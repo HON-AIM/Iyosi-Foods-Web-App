@@ -55,16 +55,26 @@ export async function POST(request: NextRequest) {
       .update(verificationToken)
       .digest("hex");
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: {
-        verificationToken: verificationTokenHash,
-        verificationTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: user.id },
+        data: {
+          verificationToken: verificationTokenHash,
+          verificationTokenExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
+      });
+
+      await tx.verificationToken.create({
+        data: {
+          identifier: email,
+          token: verificationTokenHash,
+          expires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+        },
+      });
     });
 
     try {
-      const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/verify?token=${verificationToken}&email=${encodeURIComponent(email)}`;
+      const verificationLink = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/verify?token=${verificationToken}&email=${encodeURIComponent(email)}`;
 
       await sendVerificationEmail(email, user.name || "User", verificationLink);
 

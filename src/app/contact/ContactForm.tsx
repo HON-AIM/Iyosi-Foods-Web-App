@@ -51,7 +51,7 @@ const CONTACT_INFO = {
   },
   email: {
     title: "Email",
-    address: "contact@iyosiolagroup.com",
+    address: "israelmiracle12@gmail.com",
   },
   hours: {
     title: "Business Hours",

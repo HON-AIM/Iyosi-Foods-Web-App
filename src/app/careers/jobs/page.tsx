@@ -161,20 +161,13 @@ export default function JobsPage() {
 
       <section className="bg-primary-50 py-12 px-4">
         <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-2xl font-bold text-primary-900 mb-4">Don't See the Right Role?</h2>
+          <h2 className="text-2xl font-bold text-primary-900 mb-4">Don&apos;t See the Right Role?</h2>
           <p className="text-surface-600 mb-6">
-            Send us your CV and we'll keep you in mind for future opportunities
+            Send us your CV and we&apos;ll keep you in mind for future opportunities
           </p>
-          <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg border border-surface-200 focus:outline-none focus:border-accent-500"
-            />
-            <button type="submit" className="bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-6 rounded-lg transition-colors">
-              Submit CV
-            </button>
-          </form>
+          <Link href="/careers/submit-cv" className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">
+            Submit Your CV
+          </Link>
         </div>
       </section>
 

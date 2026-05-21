@@ -41,7 +41,7 @@ export async function sendVerificationEmail(email: string, name: string, verific
   const safeName = escapeHtml(name || "User");
 
   await transporter.sendMail({
-    from: `"Iyosiola Foods" <${process.env.EMAIL_FROM || "noreply@iyosiolagroup.com"}>`,
+    from: `"Iyosiola Foods" <${process.env.EMAIL_FROM || "israelmiracle12@gmail.com"}>`,
     to: email,
     subject: "Verify your email address - Iyosiola Foods",
     text: `Welcome to Iyosiola Foods, ${safeName}!\n\nPlease verify your email by visiting: ${verificationLink}\n\nThis link expires in 24 hours.\n\nIf you didn't request this, you can safely ignore this email.`,
@@ -62,7 +62,7 @@ export async function sendPasswordResetEmail(email: string, name: string, resetL
   const safeName = escapeHtml(name || "User");
 
   await transporter.sendMail({
-    from: `"Iyosiola Foods" <${process.env.EMAIL_FROM || "noreply@iyosiolagroup.com"}>`,
+    from: `"Iyosiola Foods" <${process.env.EMAIL_FROM || "israelmiracle12@gmail.com"}>`,
     to: email,
     subject: "Reset your password - Iyosiola Foods",
     text: `Reset Your Password\n\nHello ${safeName},\n\nWe received a request to reset the password for your Iyosiola Foods account.\n\nClick the link below to reset your password (expires in 1 hour):\n${resetLink}\n\nIf you didn't request a new password, you can safely ignore this email.`,
@@ -92,7 +92,7 @@ export async function sendAdminDirectMessage(
   const safeContent = escapeHtml(content).replace(/\n/g, "<br />");
 
   await transporter.sendMail({
-    from: `"Iyosiola Store" <${process.env.EMAIL_FROM || "admin@iyosiolagroup.com"}>`,
+    from: `"Iyosiola Store" <${process.env.EMAIL_FROM || "israelmiracle12@gmail.com"}>`,
     to: email,
     subject: safeSubject,
     text: `A message from the Iyosiola Store Team:\n\n${content}`,
@@ -127,7 +127,7 @@ export async function sendOrderStatusUpdate(
   const safeStatus = escapeHtml(status);
 
   await transporter.sendMail({
-    from: `"Iyosiola Store" <${process.env.EMAIL_FROM || "noreply@iyosiolagroup.com"}>`,
+    from: `"Iyosiola Store" <${process.env.EMAIL_FROM || "israelmiracle12@gmail.com"}>`,
     to: email,
     subject: `Order Update: ${safeStatus} - Iyosiola Foods`,
     text: `Hello ${safeName},\n\nYour order #${safeOrderId} has been updated to: ${safeStatus}.\n\nThank you for shopping with Iyosiola Foods.`,
@@ -172,7 +172,7 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
       break;
     case "contact-confirmation":
       await transporter.sendMail({
-        from: `"Iyosiola Foods" <${process.env.EMAIL_FROM || "noreply@iyosiolagroup.com"}>`,
+        from: `"Iyosiola Foods" <${process.env.EMAIL_FROM || "israelmiracle12@gmail.com"}>`,
         to,
         subject: "We received your message - Iyosiola Foods",
         text: `Thank you for contacting Iyosiola Foods!\n\nWe have received your message and will get back to you within 24 business hours.\n\nYour submitted message:\n${data.message || ""}`,

@@ -88,7 +88,7 @@ function SuccessMessage({ email, onReset }: SuccessMessageProps) {
             <strong>💡 Tip:</strong> If you don't receive the email within a few
             minutes, check your spam or junk folder. Add{" "}
             <code className="bg-surface-100 px-2 py-1 rounded text-xs">
-              noreply@iyosiolagroup.com
+              israelmiracle12@gmail.com
             </code>{" "}
             to your contacts to prevent future emails from going to spam.
           </p>
@@ -103,7 +103,7 @@ function SuccessMessage({ email, onReset }: SuccessMessageProps) {
               <p className="text-surface-600">
                 Look for an email from{" "}
                 <span className="font-mono text-xs bg-surface-100 px-2 py-1 rounded">
-                  noreply@iyosiolagroup.com
+                  israelmiracle12@gmail.com
                 </span>
               </p>
             </div>
@@ -242,7 +242,7 @@ export default function ForgotPasswordPage() {
       setLoading(true);
 
       try {
-        const response = await fetch("/api/auth/forgot-password", {
+        const response = await fetch("/api/forgot-password", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

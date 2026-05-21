@@ -1,12 +1,82 @@
-import { type Metadata } from "next";
+"use client";
+
+import { useState, useCallback } from "react";
 import Link from "next/link";
 
-export const metadata: Metadata = {
-  title: "Distributor Partnerships | Iyosiola Group",
-  description: "Become a distribution partner with Iyosiola Group and grow your business across Nigeria.",
-};
-
 export default function PartnersPage() {
+  const [formData, setFormData] = useState({
+    companyName: "",
+    contactPerson: "",
+    email: "",
+    phone: "",
+    address: "",
+    description: "",
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [generalError, setGeneralError] = useState<string | null>(null);
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+      if (errors[name]) {
+        setErrors((prev) => {
+          const next = { ...prev };
+          delete next[name];
+          return next;
+        });
+      }
+    },
+    [errors]
+  );
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setGeneralError(null);
+
+      const newErrors: Record<string, string> = {};
+      if (!formData.companyName.trim() || formData.companyName.trim().length < 2) newErrors.companyName = "Company name is required";
+      if (!formData.contactPerson.trim() || formData.contactPerson.trim().length < 2) newErrors.contactPerson = "Contact person is required";
+      if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Valid email is required";
+      if (!formData.phone.trim()) newErrors.phone = "Phone is required";
+      if (!formData.address.trim() || formData.address.trim().length < 5) newErrors.address = "Address is required (min 5 characters)";
+      if (!formData.description.trim() || formData.description.trim().length < 10) newErrors.description = "Please describe your business (min 10 characters)";
+
+      setErrors(newErrors);
+      if (Object.keys(newErrors).length > 0) return;
+
+      setLoading(true);
+
+      try {
+        const res = await fetch("/api/partners", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            companyName: formData.companyName.trim(),
+            contactPerson: formData.contactPerson.trim(),
+            email: formData.email.trim().toLowerCase(),
+            phone: formData.phone.trim(),
+            address: formData.address.trim(),
+            description: formData.description.trim(),
+          }),
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || "Submission failed");
+
+        setSubmitted(true);
+      } catch (err) {
+        setGeneralError(err instanceof Error ? err.message : "An error occurred");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [formData]
+  );
+
   const benefits = [
     { title: "Competitive Margins", desc: "Attractive profit margins on all products", icon: "💰" },
     { title: "Training Support", desc: "Comprehensive product and sales training", icon: "📚" },
@@ -38,7 +108,7 @@ export default function PartnersPage() {
       <section className="bg-primary-900 text-white py-16 md:py-20 px-4 md:px-8 text-center border-b-8 border-accent-500">
         <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Distributor Partnerships</h1>
         <p className="text-lg md:text-xl text-primary-100 max-w-2xl mx-auto font-light">
-          Grow your business with Nigeria's leading FMCG company
+          Grow your business with Nigeria&apos;s leading FMCG company
         </p>
       </section>
 
@@ -95,9 +165,6 @@ export default function PartnersPage() {
                 </div>
                 <h3 className="text-sm font-bold text-primary-900 mb-1">{p.title}</h3>
                 <p className="text-xs text-surface-600 text-center">{p.desc}</p>
-                {i < process.length - 1 && (
-                  <div className="hidden sm:block w-16 h-0.5 bg-surface-200 absolute right-[-2rem] top-8"></div>
-                )}
               </div>
             ))}
           </div>
@@ -110,61 +177,60 @@ export default function PartnersPage() {
             <h2 className="text-2xl font-bold text-primary-900 mb-6 text-center">
               Apply Now
             </h2>
-            <form className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-surface-700 mb-1">Company Name</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 rounded-lg border border-surface-200 focus:outline-none focus:border-accent-500"
-                  />
+
+            {submitted && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg text-center">
+                <p className="text-green-700 font-semibold">Application submitted successfully! Our team will contact you within 3-5 business days.</p>
+              </div>
+            )}
+
+            {generalError && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-center">
+                <p className="text-red-700 text-sm">{generalError}</p>
+              </div>
+            )}
+
+            {!submitted && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="companyName" className="block text-sm font-medium text-surface-700 mb-1">Company Name *</label>
+                    <input type="text" id="companyName" name="companyName" value={formData.companyName} onChange={handleChange} className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:border-accent-500 ${errors.companyName ? "border-red-400" : "border-surface-200"}`} disabled={loading} required />
+                    {errors.companyName && <p className="text-red-600 text-xs mt-1">{errors.companyName}</p>}
+                  </div>
+                  <div>
+                    <label htmlFor="contactPerson" className="block text-sm font-medium text-surface-700 mb-1">Contact Person *</label>
+                    <input type="text" id="contactPerson" name="contactPerson" value={formData.contactPerson} onChange={handleChange} className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:border-accent-500 ${errors.contactPerson ? "border-red-400" : "border-surface-200"}`} disabled={loading} required />
+                    {errors.contactPerson && <p className="text-red-600 text-xs mt-1">{errors.contactPerson}</p>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-surface-700 mb-1">Email *</label>
+                    <input type="email" id="email" name="email" value={formData.email} onChange={handleChange} className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:border-accent-500 ${errors.email ? "border-red-400" : "border-surface-200"}`} disabled={loading} required />
+                    {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email}</p>}
+                  </div>
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-surface-700 mb-1">Phone *</label>
+                    <input type="tel" id="phone" name="phone" value={formData.phone} onChange={handleChange} className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:border-accent-500 ${errors.phone ? "border-red-400" : "border-surface-200"}`} disabled={loading} required />
+                    {errors.phone && <p className="text-red-600 text-xs mt-1">{errors.phone}</p>}
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-surface-700 mb-1">Contact Person</label>
-                  <input
-                    type="text"
-                    className="w-full px-4 py-3 rounded-lg border border-surface-200 focus:outline-none focus:border-accent-500"
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-surface-700 mb-1">Email</label>
-                  <input
-                    type="email"
-                    className="w-full px-4 py-3 rounded-lg border border-surface-200 focus:outline-none focus:border-accent-500"
-                  />
+                  <label htmlFor="address" className="block text-sm font-medium text-surface-700 mb-1">Business Address *</label>
+                  <textarea id="address" name="address" value={formData.address} onChange={handleChange} rows={3} className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:border-accent-500 ${errors.address ? "border-red-400" : "border-surface-200"}`} disabled={loading} required />
+                  {errors.address && <p className="text-red-600 text-xs mt-1">{errors.address}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-surface-700 mb-1">Phone</label>
-                  <input
-                    type="tel"
-                    className="w-full px-4 py-3 rounded-lg border border-surface-200 focus:outline-none focus:border-accent-500"
-                  />
+                  <label htmlFor="description" className="block text-sm font-medium text-surface-700 mb-1">Describe Your Business *</label>
+                  <textarea id="description" name="description" value={formData.description} onChange={handleChange} rows={4} placeholder="Tell us about your distribution experience, coverage area, and why you want to partner with us..." className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:border-accent-500 ${errors.description ? "border-red-400" : "border-surface-200"}`} disabled={loading} required />
+                  {errors.description && <p className="text-red-600 text-xs mt-1">{errors.description}</p>}
                 </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Business Address</label>
-                <textarea
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-lg border border-surface-200 focus:outline-none focus:border-accent-500"
-                ></textarea>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-surface-700 mb-1">Describe Your Business</label>
-                <textarea
-                  rows={4}
-                  placeholder="Tell us about your distribution experience, coverage area, and why you want to partner with us..."
-                  className="w-full px-4 py-3 rounded-lg border border-surface-200 focus:outline-none focus:border-accent-500"
-                ></textarea>
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 rounded-lg transition-colors"
-              >
-                Submit Application
-              </button>
-            </form>
+                <button type="submit" disabled={loading} className="w-full bg-accent-500 hover:bg-accent-600 disabled:bg-surface-300 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition-colors">
+                  {loading ? "Submitting..." : "Submit Application"}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </section>

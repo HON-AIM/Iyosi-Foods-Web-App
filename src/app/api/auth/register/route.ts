@@ -131,6 +131,14 @@ export async function POST(request: NextRequest) {
 
     try {
       await prisma.$transaction(async (tx) => {
+        await tx.user.update({
+          where: { id: newUser.id },
+          data: {
+            verificationToken: tokenHash,
+            verificationTokenExpires: tokenExpiry,
+          },
+        });
+
         await tx.verificationToken.create({
           data: {
             identifier: email,

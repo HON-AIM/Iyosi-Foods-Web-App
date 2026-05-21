@@ -4,7 +4,6 @@ import { type NextRequest } from "next/server";
 import { z } from "zod";
 import crypto from "crypto";
 
-// ✅ Validation schema
 const VerifyEmailSchema = z.object({
   token: z.string().min(1),
   email: z.string().email(),
@@ -12,7 +11,6 @@ const VerifyEmailSchema = z.object({
 
 export async function POST(request: NextRequest) {
   try {
-    // ✅ Parse request
     const body = await request.json().catch(() => null);
 
     if (!body || typeof body !== "object") {
@@ -22,7 +20,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ✅ Validate input
     const validation = VerifyEmailSchema.safeParse(body);
 
     if (!validation.success) {
@@ -33,11 +30,36 @@ export async function POST(request: NextRequest) {
     }
 
     const { token, email } = validation.data;
-
-    // ✅ Hash token to match database
     const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
-    // ✅ Find user and verify
+    // Check VerificationToken table first (primary storage from register)
+    const verificationRecord = await prisma.verificationToken.findUnique({
+      where: { token: tokenHash },
+    });
+
+    if (verificationRecord) {
+      if (new Date() > verificationRecord.expires) {
+        await prisma.verificationToken.delete({ where: { token: tokenHash } });
+        return NextResponse.json(
+          { message: "Verification link has expired" },
+          { status: 400 }
+        );
+      }
+
+      await prisma.user.update({
+        where: { email: verificationRecord.identifier },
+        data: { emailVerified: new Date() },
+      });
+
+      await prisma.verificationToken.delete({ where: { token: tokenHash } });
+
+      return NextResponse.json(
+        { message: "Email verified successfully! You can now sign in." },
+        { status: 200 }
+      );
+    }
+
+    // Fallback: check User model (used by resend-verification route)
     const user = await prisma.user.findUnique({
       where: { email },
       select: {
@@ -56,7 +78,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ✅ Check if already verified
     if (user.emailVerified) {
       return NextResponse.json(
         { message: "Email already verified" },
@@ -64,7 +85,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ✅ Verify token hash matches
     if (user.verificationToken !== tokenHash) {
       return NextResponse.json(
         { message: "Invalid verification link" },
@@ -72,7 +92,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ✅ Verify token hasn't expired
     if (
       !user.verificationTokenExpires ||
       new Date() > user.verificationTokenExpires
@@ -83,7 +102,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // ✅ Update user - mark email as verified
     await prisma.user.update({
       where: { id: user.id },
       data: {

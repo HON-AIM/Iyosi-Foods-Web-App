@@ -65,6 +65,7 @@ export const navConfig: NavItemConfig[] = [
     href: "/careers",
     children: [
       { label: "Vacancies & Job Opportunities", href: "/careers/jobs", description: "Explore open positions" },
+      { label: "Submit Your CV", href: "/careers/submit-cv", description: "Send us your resume for future opportunities" },
       { label: "Distributor Partnerships", href: "/careers/partners", description: "Become a distribution partner" },
     ],
   },
