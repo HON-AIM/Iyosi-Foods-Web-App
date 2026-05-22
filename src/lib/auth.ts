@@ -8,15 +8,19 @@ import { authConfig } from "./auth.config";
 import { CredentialsSignin } from "@auth/core/errors";
 
 class InvalidCredentialsError extends CredentialsSignin {
+  static type = "CredentialsSignin" as const;
   constructor() { super(); this.code = "InvalidCredentials"; }
 }
 class TooManyAttemptsError extends CredentialsSignin {
+  static type = "CredentialsSignin" as const;
   constructor() { super(); this.code = "TooManyAttempts"; }
 }
 class EmailNotVerifiedError extends CredentialsSignin {
+  static type = "CredentialsSignin" as const;
   constructor() { super(); this.code = "EmailNotVerified"; }
 }
 class AccountDisabledError extends CredentialsSignin {
+  static type = "CredentialsSignin" as const;
   constructor() { super(); this.code = "AccountDisabled"; }
 }
 
