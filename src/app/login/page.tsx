@@ -229,7 +229,7 @@ function LoginForm() {
             setError(
               "❌ Email not verified. Please check your inbox for the verification link."
             );
-          } else if (errCode === "InvalidCredentials") {
+          } else if (errCode === "InvalidCredentials" || errCode === "CredentialsSignin" || errCode === "credentials") {
             setError(
               `❌ Invalid email or password. ${5 - newAttemptCount} attempt(s) remaining.`
             );
@@ -239,6 +239,8 @@ function LoginForm() {
             );
           } else if (errCode === "TooManyAttempts") {
             setError("❌ Too many login attempts. Please try again later.");
+          } else if (errCode === "MissingCSRF" || errCode === "Configuration") {
+            setError("❌ Session expired. Please refresh and try again.");
           } else {
             setError("❌ Login failed. Please try again.");
           }
