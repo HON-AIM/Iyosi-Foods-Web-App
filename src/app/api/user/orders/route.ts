@@ -2,29 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { type NextRequest } from "next/server";
-import { z } from "zod";
-
-const OrderItemSchema = z.object({
-  productId: z.string().cuid("Invalid product ID"),
-  quantity: z.number().int().min(1, "Quantity must be at least 1").max(1000),
-});
-
-const AddressSchema = z.union([
-  z.object({
-    street: z.string().min(5).max(255).trim(),
-    city: z.string().min(2).max(100).trim(),
-    state: z.string().min(2).max(100).trim(),
-    postalCode: z.string().max(20).trim().optional().nullable(),
-    country: z.string().max(100).trim().default("Nigeria"),
-  }),
-  z.string().min(5).max(500).trim(),
-]);
-
-const CreateOrderSchema = z.object({
-  items: z.array(OrderItemSchema).min(1).max(100),
-  shippingAddress: AddressSchema,
-  notes: z.string().max(1000).trim().optional().nullable(),
-});
+import crypto from "crypto";
+import { CreateOrderSchema } from "@/schemas/order.schema";
 
 export async function GET(request: NextRequest) {
   try {
@@ -118,7 +97,7 @@ export async function POST(request: NextRequest) {
         const newOrder = await tx.order.create({
           data: {
             userId: session.user.id,
-            orderNumber: `ORD-${Date.now()}-${Math.random().toString(36).substring(7).toUpperCase()}`,
+            orderNumber: `ORD-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(4).toString("hex").toUpperCase()}`,
             items: {
               create: items.map((item) => {
                 const product = products.find((p) => p.id === item.productId)!;

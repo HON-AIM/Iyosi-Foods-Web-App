@@ -30,8 +30,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files
+.env
+.env.local
+.env.development.local
+.env.production.local
+.env.test.local
+!.env.example
 
 # build artifacts
 build-output.txt
@@ -44,4 +49,23 @@ tsconfig.tsbuildinfo
 *.tsbuildinfo
 next-env.d.ts
 
+# generated code
 /src/generated/prisma
+
+# prisma local databases
+prisma/dev.db
+prisma/*.db
+prisma/dev.db-journal
+
+# uploaded files (local dev only — production uses Vercel Blob)
+public/uploads/*.jpg
+public/uploads/*.jpeg
+public/uploads/*.png
+public/uploads/*.webp
+public/uploads/*.gif
+
+# security: never commit these
+create-admin.js
+
+# internal docs
+docs/

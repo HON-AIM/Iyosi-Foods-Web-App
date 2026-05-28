@@ -36,6 +36,10 @@ export const metadata: Metadata = {
 
 async function getDashboardData() {
   try {
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const sixtyDaysAgo = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000);
+    const paidStatuses = ["PAID", "PROCESSING", "SHIPPED", "DELIVERED"] as const;
+
     const [
       totalOrders,
       pendingOrders,
@@ -47,6 +51,12 @@ async function getDashboardData() {
       recentMessages,
       todayOrders,
       yesterdayOrders,
+      revenueThisMonth,
+      revenueLastMonth,
+      customersThisMonth,
+      customersLastMonth,
+      productsThisMonth,
+      productsLastMonth,
     ] = await Promise.all([
       prisma.order.count(),
       prisma.order.count({ where: { status: "PENDING" } }),
@@ -84,7 +94,45 @@ async function getDashboardData() {
           },
         },
       }),
+      prisma.order.aggregate({
+        _sum: { totalAmount: true },
+        where: { status: { in: [...paidStatuses] }, createdAt: { gte: thirtyDaysAgo } },
+      }),
+      prisma.order.aggregate({
+        _sum: { totalAmount: true },
+        where: {
+          status: { in: [...paidStatuses] },
+          createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo },
+        },
+      }),
+      prisma.user.count({ where: { role: "USER", createdAt: { gte: thirtyDaysAgo } } }),
+      prisma.user.count({
+        where: { role: "USER", createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } },
+      }),
+      prisma.product.count({ where: { isActive: true, createdAt: { gte: thirtyDaysAgo } } }),
+      prisma.product.count({
+        where: { isActive: true, createdAt: { gte: sixtyDaysAgo, lt: thirtyDaysAgo } },
+      }),
     ]);
+
+    const revThis = revenueThisMonth._sum.totalAmount || 0;
+    const revLast = revenueLastMonth._sum.totalAmount || 0;
+    const revenueChange =
+      revLast > 0 ? Math.round(((revThis - revLast) / revLast) * 100) : revThis > 0 ? 100 : 0;
+
+    const custChange =
+      customersLastMonth > 0
+        ? Math.round(((customersThisMonth - customersLastMonth) / customersLastMonth) * 100)
+        : customersThisMonth > 0
+          ? 100
+          : 0;
+
+    const productsChange =
+      productsLastMonth > 0
+        ? Math.round(((productsThisMonth - productsLastMonth) / productsLastMonth) * 100)
+        : productsThisMonth > 0
+          ? 100
+          : 0;
 
     return {
       totalOrders,
@@ -97,6 +145,9 @@ async function getDashboardData() {
       recentMessages,
       todayOrders,
       yesterdayOrders,
+      revenueChange,
+      custChange,
+      productsChange,
     };
   } catch (error) {
     console.error("Dashboard error:", error);
@@ -111,6 +162,9 @@ async function getDashboardData() {
       recentMessages: [],
       todayOrders: 0,
       yesterdayOrders: 0,
+      revenueChange: 0,
+      custChange: 0,
+      productsChange: 0,
     };
   }
 }
@@ -135,8 +189,8 @@ export default async function AdminDashboardPage() {
     {
       title: "Total Revenue",
       value: formatCurrency(data.totalRevenue),
-      change: "+12.5%",
-      positive: true,
+      change: `${data.revenueChange > 0 ? "+" : ""}${data.revenueChange}%`,
+      positive: data.revenueChange >= 0,
       icon: <DollarSign className="w-6 h-6" />,
       color: "green",
       href: "/admin/orders",
@@ -153,8 +207,8 @@ export default async function AdminDashboardPage() {
     {
       title: "Active Customers",
       value: data.totalCustomers.toLocaleString(),
-      change: "+8.3%",
-      positive: true,
+      change: `${data.custChange > 0 ? "+" : ""}${data.custChange}%`,
+      positive: data.custChange >= 0,
       icon: <Users className="w-6 h-6" />,
       color: "purple",
       href: "/admin/customers",
@@ -162,8 +216,8 @@ export default async function AdminDashboardPage() {
     {
       title: "Total Products",
       value: data.totalProducts.toLocaleString(),
-      change: "+3",
-      positive: true,
+      change: `${data.productsChange > 0 ? "+" : ""}${data.productsChange}%`,
+      positive: data.productsChange >= 0,
       icon: <Package className="w-6 h-6" />,
       color: "orange",
       href: "/admin/products",

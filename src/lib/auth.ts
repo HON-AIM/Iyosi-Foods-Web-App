@@ -188,9 +188,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           };
         } catch (error) {
           if (error instanceof CredentialsSignin) throw error;
-          const errorMessage =
-            error instanceof Error ? error.message : "AuthenticationError";
-          throw new InvalidCredentialsError();
+          console.error("[ERROR] authorize() failed:", error);
+          throw error;
         }
       },
     }),

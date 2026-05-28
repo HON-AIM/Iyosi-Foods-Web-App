@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir, unlink } from "fs/promises";
-import path from "path";
+import { put, del } from "@vercel/blob";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { type NextRequest } from "next/server";
@@ -9,11 +8,10 @@ import crypto from "crypto";
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 const MIN_FILE_SIZE_BYTES = 100;
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
 
 function isValidImageBuffer(buffer: Buffer): boolean {
   if (buffer.length < 12) return false;
-  
+
   if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return true;
   if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4e && buffer[3] === 0x47) return true;
   if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 && buffer.length >= 12 && buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50) return true;
@@ -47,6 +45,10 @@ export async function POST(request: NextRequest) {
 
     if (!session?.user?.id || session.user.role !== "ADMIN") {
       return NextResponse.json({ message: "Unauthorized: Admin access required" }, { status: 401 });
+    }
+
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return NextResponse.json({ message: "File storage not configured" }, { status: 503 });
     }
 
     const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
@@ -86,26 +88,17 @@ export async function POST(request: NextRequest) {
 
     const filename = generateSafeFilename(file.type);
 
+    let blob;
     try {
-      await mkdir(UPLOAD_DIR, { recursive: true });
-    } catch {
-      return NextResponse.json({ message: "Server error: Cannot write to upload directory" }, { status: 500 });
-    }
-
-    const filePath = path.join(UPLOAD_DIR, filename);
-    const resolvedPath = path.resolve(filePath);
-    const resolvedUploadDir = path.resolve(UPLOAD_DIR);
-
-    if (!resolvedPath.startsWith(resolvedUploadDir)) {
-      console.error("[ERROR] Path traversal attempt detected:", { filePath: resolvedPath, uploadDir: resolvedUploadDir, adminId: session.user.id });
-      return NextResponse.json({ message: "Server error: Invalid file path" }, { status: 500 });
-    }
-
-    try {
-      await writeFile(filePath, buffer);
+      blob = await put(`products/${filename}`, buffer, {
+        access: "public",
+        contentType: file.type,
+      });
     } catch {
       return NextResponse.json({ message: "Server error: Failed to save file" }, { status: 500 });
     }
+
+    const fileUrl = blob.url;
 
     try {
       await prisma.uploadedFile.create({
@@ -114,14 +107,16 @@ export async function POST(request: NextRequest) {
           originalName: file.name.replace(/[\/\\]/g, "_").slice(0, 255),
           mimeType: file.type,
           size: buffer.length,
-          url: `/uploads/${filename}`,
+          url: fileUrl,
           uploadedBy: session.user.id,
           ipAddress: clientIp,
           checksum: crypto.createHash("sha256").update(buffer).digest("hex"),
         },
       });
     } catch (dbError) {
-      try { await unlink(filePath); } catch {}
+      try {
+        await del(fileUrl);
+      } catch {}
       console.error("[ERROR] Failed to create upload record:", { error: dbError instanceof Error ? dbError.message : String(dbError) });
       return NextResponse.json({ message: "Server error: Failed to save upload metadata" }, { status: 500 });
     }
@@ -129,13 +124,14 @@ export async function POST(request: NextRequest) {
     console.info("[AUDIT] File uploaded successfully:", {
       adminId: session.user.id,
       filename,
+      url: fileUrl,
       size: buffer.length,
       ip: clientIp,
       duration: Date.now() - startTime,
     });
 
     return NextResponse.json(
-      { message: "File uploaded successfully", url: `/uploads/${filename}`, fileName: filename },
+      { message: "File uploaded successfully", url: fileUrl, fileName: filename },
       { status: 201 }
     );
   } catch (error) {

@@ -48,6 +48,7 @@ export async function GET(request: NextRequest) {
       "providers",
       "error",
       "signout",
+      "verify-request",
     ];
 
     if (!validRoutes.includes(route)) {
@@ -133,6 +134,8 @@ export async function POST(request: NextRequest) {
       "csrf",
       "signout",
       "verify-request",
+      "providers",
+      "error",
     ];
 
     if (!validRoutes.includes(route)) {

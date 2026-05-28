@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma, TransactionClient } from "@/lib/db";
 import { sendVerificationEmail } from "@/lib/email";
 import { type NextRequest } from "next/server";
 import { z } from "zod";
@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
       .update(verificationToken)
       .digest("hex");
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       await tx.user.update({
         where: { id: user.id },
         data: {

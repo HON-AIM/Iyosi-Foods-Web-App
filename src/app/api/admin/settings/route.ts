@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma, TransactionClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { type NextRequest } from "next/server";
 import { z } from "zod";
-import { adminLimiter } from "@/lib/admin-rate-limiter";
+import { checkAdminRateLimit, rateLimitResponse } from "@/lib/admin-rate-limiter";
 
 // ✅ Define store settings schema for validation
 const StoreSettingsSchema = z.object({
@@ -79,12 +79,10 @@ export async function GET(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
         request.headers.get("x-real-ip") ||
         "unknown";
-    const allowed = await adminLimiter.check(ip);
-    if (!allowed) {
-      return NextResponse.json(
-        { message: "Too many requests. Please try again later." },
-        { status: 429 }
-      );
+    const { success, resetAt } = await checkAdminRateLimit(ip);
+    if (!success) {
+      const { body, headers } = rateLimitResponse(resetAt);
+      return NextResponse.json(body, { status: 429, headers });
     }
 
     // ✅ Fetch settings from database
@@ -161,12 +159,10 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
         request.headers.get("x-real-ip") ||
         "unknown";
-    const allowed = await adminLimiter.check(ip);
-    if (!allowed) {
-      return NextResponse.json(
-        { message: "Too many requests. Please try again later." },
-        { status: 429 }
-      );
+    const { success, resetAt } = await checkAdminRateLimit(ip);
+    if (!success) {
+      const { body, headers } = rateLimitResponse(resetAt);
+      return NextResponse.json(body, { status: 429, headers });
     }
 
     const session = await auth();
@@ -230,7 +226,7 @@ export async function POST(request: NextRequest) {
     let updatedSettings;
     try {
       updatedSettings = await prisma.$transaction(
-        async (tx) => {
+        async (tx: TransactionClient) => {
           // ✅ Upsert settings
           const updated = await tx.storeSettings.upsert({
             where: { id: "global" },
@@ -313,12 +309,10 @@ export async function PATCH(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
         request.headers.get("x-real-ip") ||
         "unknown";
-    const allowed = await adminLimiter.check(ip);
-    if (!allowed) {
-      return NextResponse.json(
-        { message: "Too many requests. Please try again later." },
-        { status: 429 }
-      );
+    const { success, resetAt } = await checkAdminRateLimit(ip);
+    if (!success) {
+      const { body, headers } = rateLimitResponse(resetAt);
+      return NextResponse.json(body, { status: 429, headers });
     }
 
     const session = await auth();
@@ -354,7 +348,7 @@ export async function PATCH(request: NextRequest) {
 
     // ✅ Reset in transaction
     const resetSettings = await prisma.$transaction(
-      async (tx) => {
+      async (tx: TransactionClient) => {
         const updated = await tx.storeSettings.update({
           where: { id: "global" },
           data: {

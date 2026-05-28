@@ -1,5 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 
+/** Type for the `tx` parameter inside `prisma.$transaction(async (tx) => ...)` */
+export type TransactionClient = Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
+
 declare global {
   var prisma: PrismaClient | undefined;
 }

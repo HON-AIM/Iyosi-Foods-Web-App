@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma, TransactionClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { sendOrderStatusUpdate } from "@/lib/email";
 import { type NextRequest } from "next/server";
@@ -200,7 +200,7 @@ export async function PUT(
     }
 
     // ✅ Update order in transaction with audit
-    const updatedOrder = await prisma.$transaction(async (tx) => {
+    const updatedOrder = await prisma.$transaction(async (tx: TransactionClient) => {
       const updated = await tx.order.update({
         where: { id },
         data: {
@@ -353,7 +353,7 @@ export async function DELETE(
     }
 
     // ✅ Cancel order in transaction
-    const cancelledOrder = await prisma.$transaction(async (tx) => {
+    const cancelledOrder = await prisma.$transaction(async (tx: TransactionClient) => {
       const cancelled = await tx.order.update({
         where: { id },
         data: {

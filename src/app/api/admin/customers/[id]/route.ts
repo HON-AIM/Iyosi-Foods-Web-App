@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma, TransactionClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
 
 /**
@@ -73,7 +73,7 @@ export async function DELETE(
 
     // ✅ Use transaction for atomic deletion
     // Delete all dependent records in the correct order
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: TransactionClient) => {
       // Delete reviews by this user
       await tx.review.deleteMany({
         where: { userId: id },

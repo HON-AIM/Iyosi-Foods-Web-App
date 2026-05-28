@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma, TransactionClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { type NextRequest } from "next/server";
-import { adminLimiter } from "@/lib/admin-rate-limiter";
+import { checkAdminRateLimit, rateLimitResponse } from "@/lib/admin-rate-limiter";
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
@@ -27,12 +27,10 @@ export async function GET(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
         request.headers.get("x-real-ip") ||
         "unknown";
-    const allowed = await adminLimiter.check(ip);
-    if (!allowed) {
-      return NextResponse.json(
-        { message: "Too many requests. Please try again later." },
-        { status: 429 }
-      );
+    const { success, resetAt } = await checkAdminRateLimit(ip);
+    if (!success) {
+      const { body, headers } = rateLimitResponse(resetAt);
+      return NextResponse.json(body, { status: 429, headers });
     }
 
     const session = await auth();
@@ -234,7 +232,7 @@ export async function GET(request: NextRequest) {
         },
         stats: {
           statusCounts: Object.fromEntries(
-            statusCounts.map((s) => [s.status, s._count])
+            statusCounts.map((s: { status: string; _count: number }) => [s.status, s._count])
           ),
           revenue: {
             total: revenueStats._sum.totalAmount || 0,
@@ -277,12 +275,10 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
         request.headers.get("x-real-ip") ||
         "unknown";
-    const allowed = await adminLimiter.check(ip);
-    if (!allowed) {
-      return NextResponse.json(
-        { message: "Too many requests. Please try again later." },
-        { status: 429 }
-      );
+    const { success, resetAt } = await checkAdminRateLimit(ip);
+    if (!success) {
+      const { body, headers } = rateLimitResponse(resetAt);
+      return NextResponse.json(body, { status: 429, headers });
     }
 
     const session = await auth();
@@ -391,7 +387,7 @@ export async function POST(request: NextRequest) {
     }
 
     // ✅ Create order in transaction
-    const newOrder = await prisma.$transaction(async (tx) => {
+    const newOrder = await prisma.$transaction(async (tx: TransactionClient) => {
       // Create order
       const order = await tx.order.create({
         data: {

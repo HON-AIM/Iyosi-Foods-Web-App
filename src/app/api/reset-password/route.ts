@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { z } from "zod";
 import { type NextRequest } from "next/server";
-import { passwordResetLimiter, createRateLimitResponse, setRateLimitHeaders } from "@/lib/rate-limiter";
+import { passwordResetLimiter, checkLimit } from "@/lib/redis-rate-limiter";
 
 const ResetPasswordSchema = z
   .object({
@@ -33,16 +33,16 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
                request.headers.get("x-real-ip") ||
                "unknown";
-    const isAllowed = await passwordResetLimiter.check(ip);
-    if (!isAllowed) {
-      const remaining = passwordResetLimiter.getRemaining(ip);
-      const resetTime = passwordResetLimiter.getResetTime(ip);
-      const response = NextResponse.json(
-        createRateLimitResponse(remaining, resetTime),
-        { status: 429 }
+    const { success, resetAt } = await checkLimit(passwordResetLimiter, ip);
+    if (!success) {
+      const retryAfter = Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
+      return NextResponse.json(
+        {
+          message: "Too many password reset attempts. Please try again later.",
+          retryAfter,
+        },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
       );
-      setRateLimitHeaders(response, remaining, resetTime);
-      return response;
     }
 
     const body = await request.text();

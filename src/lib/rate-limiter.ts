@@ -185,7 +185,7 @@ export function createRateLimitResponse(
  * Helper function to set rate limit headers
  */
 export function setRateLimitHeaders(
-  response: any,
+  response: Response,
   remaining: number,
   resetTime: number
 ) {

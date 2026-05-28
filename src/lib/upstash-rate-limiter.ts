@@ -212,14 +212,14 @@ export function createRateLimitResponse(
  * Set rate limit headers on response
  */
 export function setRateLimitHeaders(
-  response: any,
+  response: Response,
   result: {
     allowed: boolean;
     remaining: number;
     resetTime: number;
     retryAfter: number;
   }
-): any {
+): Response {
   response.headers.set("X-RateLimit-Limit", "1"); // Can vary by config
   response.headers.set("X-RateLimit-Remaining", String(result.remaining));
   response.headers.set(

@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 import CategoryStrip from "@/components/shop/CategoryStrip";
 import PromoBanners from "@/components/shop/PromoBanners";
 import Link from "next/link";
-import { ChevronRight, Tag, Flame, Percent, TrendingUp, Sparkles } from "lucide-react";
+import { ChevronRight, Flame, Percent, TrendingUp, Sparkles } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Shop Premium Flour Online | Iyosiola Foods",
@@ -31,48 +31,51 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function ShopHomePage() {
-  let flashProducts: Awaited<ReturnType<typeof prisma.product.findMany>> = [];
-  let topProducts: Awaited<ReturnType<typeof prisma.product.findMany>> = [];
-  let recommendedProducts: Awaited<ReturnType<typeof prisma.product.findMany>> = [];
+export default async function ShopHomePage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ category?: string; q?: string }>
+}) {
+  const params = searchParams ? await searchParams : {};
+  const rawCategory = (params?.category || "").toUpperCase();
 
-  try {
-    flashProducts = await prisma.product.findMany({
-      where: { stock: { gt: 0 }, isActive: true },
+  const CATEGORY_ALIAS: Record<string, string> = {
+    "FLOUR": "BAKING",
+    "BAKING": "BAKING",
+    "WHEAT": "WHEAT",
+    "ALL_PURPOSE": "ALL_PURPOSE",
+    "ALL-PURPOSE": "ALL_PURPOSE",
+    "SEMOLINA": "SEMOLINA",
+  };
+  const activeCategory = CATEGORY_ALIAS[rawCategory] || null;
+  const categoryFilter = activeCategory
+    ? { category: activeCategory as "BAKING" | "WHEAT" | "ALL_PURPOSE" | "SEMOLINA" }
+    : {};
+
+  const [flashProducts, topProducts, recommendedProducts] = await Promise.all([
+    prisma.product.findMany({
+      where: { stock: { gt: 0 }, isActive: true, ...categoryFilter },
       take: 8,
       orderBy: { createdAt: "asc" },
-    });
-  } catch (err) {
-    console.error("[Shop] Failed to fetch flash products:", err);
-  }
-
-  try {
-    topProducts = await prisma.product.findMany({
-      where: { stock: { gt: 0 }, isActive: true },
+    }).catch(() => [] as Awaited<ReturnType<typeof prisma.product.findMany>>),
+    prisma.product.findMany({
+      where: { stock: { gt: 0 }, isActive: true, ...categoryFilter },
       take: 12,
       orderBy: { createdAt: "desc" },
-    });
-  } catch (err) {
-    console.error("[Shop] Failed to fetch top products:", err);
-  }
-
-  try {
-    recommendedProducts = await prisma.product.findMany({
-      where: { isActive: true },
+    }).catch(() => [] as Awaited<ReturnType<typeof prisma.product.findMany>>),
+    prisma.product.findMany({
+      where: { isActive: true, ...categoryFilter },
       orderBy: { updatedAt: "desc" },
       take: 18,
-    });
-  } catch (err) {
-    console.error("[Shop] Failed to fetch recommended products:", err);
-  }
+    }).catch(() => [] as Awaited<ReturnType<typeof prisma.product.findMany>>),
+  ]);
 
   const categories = [
-    { name: "Flour", icon: "🌾", link: "/shop?category=flour" },
-    { name: "Semolina", icon: "🥣", link: "/shop?category=semolina" },
-    { name: "Wheat", icon: "🍞", link: "/shop?category=wheat" },
-    { name: "Baking", icon: "🧁", link: "/shop?category=baking" },
-    { name: "Groceries", icon: "🛒", link: "/shop?category=groceries" },
-    { name: "Bulk Purchases", icon: "📦", link: "/shop?category=bulk" },
+    { name: "All Products", icon: "🛒", link: "/shop" },
+    { name: "Baking Flour", icon: "🧁", link: "/shop?category=BAKING" },
+    { name: "Wheat Flour", icon: "🌾", link: "/shop?category=WHEAT" },
+    { name: "All-Purpose", icon: "🍞", link: "/shop?category=ALL_PURPOSE" },
+    { name: "Semolina", icon: "🥣", link: "/shop?category=SEMOLINA" },
   ];
 
   return (
@@ -94,7 +97,12 @@ export default async function ShopHomePage() {
                 <Link
                   key={index}
                   href={cat.link}
-                  className="px-4 py-2.5 hover:bg-orange-50 flex items-center justify-between text-gray-700 hover:text-orange-600 transition-colors text-sm border-b border-gray-50 last:border-0"
+                  className={`px-4 py-2.5 hover:bg-orange-50 flex items-center justify-between transition-colors text-sm border-b border-gray-50 last:border-0 ${
+                    (cat.link === "/shop" && !activeCategory) ||
+                    (activeCategory && cat.link.includes(activeCategory))
+                      ? "bg-orange-50 text-orange-600 font-semibold"
+                      : "text-gray-700 hover:text-orange-600"
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <span className="text-lg">{cat.icon}</span>
@@ -114,7 +122,7 @@ export default async function ShopHomePage() {
           {/* Side Promo Cards - Large Desktop Only */}
           <div className="hidden xl:flex flex-col w-52 gap-3 shrink-0">
             <Link
-              href="/shop?category=bulk"
+              href="/shop?category=BAKING"
               className="flex-1 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg p-4 flex flex-col justify-center items-center text-center text-white hover:shadow-lg transition-shadow group"
             >
               <div className="bg-white/20 p-3 rounded-full mb-2 group-hover:scale-110 transition-transform">
@@ -138,6 +146,14 @@ export default async function ShopHomePage() {
 
         {/* ═══ ROW 2: Category Icon Strip (Mobile + Desktop) ═══ */}
         <CategoryStrip />
+
+        {/* Active Category Indicator */}
+        {activeCategory && (
+          <div className="flex items-center gap-2 bg-white rounded-lg px-4 py-2 text-sm text-gray-600 border border-gray-100">
+            Filtering: <strong className="text-gray-900">{activeCategory.replace("_", " ")}</strong>
+            <a href="/shop" className="ml-auto text-orange-500 hover:underline text-xs">Clear ✕</a>
+          </div>
+        )}
 
         {/* ═══ ROW 3: Flash Sale Section ═══ */}
         <FlashSale products={flashProducts} />

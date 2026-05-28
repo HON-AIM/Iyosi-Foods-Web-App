@@ -82,12 +82,6 @@ export function withRateLimit(
       try {
         // Allow skipping rate limiting for certain requests
         if (options?.shouldSkip?.(request)) {
-          if (options?.debug) {
-            console.log("[RATE-LIMIT] Request skipped:", {
-              type,
-              pathname: request.nextUrl.pathname,
-            });
-          }
           return handler(request);
         }
 
@@ -120,17 +114,6 @@ export function withRateLimit(
           ipBased: !userId,
           userBased: !!userId,
         });
-
-        if (options?.debug) {
-          console.log("[RATE-LIMIT] Check result:", {
-            type,
-            identifier,
-            customKey,
-            userId,
-            allowed: result.allowed,
-            remaining: result.remaining,
-          });
-        }
 
         // Rate limit exceeded
         if (!result.allowed) {

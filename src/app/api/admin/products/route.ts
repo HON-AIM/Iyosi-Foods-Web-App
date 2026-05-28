@@ -1,18 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma, TransactionClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { type NextRequest } from "next/server";
-import { z } from "zod";
-import { adminLimiter } from "@/lib/admin-rate-limiter";
-
-const ProductSchema = z.object({
-  name: z.string().min(2, "Product name must be at least 2 characters").max(200).trim(),
-  description: z.string().min(10, "Description must be at least 10 characters").max(2000).trim(),
-  price: z.number().positive("Price must be greater than 0"),
-  stock: z.number().int("Stock must be a whole number").min(0, "Stock cannot be negative"),
-  image: z.string().url("Image must be a valid URL").nullable().optional(),
-  category: z.enum(["BAKING", "WHEAT", "ALL_PURPOSE", "SEMOLINA"]).default("BAKING"),
-});
+import { checkAdminRateLimit, rateLimitResponse } from "@/lib/admin-rate-limiter";
+import { ProductSchema } from "@/schemas/product.schema";
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
@@ -23,12 +14,10 @@ export async function GET(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
         request.headers.get("x-real-ip") ||
         "unknown";
-    const allowed = await adminLimiter.check(ip);
-    if (!allowed) {
-      return NextResponse.json(
-        { message: "Too many requests. Please try again later." },
-        { status: 429 }
-      );
+    const { success, resetAt } = await checkAdminRateLimit(ip);
+    if (!success) {
+      const { body, headers } = rateLimitResponse(resetAt);
+      return NextResponse.json(body, { status: 429, headers });
     }
 
     const session = await auth();
@@ -107,12 +96,10 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
         request.headers.get("x-real-ip") ||
         "unknown";
-    const allowed = await adminLimiter.check(ip);
-    if (!allowed) {
-      return NextResponse.json(
-        { message: "Too many requests. Please try again later." },
-        { status: 429 }
-      );
+    const { success, resetAt } = await checkAdminRateLimit(ip);
+    if (!success) {
+      const { body, headers } = rateLimitResponse(resetAt);
+      return NextResponse.json(body, { status: 429, headers });
     }
 
     const session = await auth();
@@ -163,7 +150,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Bad Request: A product with this name already exists" }, { status: 400 });
     }
 
-    const newProduct = await prisma.$transaction(async (tx) => {
+    const newProduct = await prisma.$transaction(async (tx: TransactionClient) => {
       const product = await tx.product.create({
         data: { name, description, price, stock, image: image || null, category },
         include: { _count: { select: { reviews: true, orderItems: true } } },

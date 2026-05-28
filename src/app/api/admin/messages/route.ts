@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { sendAdminDirectMessage } from "@/lib/email";
 import { type NextRequest } from "next/server";
-import { adminLimiter } from "@/lib/admin-rate-limiter";
+import { checkAdminRateLimit, rateLimitResponse } from "@/lib/admin-rate-limiter";
 
 const DEFAULT_LIMIT = 20;
 const MAX_LIMIT = 100;
@@ -26,12 +26,10 @@ export async function GET(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
         request.headers.get("x-real-ip") ||
         "unknown";
-    const allowed = await adminLimiter.check(ip);
-    if (!allowed) {
-      return NextResponse.json(
-        { message: "Too many requests. Please try again later." },
-        { status: 429 }
-      );
+    const { success, resetAt } = await checkAdminRateLimit(ip);
+    if (!success) {
+      const { body, headers } = rateLimitResponse(resetAt);
+      return NextResponse.json(body, { status: 429, headers });
     }
 
     const session = await auth();
@@ -158,12 +156,10 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
         request.headers.get("x-real-ip") ||
         "unknown";
-    const allowed = await adminLimiter.check(ip);
-    if (!allowed) {
-      return NextResponse.json(
-        { message: "Too many requests. Please try again later." },
-        { status: 429 }
-      );
+    const { success, resetAt } = await checkAdminRateLimit(ip);
+    if (!success) {
+      const { body, headers } = rateLimitResponse(resetAt);
+      return NextResponse.json(body, { status: 429, headers });
     }
 
     const session = await auth();

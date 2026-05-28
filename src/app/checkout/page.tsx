@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
@@ -12,18 +11,14 @@ import {
   ChevronLeft,
   CheckCircle2,
   Loader2,
-  Package,
   AlertTriangle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function CheckoutPage() {
-  const router = useRouter();
   const { items, cartTotal, clearCart } = useCart();
   const [shippingAddress, setShippingAddress] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [orderPlaced, setOrderPlaced] = useState(false);
-  const [orderId, setOrderId] = useState<string | null>(null);
   const [validating, setValidating] = useState(true);
   const [validationError, setValidationError] = useState<string | null>(null);
 
@@ -82,59 +77,26 @@ export default function CheckoutPage() {
         return;
       }
 
-      setOrderId(data.id);
-      setOrderPlaced(true);
+      const paymentRes = await fetch("/api/payments/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ orderId: data.id }),
+      });
+      const paymentData = await paymentRes.json();
+
+      if (!paymentRes.ok) {
+        toast.error(paymentData.message || "Payment initialization failed");
+        return;
+      }
+
       clearCart();
+      window.location.href = paymentData.authorizationUrl;
     } catch {
       toast.error("A network error occurred. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  // ─── Order Confirmation Screen ────────────────────────────────────────────
-  if (orderPlaced) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-10 text-center space-y-6">
-          <div className="flex justify-center">
-            <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center">
-              <CheckCircle2 className="h-10 w-10 text-green-600" />
-            </div>
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Order Placed!</h1>
-            <p className="text-gray-500 mt-2 text-sm">
-              Thank you for your order. We&apos;ll start preparing it right away.
-            </p>
-          </div>
-          {orderId && (
-            <div className="bg-gray-50 rounded-lg px-4 py-3 text-sm">
-              <span className="text-gray-500">Order ID: </span>
-              <span className="font-mono font-medium text-gray-800 break-all">
-                {orderId}
-              </span>
-            </div>
-          )}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Link
-              href="/dashboard/orders"
-              className="inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-            >
-              <Package className="h-4 w-4" />
-              View My Orders
-            </Link>
-            <Link
-              href="/shop"
-              className="inline-flex items-center justify-center gap-2 border border-gray-200 hover:bg-gray-50 text-gray-700 px-6 py-3 rounded-lg font-semibold transition-colors"
-            >
-              Continue Shopping
-            </Link>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // ─── Empty Cart Redirect ──────────────────────────────────────────────────
   if (items.length === 0) {
@@ -237,7 +199,7 @@ export default function CheckoutPage() {
                     Placing Order…
                   </>
                 ) : (
-                  "PLACE ORDER"
+                  "CONTINUE TO PAYMENT"
                 )}
               </button>
             </form>

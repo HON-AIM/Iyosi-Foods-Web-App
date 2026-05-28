@@ -1,33 +1,11 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { prisma } from "@/lib/db";
+import { prisma, TransactionClient } from "@/lib/db";
 import { sendVerificationEmail } from "@/lib/email";
 import crypto from "crypto";
-import { z } from "zod";
 import { type NextRequest } from "next/server";
-import { registrationLimiter, createRateLimitResponse, setRateLimitHeaders } from "@/lib/rate-limiter";
-
-const RegisterSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Name must be at least 2 characters")
-    .max(100, "Name is too long")
-    .trim()
-    .regex(/^[a-zA-Z\s'-]+$/, "Name can only contain letters, spaces, hyphens, and apostrophes"),
-  email: z
-    .string()
-    .email("Invalid email address")
-    .toLowerCase()
-    .trim(),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .max(128, "Password is too long")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, "Password must contain at least one special character"),
-});
+import { registrationLimiter, checkLimit } from "@/lib/redis-rate-limiter";
+import { RegisterSchema } from "@/schemas/auth.schema";
 
 const VERIFICATION_TOKEN_LENGTH = 64;
 const VERIFICATION_TOKEN_EXPIRY = 24 * 60 * 60 * 1000;
@@ -42,16 +20,16 @@ export async function POST(request: NextRequest) {
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
                request.headers.get("x-real-ip") ||
                "unknown";
-    const isAllowed = await registrationLimiter.check(ip);
-    if (!isAllowed) {
-      const remaining = registrationLimiter.getRemaining(ip);
-      const resetTime = registrationLimiter.getResetTime(ip);
-      const response = NextResponse.json(
-        createRateLimitResponse(remaining, resetTime),
-        { status: 429 }
+    const { success, resetAt } = await checkLimit(registrationLimiter, ip);
+    if (!success) {
+      const retryAfter = Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
+      return NextResponse.json(
+        {
+          message: "Too many registration attempts. Please try again later.",
+          retryAfter,
+        },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } }
       );
-      setRateLimitHeaders(response, remaining, resetTime);
-      return response;
     }
 
     const body = await request.text();
@@ -85,7 +63,7 @@ export async function POST(request: NextRequest) {
 
     let newUser;
     try {
-      newUser = await prisma.$transaction(async (tx) => {
+      newUser = await prisma.$transaction(async (tx: TransactionClient) => {
         const existingUser = await tx.user.findUnique({
           where: { email },
           select: { id: true },
@@ -130,7 +108,7 @@ export async function POST(request: NextRequest) {
     const tokenExpiry = new Date(Date.now() + VERIFICATION_TOKEN_EXPIRY);
 
     try {
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: TransactionClient) => {
         await tx.user.update({
           where: { id: newUser.id },
           data: {

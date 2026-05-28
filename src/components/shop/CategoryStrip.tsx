@@ -4,13 +4,10 @@ import Link from "next/link";
 
 const CATEGORIES = [
   { name: "All Products", icon: "🛒", link: "/shop" },
-  { name: "Flour", icon: "🌾", link: "/shop?category=flour" },
-  { name: "Semolina", icon: "🥣", link: "/shop?category=semolina" },
-  { name: "Wheat", icon: "🍞", link: "/shop?category=wheat" },
-  { name: "Baking", icon: "🧁", link: "/shop?category=baking" },
-  { name: "Bulk Deals", icon: "📦", link: "/shop?category=bulk" },
-  { name: "Groceries", icon: "🥕", link: "/shop?category=groceries" },
-  { name: "New Arrivals", icon: "✨", link: "/shop?sort=newest" },
+  { name: "Baking Flour", icon: "🧁", link: "/shop?category=BAKING" },
+  { name: "Wheat Flour", icon: "🌾", link: "/shop?category=WHEAT" },
+  { name: "All-Purpose", icon: "🍞", link: "/shop?category=ALL_PURPOSE" },
+  { name: "Semolina", icon: "🥣", link: "/shop?category=SEMOLINA" },
 ];
 
 export default function CategoryStrip() {

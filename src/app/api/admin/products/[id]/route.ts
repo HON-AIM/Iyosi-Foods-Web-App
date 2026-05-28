@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma, TransactionClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { type NextRequest } from "next/server";
 import { z } from "zod";
@@ -108,7 +108,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     let updatedProduct;
     try {
-      updatedProduct = await prisma.$transaction(async (tx) => {
+      updatedProduct = await prisma.$transaction(async (tx: TransactionClient) => {
         const updated = await tx.product.update({
           where: { id },
           data: parseResult.data,
@@ -169,7 +169,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
 
     const orderItemCount = await prisma.orderItem.count({ where: { productId: id } });
 
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx: TransactionClient) => {
       let message: string;
       let softDeleted: boolean;
 

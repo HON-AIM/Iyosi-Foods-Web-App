@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { prisma, TransactionClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { type NextRequest } from "next/server";
 
@@ -157,7 +157,7 @@ export async function DELETE(
     let result;
     try {
       result = await prisma.$transaction(
-        async (tx) => {
+        async (tx: TransactionClient) => {
           // Delete the review
           const deletedReview = await tx.review.delete({
             where: { id },
