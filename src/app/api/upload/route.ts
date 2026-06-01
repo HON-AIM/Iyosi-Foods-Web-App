@@ -47,9 +47,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Unauthorized: Admin access required" }, { status: 401 });
     }
 
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      return NextResponse.json({ message: "File storage not configured" }, { status: 503 });
-    }
+    // If BLOB storage is not configured, we'll fall back to saving into public/uploads
+    // This makes local development easier; production should configure a cloud blob provider.
 
     const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
@@ -88,17 +87,29 @@ export async function POST(request: NextRequest) {
 
     const filename = generateSafeFilename(file.type);
 
-    let blob;
+    // Attempt to store in configured blob provider; otherwise fallback to local public/uploads
+    let fileUrl: string;
     try {
-      blob = await put(`products/${filename}`, buffer, {
-        access: "public",
-        contentType: file.type,
-      });
-    } catch {
+      if (process.env.BLOB_READ_WRITE_TOKEN) {
+        const blob = await put(`products/${filename}`, buffer, {
+          access: "public",
+          contentType: file.type,
+        });
+        fileUrl = blob.url;
+      } else {
+        const fs = await import("fs/promises");
+        const path = await import("path");
+        const uploadsDir = path.join(process.cwd(), "public", "uploads");
+        await fs.mkdir(uploadsDir, { recursive: true });
+        const outPath = path.join(uploadsDir, filename);
+        await fs.writeFile(outPath, buffer);
+        // Use a relative URL so Next can serve from /public
+        fileUrl = `/uploads/${filename}`;
+      }
+    } catch (saveError) {
+      console.error("[ERROR] Save file failed:", saveError instanceof Error ? saveError.message : String(saveError));
       return NextResponse.json({ message: "Server error: Failed to save file" }, { status: 500 });
     }
-
-    const fileUrl = blob.url;
 
     try {
       await prisma.uploadedFile.create({

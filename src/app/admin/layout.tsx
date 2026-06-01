@@ -34,7 +34,8 @@ export default async function AdminLayout({
 
   // Protect Admin Routes. Only users with role ADMIN can access.
   if (authError || !session?.user?.role || session.user.role !== "ADMIN") {
-    redirect("/login");
+    // Include callback so user is returned to /admin after successful login
+    redirect(`/login?callbackUrl=${encodeURIComponent("/admin")}`);
   }
 
   return <AdminLayoutClient>{children}</AdminLayoutClient>;
