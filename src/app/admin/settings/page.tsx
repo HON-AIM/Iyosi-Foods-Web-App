@@ -21,7 +21,7 @@ export default function AdminSettingsPage() {
         setAnnouncementText(data.settings?.announcementText || "");
       }
     } catch (error) {
-      console.error("Error fetching settings:", error);
+      console.error("[ERROR] Error fetching settings:", error);
       toast.error("Failed to load settings");
     } finally {
       setIsLoading(false);
@@ -45,7 +45,7 @@ export default function AdminSettingsPage() {
         toast.error("Failed to save settings");
       }
     } catch (error) {
-      console.error("Error saving settings:", error);
+      console.error("[ERROR] Error saving settings:", error);
       toast.error("An error occurred");
     } finally {
       setIsSaving(false);

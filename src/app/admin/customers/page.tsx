@@ -49,7 +49,7 @@ export default function AdminCustomersPage() {
           router.push("/login");
         }
       } catch (error) {
-        console.error("Auth check failed:", error);
+        console.error("[ERROR] Auth check failed:", error);
         router.push("/login");
       }
     };
@@ -93,7 +93,7 @@ export default function AdminCustomersPage() {
           pages: 1,
         });
       } catch (error) {
-        console.error("Error fetching customers:", error);
+        console.error("[ERROR] Error fetching customers:", error);
         setError(
           error instanceof Error
             ? error.message
@@ -157,7 +157,7 @@ export default function AdminCustomersPage() {
         toast.error(data.message || "Failed to delete customer");
       }
     } catch (error) {
-      console.error("Error deleting customer:", error);
+      console.error("[ERROR] Error deleting customer:", error);
       toast.error("An error occurred while deleting");
     } finally {
       setIsDeleting(null);

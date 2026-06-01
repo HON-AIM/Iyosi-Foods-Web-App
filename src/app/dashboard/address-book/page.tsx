@@ -41,7 +41,7 @@ export default function AddressBookPage() {
         setAddresses(data.sort((a: Address, b: Address) => (b.isDefault ? 1 : 0) - (a.isDefault ? 1 : 0)));
       }
     } catch (error) {
-      console.error("Failed to fetch addresses");
+      console.error("[ERROR] Failed to fetch addresses");
     } finally {
       setLoading(false);
     }
@@ -73,10 +73,10 @@ export default function AddressBookPage() {
         await fetchAddresses();
         closeModal();
       } else {
-         console.error("Failed to save address");
+         console.error("[ERROR] Failed to save address");
       }
     } catch (error) {
-      console.error("Failed to save address", error);
+      console.error("[ERROR] Failed to save address", error);
     } finally {
       setLoading(false);
     }
@@ -92,7 +92,7 @@ export default function AddressBookPage() {
         await fetchAddresses();
       }
     } catch (error) {
-      console.error("Failed to delete address");
+      console.error("[ERROR] Failed to delete address");
     } finally {
       setLoading(false);
     }

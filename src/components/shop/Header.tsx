@@ -22,7 +22,7 @@ export default function ShopHeader() {
           setAnnouncement(data.settings.announcementText);
         }
       })
-      .catch(err => console.error("Failed to load announcement", err));
+      .catch(err => console.error("[ERROR] Failed to load announcement", err));
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {

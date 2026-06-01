@@ -150,7 +150,7 @@ async function getDashboardData() {
       productsChange,
     };
   } catch (error) {
-    console.error("Dashboard error:", error);
+    console.error("[ERROR] Dashboard error:", error);
     return {
       totalOrders: 0,
       pendingOrders: 0,

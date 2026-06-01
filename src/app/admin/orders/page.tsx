@@ -72,7 +72,7 @@ export default function AdminOrdersPage() {
           return;
         }
       } catch (error) {
-        console.error("Auth check failed:", error);
+        console.error("[ERROR] Auth check failed:", error);
         router.push("/login");
       }
     };
@@ -118,7 +118,7 @@ export default function AdminOrdersPage() {
           pages: 1,
         });
       } catch (error) {
-        console.error("Error fetching orders:", error);
+        console.error("[ERROR] Error fetching orders:", error);
         setError("Failed to load orders");
         toast.error("Failed to load orders");
       } finally {
@@ -187,7 +187,7 @@ export default function AdminOrdersPage() {
         setOrders(previousOrders);
       }
     } catch (error) {
-      console.error("Error updating order status:", error);
+      console.error("[ERROR] Error updating order status:", error);
       toast.error("An error occurred while updating the order");
       // Rollback optimistic update
       setOrders(previousOrders);

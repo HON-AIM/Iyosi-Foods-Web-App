@@ -50,7 +50,7 @@ export default function AdminReviewsPage() {
           return;
         }
       } catch (error) {
-        console.error("Auth check failed:", error);
+        console.error("[ERROR] Auth check failed:", error);
         router.push("/login");
       }
     };
@@ -96,7 +96,7 @@ export default function AdminReviewsPage() {
         pages: 1,
       });
     } catch (error) {
-      console.error("Error fetching reviews:", error);
+      console.error("[ERROR] Error fetching reviews:", error);
       setError("Failed to load reviews");
       toast.error("Failed to load reviews");
     } finally {
@@ -151,7 +151,7 @@ export default function AdminReviewsPage() {
         );
       }
     } catch (error) {
-      console.error("Error deleting review:", error);
+      console.error("[ERROR] Error deleting review:", error);
       toast.error("An error occurred while deleting the review");
     } finally {
       setDeletingId(null);

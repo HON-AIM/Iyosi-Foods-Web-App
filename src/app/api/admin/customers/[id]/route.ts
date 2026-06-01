@@ -147,7 +147,7 @@ export async function DELETE(
       }
 
       if (error.message.includes("Foreign key constraint failed")) {
-        console.error("Foreign key constraint error:", error.message);
+        console.error("[ERROR] Foreign key constraint error:", error.message);
         return NextResponse.json(
           {
             message:

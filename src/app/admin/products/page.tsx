@@ -51,7 +51,7 @@ export default function AdminProductsPage() {
           return;
         }
       } catch (error) {
-        console.error("Auth check failed:", error);
+        console.error("[ERROR] Auth check failed:", error);
         router.push("/login");
       }
     };
@@ -96,7 +96,7 @@ export default function AdminProductsPage() {
         pages: 1,
       });
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("[ERROR] Error fetching products:", error);
       setError("Failed to load products");
       toast.error("Failed to load products");
     } finally {
@@ -152,7 +152,7 @@ export default function AdminProductsPage() {
         );
       }
     } catch (error) {
-      console.error("Error deleting product:", error);
+      console.error("[ERROR] Error deleting product:", error);
       toast.error("An error occurred while deleting the product");
     } finally {
       setDeletingId(null);

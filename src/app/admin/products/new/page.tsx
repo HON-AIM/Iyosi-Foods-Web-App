@@ -55,7 +55,7 @@ export default function AddProductPage() {
         }
         setIsAuthorized(true);
       } catch (error) {
-        console.error("Auth check failed:", error);
+        console.error("[ERROR] Auth check failed:", error);
         router.push("/login");
       } finally {
         setIsCheckingAuth(false);
@@ -181,7 +181,7 @@ export default function AddProductPage() {
       const data = await res.json();
       return data.url || null;
     } catch (error) {
-      console.error("Upload failed:", error);
+      console.error("[ERROR] Upload failed:", error);
       const message =
         error instanceof Error ? error.message : "Image upload failed";
       toast.error(message);
@@ -253,7 +253,7 @@ export default function AddProductPage() {
         );
       }
     } catch (error) {
-      console.error("Error creating product:", error);
+      console.error("[ERROR] Error creating product:", error);
       const message =
         error instanceof Error
           ? error.message

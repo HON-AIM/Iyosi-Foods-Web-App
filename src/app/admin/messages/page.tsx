@@ -52,7 +52,7 @@ export default function AdminMessagesPage() {
           router.push("/login");
         }
       } catch (error) {
-        console.error("Auth check failed:", error);
+        console.error("[ERROR] Auth check failed:", error);
         router.push("/login");
       }
     };
@@ -91,7 +91,7 @@ export default function AdminMessagesPage() {
       setMessages(messagesData.messages || []);
       setUsers(usersData.customers || []);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("[ERROR] Error fetching data:", error);
       setError("Failed to load communication data");
       toast.error("An error occurred loading communication data");
     } finally {
@@ -181,7 +181,7 @@ export default function AdminMessagesPage() {
         );
       }
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("[ERROR] Error sending message:", error);
       toast.error("An error occurred while sending the message");
     } finally {
       setIsSending(false);
@@ -218,7 +218,7 @@ export default function AdminMessagesPage() {
         toast.error(data.message || "Failed to delete message");
       }
     } catch (error) {
-      console.error("Error deleting message:", error);
+      console.error("[ERROR] Error deleting message:", error);
       toast.error("An error occurred while deleting the message");
     }
   };
