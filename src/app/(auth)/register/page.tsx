@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect, Suspense } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -793,13 +793,15 @@ function RegisterForm() {
   );
 }
 
+// ✅ Memoized components for performance
+const MemoizedSuccessMessage = React.memo(SuccessMessage);
+const MemoizedRegisterForm = React.memo(RegisterForm);
+
 // ✅ Main page component
 export default function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-surface-50 dark:bg-surface-900 py-12 px-4 sm:px-6 lg:px-8">
-      <Suspense fallback={<RegisterSkeleton />}>
-        <RegisterForm />
-      </Suspense>
+      <MemoizedRegisterForm />
     </div>
   );
 }

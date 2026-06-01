@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -395,12 +395,12 @@ function LoginForm() {
   );
 }
 
+const MemoizedLoginForm = React.memo(LoginForm);
+
 export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Suspense fallback={<div className="text-center text-gray-500">Loading...</div>}>
-        <LoginForm />
-      </Suspense>
+      <MemoizedLoginForm />
     </div>
   );
 }

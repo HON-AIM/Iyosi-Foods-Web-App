@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
     }
 
     try {
-      const verificationUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/verify?token=${token}&email=${encodeURIComponent(email)}`;
+      const verificationUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3001"}/verify?token=${token}&email=${encodeURIComponent(email)}`;
       await sendVerificationEmail(email, name, verificationUrl);
       console.info("[AUDIT] Registration email sent:", { userId: newUser.id, email, ip: clientIp, timestamp: new Date().toISOString() });
     } catch (emailError) {
