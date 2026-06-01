@@ -9,7 +9,8 @@ import {
   MapPin, 
   Settings, 
   LogOut,
-  Clock
+  Clock,
+  ShoppingBag
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -18,7 +19,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/login");
+    // Redirect to login and preserve callback to dashboard so user returns here after sign-in
+    redirect(`/login?callbackUrl=${encodeURIComponent("/dashboard")}`);
   }
 
   const user = session.user;
@@ -42,6 +44,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             
             <nav className="flex-1 py-2">
               <SidebarLink href="/dashboard" icon={<User size={18} />} label="My Account" />
+              <SidebarLink href="/products" icon={<ShoppingBag size={18} />} label="Visit Store" />
               <SidebarLink href="/dashboard/orders" icon={<Package size={18} />} label="Orders" />
               <SidebarLink href="/dashboard/inbox" icon={<Mail size={18} />} label="Inbox" />
               <SidebarLink href="/dashboard/reviews" icon={<Heart size={18} />} label="Pending Reviews" />
