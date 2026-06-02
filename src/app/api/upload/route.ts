@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { type NextRequest } from "next/server";
 import crypto from "crypto";
+import { tmpdir } from "os";
+import { join } from "path";
 
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -87,8 +89,9 @@ export async function POST(request: NextRequest) {
 
     const filename = generateSafeFilename(file.type);
 
-    // Attempt to store in configured blob provider; otherwise fallback to local public/uploads
+    // Attempt to store in configured blob provider; otherwise fallback to temp directory
     let fileUrl: string;
+    let storageType: "blob" | "local" = "local";
     try {
       if (process.env.BLOB_READ_WRITE_TOKEN) {
         const blob = await put(`products/${filename}`, buffer, {
@@ -96,15 +99,14 @@ export async function POST(request: NextRequest) {
           contentType: file.type,
         });
         fileUrl = blob.url;
+        storageType = "blob";
       } else {
         const fs = await import("fs/promises");
-        const path = await import("path");
-        const uploadsDir = path.join(process.cwd(), "public", "uploads");
+        const uploadsDir = join(tmpdir(), "iyosiola-uploads");
         await fs.mkdir(uploadsDir, { recursive: true });
-        const outPath = path.join(uploadsDir, filename);
+        const outPath = join(uploadsDir, filename);
         await fs.writeFile(outPath, buffer);
-        // Use a relative URL so Next can serve from /public
-        fileUrl = `/uploads/${filename}`;
+        fileUrl = `/api/uploads/${filename}`;
       }
     } catch (saveError) {
       console.error("[ERROR] Save file failed:", saveError instanceof Error ? saveError.message : String(saveError));
@@ -126,7 +128,12 @@ export async function POST(request: NextRequest) {
       });
     } catch (dbError) {
       try {
-        await del(fileUrl);
+        if (storageType === "blob") {
+          await del(fileUrl);
+        } else {
+          const fs = await import("fs/promises");
+          await fs.unlink(join(tmpdir(), "iyosiola-uploads", filename));
+        }
       } catch {}
       console.error("[ERROR] Failed to create upload record:", { error: dbError instanceof Error ? dbError.message : String(dbError) });
       return NextResponse.json({ message: "Server error: Failed to save upload metadata" }, { status: 500 });

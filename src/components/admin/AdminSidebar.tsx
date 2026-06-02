@@ -15,6 +15,8 @@ import {
   Settings,
   LogOut,
   ImageIcon,
+  ExternalLink,
+  Store,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -65,6 +67,11 @@ const NAV_ITEMS: NavItem[] = [
     label: "Settings",
     href: "/admin/settings",
     icon: <Settings className="h-5 w-5" />,
+  },
+  {
+    label: "Visit Store",
+    href: "/shop",
+    icon: <Store className="h-5 w-5" />,
   },
 ];
 

@@ -234,8 +234,14 @@ function LoginForm() {
           setAttemptCount(0); // Reset attempt count on success
 
           // ✅ Redirect to dashboard or callback URL
-          const redirectUrl =
+          // Handle both relative paths and absolute URLs from NextAuth middleware
+          let redirectUrl =
             searchParams.get("callbackUrl") || "/dashboard";
+          try {
+            redirectUrl = new URL(redirectUrl).pathname + new URL(redirectUrl).search;
+          } catch {
+            // already a relative path
+          }
 
           // ✅ Validate redirect URL (prevent open redirect)
           if (redirectUrl.startsWith("/")) {

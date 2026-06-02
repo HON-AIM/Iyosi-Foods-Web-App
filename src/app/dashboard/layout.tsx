@@ -44,7 +44,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
             
             <nav className="flex-1 py-2">
               <SidebarLink href="/dashboard" icon={<User size={18} />} label="My Account" />
-              <SidebarLink href="/products" icon={<ShoppingBag size={18} />} label="Visit Store" />
+              <SidebarLink href="/shop" icon={<ShoppingBag size={18} />} label="Visit Store" />
               <SidebarLink href="/dashboard/orders" icon={<Package size={18} />} label="Orders" />
               <SidebarLink href="/dashboard/inbox" icon={<Mail size={18} />} label="Inbox" />
               <SidebarLink href="/dashboard/reviews" icon={<Heart size={18} />} label="Pending Reviews" />
