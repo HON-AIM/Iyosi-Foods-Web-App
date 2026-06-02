@@ -231,29 +231,36 @@ function LoginForm() {
         } else if (res?.ok) {
           // ✅ Login successful
           setSuccessMsg("✅ Login successful! Redirecting...");
-          setAttemptCount(0); // Reset attempt count on success
+          setAttemptCount(0);
 
-          // ✅ Redirect to dashboard or callback URL
-          // Handle both relative paths and absolute URLs from NextAuth middleware
-          let redirectUrl =
-            searchParams.get("callbackUrl") || "/dashboard";
-          try {
-            redirectUrl = new URL(redirectUrl).pathname + new URL(redirectUrl).search;
-          } catch {
-            // already a relative path
+          const rawCallbackUrl = searchParams.get("callbackUrl");
+
+          if (rawCallbackUrl) {
+            // Handle both relative paths and absolute URLs from NextAuth middleware
+            let redirectUrl = rawCallbackUrl;
+            try {
+              redirectUrl = new URL(redirectUrl).pathname + new URL(redirectUrl).search;
+            } catch {
+              // already a relative path
+            }
+            if (redirectUrl.startsWith("/")) {
+              setTimeout(() => { router.push(redirectUrl); router.refresh(); }, 500);
+              return;
+            }
           }
 
-          // ✅ Validate redirect URL (prevent open redirect)
-          if (redirectUrl.startsWith("/")) {
-            setTimeout(() => {
-              router.push(redirectUrl);
-              router.refresh();
-            }, 500);
-          } else {
-            setTimeout(() => {
-              router.push("/dashboard");
-              router.refresh();
-            }, 500);
+          // No callbackUrl → redirect based on role
+          try {
+            const sessionRes = await fetch("/api/auth/session");
+            const session = await sessionRes.json();
+            const role = session?.user?.role;
+            if (role === "ADMIN") {
+              setTimeout(() => { router.push("/admin"); router.refresh(); }, 500);
+            } else {
+              setTimeout(() => { router.push("/dashboard"); router.refresh(); }, 500);
+            }
+          } catch {
+            setTimeout(() => { router.push("/dashboard"); router.refresh(); }, 500);
           }
         }
       } catch (err) {
