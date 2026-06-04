@@ -233,35 +233,48 @@ function LoginForm() {
           setSuccessMsg("✅ Login successful! Redirecting...");
           setAttemptCount(0);
 
+          // Fetch session with retry to handle JWT cookie propagation delay
+          let role: string | undefined;
+          for (let attempt = 0; attempt < 3; attempt++) {
+            try {
+              // Small delay to allow cookie propagation
+              await new Promise((resolve) => setTimeout(resolve, attempt === 0 ? 300 : 600));
+              const sessionRes = await fetch("/api/auth/session");
+              const session = await sessionRes.json();
+              role = session?.user?.role;
+              if (role) break; // Got a role, stop retrying
+            } catch {
+              // Continue to next retry
+            }
+          }
+
+          // Determine redirect destination based on role
+          const isAdmin = role === "ADMIN";
+          const adminDest = "/admin";
+          const userDest = "/dashboard";
+
           const rawCallbackUrl = searchParams.get("callbackUrl");
 
           if (rawCallbackUrl) {
-            // Handle both relative paths and absolute URLs from NextAuth middleware
             let redirectUrl = rawCallbackUrl;
             try {
               redirectUrl = new URL(redirectUrl).pathname + new URL(redirectUrl).search;
             } catch {
               // already a relative path
             }
+            // If admin user has callbackUrl pointing to /dashboard, override to /admin
+            if (isAdmin && (redirectUrl === "/dashboard" || redirectUrl.startsWith("/dashboard?"))) {
+              setTimeout(() => { router.push(adminDest); router.refresh(); }, 200);
+              return;
+            }
             if (redirectUrl.startsWith("/")) {
-              setTimeout(() => { router.push(redirectUrl); router.refresh(); }, 500);
+              setTimeout(() => { router.push(redirectUrl); router.refresh(); }, 200);
               return;
             }
           }
 
           // No callbackUrl → redirect based on role
-          try {
-            const sessionRes = await fetch("/api/auth/session");
-            const session = await sessionRes.json();
-            const role = session?.user?.role;
-            if (role === "ADMIN") {
-              setTimeout(() => { router.push("/admin"); router.refresh(); }, 500);
-            } else {
-              setTimeout(() => { router.push("/dashboard"); router.refresh(); }, 500);
-            }
-          } catch {
-            setTimeout(() => { router.push("/dashboard"); router.refresh(); }, 500);
-          }
+          setTimeout(() => { router.push(isAdmin ? adminDest : userDest); router.refresh(); }, 200);
         }
       } catch (err) {
         console.error("[ERROR] Login failed:", err);

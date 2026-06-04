@@ -5,6 +5,10 @@ import { prisma } from "@/lib/db";
 import { type NextRequest } from "next/server";
 import crypto from "crypto";
 
+// Ensure this route uses the Node.js runtime and allows up to 6MB body
+export const runtime = "nodejs";
+export const maxDuration = 30;
+
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 const MIN_FILE_SIZE_BYTES = 100;
@@ -47,10 +51,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Unauthorized: Admin access required" }, { status: 401 });
     }
 
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      console.error("[ERROR] BLOB_READ_WRITE_TOKEN is not configured");
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!blobToken) {
+      console.error("[ERROR] BLOB_READ_WRITE_TOKEN is not configured. Available env vars with BLOB:",
+        Object.keys(process.env).filter(k => k.includes("BLOB")).join(", ") || "none"
+      );
       return NextResponse.json({ message: "File storage not configured" }, { status: 503 });
     }
+
+    console.info("[DEBUG] Blob token loaded:", {
+      prefix: blobToken.substring(0, 20) + "...",
+      length: blobToken.length,
+    });
 
     const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
@@ -94,7 +106,7 @@ export async function POST(request: NextRequest) {
       blob = await put(`products/${filename}`, buffer, {
         access: "public",
         contentType: file.type,
-        token: process.env.BLOB_READ_WRITE_TOKEN,
+        token: blobToken,
       });
     } catch (uploadError) {
       console.error("[ERROR] Vercel Blob upload failed:", {
