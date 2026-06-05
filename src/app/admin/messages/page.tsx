@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { MessageSquare, Send, Users, Trash2, Search, AlertCircle, X } from "lucide-react";
 import toast from "react-hot-toast";
+import { SkeletonTable } from "@/components/admin/SkeletonTable";
 
 type User = {
   id: string;
@@ -52,7 +53,7 @@ export default function AdminMessagesPage() {
           router.push("/login");
         }
       } catch (error) {
-        console.error("[ERROR] Auth check failed:", error);
+        console.error("[ERROR] Auth check failed:", error instanceof Error ? error.message : String(error));
         router.push("/login");
       }
     };
@@ -91,7 +92,7 @@ export default function AdminMessagesPage() {
       setMessages(messagesData.messages || []);
       setUsers(usersData.customers || []);
     } catch (error) {
-      console.error("[ERROR] Error fetching data:", error);
+      console.error("[ERROR] Error fetching data:", error instanceof Error ? error.message : String(error));
       setError("Failed to load communication data");
       toast.error("An error occurred loading communication data");
     } finally {
@@ -181,7 +182,7 @@ export default function AdminMessagesPage() {
         );
       }
     } catch (error) {
-      console.error("[ERROR] Error sending message:", error);
+      console.error("[ERROR] Error sending message:", error instanceof Error ? error.message : String(error));
       toast.error("An error occurred while sending the message");
     } finally {
       setIsSending(false);
@@ -218,7 +219,7 @@ export default function AdminMessagesPage() {
         toast.error(data.message || "Failed to delete message");
       }
     } catch (error) {
-      console.error("[ERROR] Error deleting message:", error);
+      console.error("[ERROR] Error deleting message:", error instanceof Error ? error.message : String(error));
       toast.error("An error occurred while deleting the message");
     }
   };
@@ -232,6 +233,18 @@ export default function AdminMessagesPage() {
       (msg.user?.email && msg.user.email.toLowerCase().includes(searchLower))
     );
   });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 bg-gray-200 rounded w-28 animate-pulse" />
+        <SkeletonTable
+          headers={["From", "Subject", "Date", "Status", "Actions"]}
+          rows={8}
+        />
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -483,12 +496,7 @@ export default function AdminMessagesPage() {
           </div>
         </div>
 
-        {isLoading ? (
-          <div className="p-12 flex flex-col items-center justify-center space-y-3">
-            <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-gray-500">Loading history...</p>
-          </div>
-        ) : filteredMessages.length === 0 ? (
+        {filteredMessages.length === 0 ? (
           <div className="p-12 flex flex-col items-center justify-center space-y-3 text-center">
             <div className="h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center">
               <MessageSquare

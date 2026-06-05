@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
         from: `"Iyosiola Careers" <${process.env.EMAIL_FROM || "israelmiracle12@gmail.com"}>`,
         to: process.env.EMAIL_FROM || "israelmiracle12@gmail.com",
         subject: `New CV Submission: ${firstName} ${lastName}${position ? ` - ${position}` : ""}`,
-        text: `New CV received:\n\nName: ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone || "N/A"}\nPosition: ${position || "Not specified"}\nCV: ${process.env.NEXTAUTH_URL || "http://localhost:3000"}/uploads/cv/${filename}`,
+        text: `New CV received:\n\nName: ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone || "N/A"}\nPosition: ${position || "Not specified"}\nCV: ${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000"}/uploads/cv/${filename}`,
       });
     } catch (emailError) {
       console.error("[ERROR] Failed to notify company of CV submission:", emailError);

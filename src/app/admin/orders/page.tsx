@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import { ShoppingCart, Search, Filter, AlertCircle, Eye } from "lucide-react";
 import toast from "react-hot-toast";
 import { formatCurrency } from "@/lib/utils";
+import { SkeletonTable } from "@/components/admin/SkeletonTable";
 
 type Order = {
   id: string;
@@ -72,7 +73,7 @@ export default function AdminOrdersPage() {
           return;
         }
       } catch (error) {
-        console.error("[ERROR] Auth check failed:", error);
+        console.error("[ERROR] Auth check failed:", error instanceof Error ? error.message : String(error));
         router.push("/login");
       }
     };
@@ -118,7 +119,7 @@ export default function AdminOrdersPage() {
           pages: 1,
         });
       } catch (error) {
-        console.error("[ERROR] Error fetching orders:", error);
+        console.error("[ERROR] Error fetching orders:", error instanceof Error ? error.message : String(error));
         setError("Failed to load orders");
         toast.error("Failed to load orders");
       } finally {
@@ -187,7 +188,7 @@ export default function AdminOrdersPage() {
         setOrders(previousOrders);
       }
     } catch (error) {
-      console.error("[ERROR] Error updating order status:", error);
+      console.error("[ERROR] Error updating order status:", error instanceof Error ? error.message : String(error));
       toast.error("An error occurred while updating the order");
       // Rollback optimistic update
       setOrders(previousOrders);
@@ -208,6 +209,18 @@ export default function AdminOrdersPage() {
 
     return matchesSearch && matchesStatus;
   });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 bg-gray-200 rounded w-24 animate-pulse" />
+        <SkeletonTable
+          headers={["Order ID", "Customer", "Date", "Amount", "Status", "Actions"]}
+          rows={10}
+        />
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -294,16 +307,7 @@ export default function AdminOrdersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center justify-center space-y-3">
-                      <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
-                      <p className="text-gray-500">Loading orders...</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : filteredOrders.length === 0 ? (
+              {filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center justify-center space-y-3">

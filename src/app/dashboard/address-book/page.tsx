@@ -76,7 +76,7 @@ export default function AddressBookPage() {
          console.error("[ERROR] Failed to save address");
       }
     } catch (error) {
-      console.error("[ERROR] Failed to save address", error);
+      console.error("[ERROR] Failed to save address", error instanceof Error ? error.message : String(error));
     } finally {
       setLoading(false);
     }

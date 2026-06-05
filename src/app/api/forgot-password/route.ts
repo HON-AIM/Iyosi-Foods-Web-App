@@ -97,7 +97,7 @@ export async function POST(request: NextRequest) {
         }
       }, { timeout: 10000 });
 
-      const resetUrl = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
+      const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000"}/reset-password?token=${resetToken}&email=${encodeURIComponent(email)}`;
       await sendPasswordResetEmail(user.email!, user.name || "User", resetUrl);
 
       console.info("[AUDIT] Password reset email sent:", { userId: user.id, email, ip: clientIp, timestamp: new Date().toISOString() });

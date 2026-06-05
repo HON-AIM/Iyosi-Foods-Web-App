@@ -6,6 +6,7 @@ import { format } from "date-fns";
 import Image from "next/image";
 import { Star, Trash2, Search, MessageSquareX, AlertCircle, Filter } from "lucide-react";
 import toast from "react-hot-toast";
+import { SkeletonTable } from "@/components/admin/SkeletonTable";
 
 type Review = {
   id: string;
@@ -50,7 +51,7 @@ export default function AdminReviewsPage() {
           return;
         }
       } catch (error) {
-        console.error("[ERROR] Auth check failed:", error);
+        console.error("[ERROR] Auth check failed:", error instanceof Error ? error.message : String(error));
         router.push("/login");
       }
     };
@@ -96,7 +97,7 @@ export default function AdminReviewsPage() {
         pages: 1,
       });
     } catch (error) {
-      console.error("[ERROR] Error fetching reviews:", error);
+      console.error("[ERROR] Error fetching reviews:", error instanceof Error ? error.message : String(error));
       setError("Failed to load reviews");
       toast.error("Failed to load reviews");
     } finally {
@@ -151,7 +152,7 @@ export default function AdminReviewsPage() {
         );
       }
     } catch (error) {
-      console.error("[ERROR] Error deleting review:", error);
+      console.error("[ERROR] Error deleting review:", error instanceof Error ? error.message : String(error));
       toast.error("An error occurred while deleting the review");
     } finally {
       setDeletingId(null);
@@ -177,6 +178,18 @@ export default function AdminReviewsPage() {
     reviews.length > 0
       ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
       : "0";
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 bg-gray-200 rounded w-24 animate-pulse" />
+        <SkeletonTable
+          headers={["Product", "Customer", "Rating", "Date", "Actions"]}
+          rows={8}
+        />
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -253,12 +266,7 @@ export default function AdminReviewsPage() {
 
       {/* Reviews List */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        {isLoading ? (
-          <div className="p-12 flex flex-col items-center justify-center space-y-3">
-            <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
-            <p className="text-gray-500">Loading reviews...</p>
-          </div>
-        ) : filteredReviews.length === 0 ? (
+        {filteredReviews.length === 0 ? (
           <div className="p-12 flex flex-col items-center justify-center space-y-3 text-center">
             <div className="h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center">
               <MessageSquareX

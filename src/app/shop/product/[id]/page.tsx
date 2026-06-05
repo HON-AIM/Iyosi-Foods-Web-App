@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Image from "next/image";
 import ProductActions from "@/components/shop/ProductActions";
 import WishlistButton from "@/components/shop/WishlistButton";
@@ -7,6 +8,67 @@ import { ShieldCheck, Truck, RotateCcw, Package, Star, Share2, Check } from "luc
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+
+  const product = await prisma.product.findUnique({
+    where: { id },
+    select: { name: true, description: true, image: true, category: true, price: true },
+  }).catch(() => null);
+
+  if (!product) {
+    return {
+      title: "Product Not Found",
+      description: "This product could not be found.",
+    };
+  }
+
+  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://iyosifoods.com";
+  const categoryLabel = product.category.toLowerCase().replace("_", "-");
+
+  const metaDescription = product.description.length > 160
+    ? product.description.slice(0, 157) + "..."
+    : product.description;
+
+  const formattedPrice = new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    maximumFractionDigits: 0,
+  }).format(product.price);
+
+  return {
+    title: product.name,
+    description: metaDescription,
+    keywords: [
+      product.name,
+      `${product.name} Nigeria`,
+      `buy ${product.name} online`,
+      categoryLabel,
+      "Iyosiola Foods",
+      "flour Nigeria",
+    ],
+    openGraph: {
+      title: `${product.name} — ${formattedPrice} | Iyosi Foods`,
+      description: metaDescription,
+      type: "website",
+      url: `${BASE_URL}/shop/product/${id}`,
+      images: product.image
+        ? [{ url: product.image, width: 800, height: 800, alt: product.name }]
+        : [{ url: "/og-shop.jpg", width: 1200, height: 630, alt: "Iyosiola Foods Shop" }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} | Iyosi Foods`,
+      description: metaDescription,
+      images: product.image ? [product.image] : ["/og-shop.jpg"],
+    },
+  };
+}
 
 export default async function ProductDetailPage({
   params,

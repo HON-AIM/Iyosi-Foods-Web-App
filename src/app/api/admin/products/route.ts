@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
     const limit = Math.min(MAX_LIMIT, Math.max(1, parseInt(searchParams.get("limit") || String(DEFAULT_LIMIT))));
     const search = (searchParams.get("search") || "").trim();
     const category = (searchParams.get("category") || "").trim();
+    const status = (searchParams.get("status") || "").trim();
     const sortBy = searchParams.get("sortBy") || "createdAt";
     const sortOrder = searchParams.get("sortOrder") || "desc";
 
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     const validSortFields = ["createdAt", "name", "price", "stock"];
     const validSortOrders = ["asc", "desc"];
-    const validCategories = ["BAKING", "WHEAT", "ALL_PURPOSE", "SEMOLINA"];
+    const validCategories = ["BAKING", "WHEAT", "ALL_PURPOSE", "SEMOLINA", "SUGAR", "OIL", "RICE", "TOMATO_PASTE"];
 
     if (!validSortFields.includes(sortBy)) {
       return NextResponse.json({ message: `Bad Request: sortBy must be one of: ${validSortFields.join(", ")}` }, { status: 400 });
@@ -57,20 +58,21 @@ export async function GET(request: NextRequest) {
     }
 
     const where = {
-      isActive: true,
+      ...(status === "active" && { isActive: true }),
+      ...(status === "inactive" && { isActive: false }),
       ...(search && {
         OR: [
           { name: { contains: search, mode: "insensitive" as const } },
           { description: { contains: search, mode: "insensitive" as const } },
         ],
       }),
-      ...(category && { category: category as "BAKING" | "WHEAT" | "ALL_PURPOSE" | "SEMOLINA" }),
+      ...(category && { category: category as "BAKING" | "WHEAT" | "ALL_PURPOSE" | "SEMOLINA" | "SUGAR" | "OIL" | "RICE" | "TOMATO_PASTE" }),
     };
 
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
-        select: { id: true, name: true, description: true, price: true, stock: true, category: true, image: true, createdAt: true },
+        select: { id: true, name: true, description: true, price: true, stock: true, category: true, image: true, isActive: true, createdAt: true },
         orderBy: { [sortBy]: sortOrder },
         skip,
         take: limit,

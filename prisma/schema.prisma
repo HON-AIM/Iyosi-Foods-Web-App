@@ -156,6 +156,10 @@ enum Category {
   WHEAT
   ALL_PURPOSE
   SEMOLINA
+  SUGAR
+  OIL
+  RICE
+  TOMATO_PASTE
 }
 
 // Product Audit Log

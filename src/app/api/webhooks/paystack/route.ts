@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import { prisma } from "@/lib/db"
+import { sendOrderConfirmationEmail } from "@/lib/email"
 import crypto from "crypto"
 
 export async function POST(request: Request) {
@@ -24,11 +25,36 @@ export async function POST(request: Request) {
   if (event.event === "charge.success") {
     const orderId = event.data?.metadata?.orderId
     if (orderId) {
-      await prisma.order.update({
+      const updatedOrder = await prisma.order.update({
         where: { id: orderId },
         data: { status: "PAID", paymentRef: event.data.reference },
+        include: {
+          user: { select: { email: true, name: true } },
+          items: {
+            include: { product: { select: { name: true } } },
+          },
+        },
       })
-      console.info("[AUDIT] Order paid via Paystack:", { orderId, reference: event.data.reference })
+
+      console.info("[AUDIT] Order paid via Paystack:", {
+        orderId,
+        reference: event.data.reference,
+      })
+
+      if (updatedOrder.user.email) {
+        sendOrderConfirmationEmail(updatedOrder.user.email, updatedOrder.user.name || "Customer", {
+          orderNumber: updatedOrder.orderNumber,
+          totalAmount: updatedOrder.totalAmount,
+          shippingAddr: updatedOrder.shippingAddr,
+          items: updatedOrder.items.map((item) => ({
+            productName: item.product.name,
+            quantity: item.quantity,
+            price: item.price,
+          })),
+        }).catch((err) =>
+          console.error("[ERROR] Failed to send order confirmation email:", err instanceof Error ? err.message : String(err))
+        )
+      }
     }
   }
 

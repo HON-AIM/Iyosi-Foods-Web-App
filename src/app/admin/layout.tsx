@@ -28,7 +28,7 @@ export default async function AdminLayout({
   try {
     session = await auth();
   } catch (error) {
-    console.error("[ERROR] Auth session error:", error);
+    console.error("[ERROR] Auth session error:", error instanceof Error ? error.message : String(error));
     authError = true;
   }
 

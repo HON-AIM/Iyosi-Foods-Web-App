@@ -46,10 +46,15 @@ export default async function ShopHomePage({
     "ALL_PURPOSE": "ALL_PURPOSE",
     "ALL-PURPOSE": "ALL_PURPOSE",
     "SEMOLINA": "SEMOLINA",
+    "SUGAR": "SUGAR",
+    "OIL": "OIL",
+    "RICE": "RICE",
+    "TOMATO_PASTE": "TOMATO_PASTE",
+    "TOMATO-PASTE": "TOMATO_PASTE",
   };
   const activeCategory = CATEGORY_ALIAS[rawCategory] || null;
   const categoryFilter = activeCategory
-    ? { category: activeCategory as "BAKING" | "WHEAT" | "ALL_PURPOSE" | "SEMOLINA" }
+    ? { category: activeCategory as "BAKING" | "WHEAT" | "ALL_PURPOSE" | "SEMOLINA" | "SUGAR" | "OIL" | "RICE" | "TOMATO_PASTE" }
     : {};
 
   const [flashProducts, topProducts, recommendedProducts] = await Promise.all([
@@ -76,6 +81,10 @@ export default async function ShopHomePage({
     { name: "Wheat Flour", icon: "🌾", link: "/shop?category=WHEAT" },
     { name: "All-Purpose", icon: "🍞", link: "/shop?category=ALL_PURPOSE" },
     { name: "Semolina", icon: "🥣", link: "/shop?category=SEMOLINA" },
+    { name: "Sugar", icon: "🍬", link: "/shop?category=SUGAR" },
+    { name: "Cooking Oil", icon: "🫙", link: "/shop?category=OIL" },
+    { name: "Rice", icon: "🍚", link: "/shop?category=RICE" },
+    { name: "Tomato Paste", icon: "🍅", link: "/shop?category=TOMATO_PASTE" },
   ];
 
   return (

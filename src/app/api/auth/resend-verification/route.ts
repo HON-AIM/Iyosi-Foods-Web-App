@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     });
 
     try {
-      const verificationLink = `${process.env.NEXTAUTH_URL || "http://localhost:3001"}/verify?token=${verificationToken}&email=${encodeURIComponent(email)}`;
+      const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3001"}/verify?token=${verificationToken}&email=${encodeURIComponent(email)}`;
 
       await sendVerificationEmail(email, user.name || "User", verificationLink);
 

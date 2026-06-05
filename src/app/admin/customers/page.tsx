@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { Users, Search, Mail, ShoppingBag, Star, Trash2, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
+import { SkeletonTable } from "@/components/admin/SkeletonTable";
 
 type Customer = {
   id: string;
@@ -49,7 +50,7 @@ export default function AdminCustomersPage() {
           router.push("/login");
         }
       } catch (error) {
-        console.error("[ERROR] Auth check failed:", error);
+        console.error("[ERROR] Auth check failed:", error instanceof Error ? error.message : String(error));
         router.push("/login");
       }
     };
@@ -93,7 +94,7 @@ export default function AdminCustomersPage() {
           pages: 1,
         });
       } catch (error) {
-        console.error("[ERROR] Error fetching customers:", error);
+        console.error("[ERROR] Error fetching customers:", error instanceof Error ? error.message : String(error));
         setError(
           error instanceof Error
             ? error.message
@@ -157,7 +158,7 @@ export default function AdminCustomersPage() {
         toast.error(data.message || "Failed to delete customer");
       }
     } catch (error) {
-      console.error("[ERROR] Error deleting customer:", error);
+      console.error("[ERROR] Error deleting customer:", error instanceof Error ? error.message : String(error));
       toast.error("An error occurred while deleting");
     } finally {
       setIsDeleting(null);
@@ -172,6 +173,18 @@ export default function AdminCustomersPage() {
       (customer.email && customer.email.toLowerCase().includes(searchLower))
     );
   });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="h-8 bg-gray-200 rounded w-28 animate-pulse" />
+        <SkeletonTable
+          headers={["Name", "Email", "Joined", "Orders", "Actions"]}
+          rows={10}
+        />
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -229,16 +242,7 @@ export default function AdminCustomersPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-gray-500">
-                    <div className="flex flex-col items-center justify-center space-y-3">
-                      <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-                      <p>Loading customers...</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : filteredCustomers.length === 0 ? (
+              {filteredCustomers.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center justify-center space-y-3">

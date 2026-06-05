@@ -55,7 +55,7 @@ export default function AddProductPage() {
         }
         setIsAuthorized(true);
       } catch (error) {
-        console.error("[ERROR] Auth check failed:", error);
+        console.error("[ERROR] Auth check failed:", error instanceof Error ? error.message : String(error));
         router.push("/login");
       } finally {
         setIsCheckingAuth(false);
@@ -181,7 +181,7 @@ export default function AddProductPage() {
       const data = await res.json();
       return data.url || null;
     } catch (error) {
-      console.error("[ERROR] Upload failed:", error);
+      console.error("[ERROR] Upload failed:", error instanceof Error ? error.message : String(error));
       const message =
         error instanceof Error ? error.message : "Image upload failed";
       toast.error(message);
@@ -253,7 +253,7 @@ export default function AddProductPage() {
         );
       }
     } catch (error) {
-      console.error("[ERROR] Error creating product:", error);
+      console.error("[ERROR] Error creating product:", error instanceof Error ? error.message : String(error));
       const message =
         error instanceof Error
           ? error.message
@@ -456,10 +456,14 @@ export default function AddProductPage() {
               aria-label="Select product category"
               className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-all bg-white"
             >
-              <option value="BAKING">Baking</option>
+              <option value="BAKING">Baking Flour</option>
+              <option value="WHEAT">Wheat Flour</option>
+              <option value="ALL_PURPOSE">All-Purpose Flour</option>
               <option value="SEMOLINA">Semolina</option>
-              <option value="WHEAT">Wheat</option>
-              <option value="ALL_PURPOSE">All Purpose</option>
+              <option value="SUGAR">Sugar</option>
+              <option value="OIL">Cooking Oil</option>
+              <option value="RICE">Rice</option>
+              <option value="TOMATO_PASTE">Tomato Paste</option>
             </select>
           </div>
 

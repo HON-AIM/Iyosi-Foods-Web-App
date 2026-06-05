@@ -7,6 +7,7 @@ import Image from "next/image";
 import { Package, Plus, Search, Edit, Trash2, AlertCircle } from "lucide-react";
 import toast from "react-hot-toast";
 import { formatCurrency } from "@/lib/utils";
+import { SkeletonTable } from "@/components/admin/SkeletonTable";
 
 type AdminProduct = {
   id: string;
@@ -16,6 +17,7 @@ type AdminProduct = {
   stock: number;
   image: string;
   category: string;
+  isActive: boolean;
 };
 
 type PaginationMeta = {
@@ -33,6 +35,7 @@ export default function AdminProductsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<"" | "active" | "inactive">("");
   const [error, setError] = useState<string | null>(null);
   const [pagination, setPagination] = useState<PaginationMeta>({
     total: 0,
@@ -51,7 +54,7 @@ export default function AdminProductsPage() {
           return;
         }
       } catch (error) {
-        console.error("[ERROR] Auth check failed:", error);
+        console.error("[ERROR] Auth check failed:", error instanceof Error ? error.message : String(error));
         router.push("/login");
       }
     };
@@ -66,6 +69,7 @@ export default function AdminProductsPage() {
         page: page.toString(),
         limit: ITEMS_PER_PAGE.toString(),
         ...(searchTerm && { search: searchTerm }),
+        ...(statusFilter && { status: statusFilter }),
       });
 
       const response = await fetch(`/api/admin/products?${queryParams}`);
@@ -96,7 +100,7 @@ export default function AdminProductsPage() {
         pages: 1,
       });
     } catch (error) {
-      console.error("[ERROR] Error fetching products:", error);
+      console.error("[ERROR] Error fetching products:", error instanceof Error ? error.message : String(error));
       setError("Failed to load products");
       toast.error("Failed to load products");
     } finally {
@@ -152,7 +156,7 @@ export default function AdminProductsPage() {
         );
       }
     } catch (error) {
-      console.error("[ERROR] Error deleting product:", error);
+      console.error("[ERROR] Error deleting product:", error instanceof Error ? error.message : String(error));
       toast.error("An error occurred while deleting the product");
     } finally {
       setDeletingId(null);
@@ -162,6 +166,21 @@ export default function AdminProductsPage() {
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="h-8 bg-gray-200 rounded w-32 animate-pulse" />
+          <div className="h-10 bg-gray-200 rounded w-36 animate-pulse" />
+        </div>
+        <SkeletonTable
+          headers={["Product", "Category", "Price", "Stock", "Actions"]}
+          rows={8}
+        />
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -203,23 +222,38 @@ export default function AdminProductsPage() {
         </Link>
       </div>
 
-      {/* Search */}
+        {/* Search & Filters */}
       <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-200">
-        <div className="relative max-w-md">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search
-              className="h-4 w-4 text-gray-400"
-              aria-hidden="true"
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-md">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search
+                className="h-4 w-4 text-gray-400"
+                aria-hidden="true"
+              />
+            </div>
+            <input
+              type="text"
+              placeholder="Search products by name..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search products"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm bg-gray-50 transition-all"
             />
           </div>
-          <input
-            type="text"
-            placeholder="Search products by name..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            aria-label="Search products"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 sm:text-sm bg-gray-50 transition-all"
-          />
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value as "" | "active" | "inactive");
+              fetchProducts(1);
+            }}
+            className="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white"
+            aria-label="Filter by status"
+          >
+            <option value="">All Products</option>
+            <option value="active">Active Only</option>
+            <option value="inactive">Inactive Only</option>
+          </select>
         </div>
       </div>
 
@@ -237,16 +271,7 @@ export default function AdminProductsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {isLoading ? (
-                <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center justify-center space-y-3">
-                      <div className="w-8 h-8 border-4 border-green-500 border-t-transparent rounded-full animate-spin" />
-                      <p className="text-gray-500">Loading inventory...</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : filteredProducts.length === 0 ? (
+              {filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-6 py-12 text-center">
                     <div className="flex flex-col items-center justify-center space-y-3">
@@ -305,6 +330,11 @@ export default function AdminProductsPage() {
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-gray-900 line-clamp-2">
                             {product.name}
+                            {!product.isActive && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-600 ml-2">
+                                Inactive
+                              </span>
+                            )}
                           </p>
                           <p className="text-xs text-gray-500 line-clamp-1">
                             {product.description}

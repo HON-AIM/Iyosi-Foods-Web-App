@@ -145,6 +145,67 @@ export async function sendOrderStatusUpdate(
   });
 }
 
+export async function sendOrderConfirmationEmail(
+  email: string,
+  name: string,
+  order: {
+    orderNumber: string;
+    totalAmount: number;
+    shippingAddr: string;
+    items: Array<{ productName: string; quantity: number; price: number }>;
+  }
+) {
+  const safeName = escapeHtml(name || "Customer");
+  const formattedTotal = new Intl.NumberFormat("en-NG", {
+    style: "currency",
+    currency: "NGN",
+    maximumFractionDigits: 0,
+  }).format(order.totalAmount);
+
+  const itemRows = order.items
+    .map(
+      (item) =>
+        `<tr>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;">${escapeHtml(item.productName)}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">${new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(item.price * item.quantity)}</td>
+        </tr>`
+    )
+    .join("");
+
+  await transporter.sendMail({
+    from: `"Iyosiola Foods" <${process.env.EMAIL_FROM}>`,
+    to: email,
+    subject: `Order Confirmed — ${order.orderNumber} | Iyosiola Foods`,
+    text: `Hi ${safeName}, your order ${order.orderNumber} has been confirmed and payment received. Total: ${formattedTotal}. Shipping to: ${order.shippingAddr}. We will update you when your order is on its way.`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;border:1px solid #eaeaea;border-radius:10px;">
+        <h2 style="color:#166534;">Order Confirmed ✅</h2>
+        <p style="color:#555;">Hi ${safeName}, thank you for your order. We have received your payment and are preparing your items.</p>
+        <div style="background:#f9fafb;border-radius:8px;padding:16px;margin:20px 0;">
+          <p style="margin:0 0 8px;font-size:13px;color:#888;">ORDER NUMBER</p>
+          <p style="margin:0;font-size:18px;font-weight:bold;color:#111;">${escapeHtml(order.orderNumber)}</p>
+        </div>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+          <thead>
+            <tr style="background:#f3f4f6;">
+              <th style="padding:10px 12px;text-align:left;font-size:13px;color:#555;">Product</th>
+              <th style="padding:10px 12px;text-align:center;font-size:13px;color:#555;">Qty</th>
+              <th style="padding:10px 12px;text-align:right;font-size:13px;color:#555;">Amount</th>
+            </tr>
+          </thead>
+          <tbody>${itemRows}</tbody>
+        </table>
+        <div style="text-align:right;margin-bottom:20px;">
+          <strong style="font-size:16px;">Total: ${formattedTotal}</strong>
+        </div>
+        <p style="color:#555;font-size:14px;"><strong>Shipping to:</strong> ${escapeHtml(order.shippingAddr)}</p>
+        <p style="color:#888;font-size:12px;margin-top:24px;">Questions? Contact us at ${process.env.EMAIL_FROM}</p>
+      </div>
+    `,
+  });
+}
+
 interface SendEmailOptions {
   to: string;
   subject: string;

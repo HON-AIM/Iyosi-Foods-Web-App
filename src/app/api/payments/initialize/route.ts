@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   if (!customerEmail)
     return NextResponse.json({ message: "Account email required for payment" }, { status: 400 })
 
-  const baseUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL || "http://localhost:3001"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || process.env.AUTH_URL || "http://localhost:3001"
 
   const paystackRes = await fetch("https://api.paystack.co/transaction/initialize", {
     method: "POST",
