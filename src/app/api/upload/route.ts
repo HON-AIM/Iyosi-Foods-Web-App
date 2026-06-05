@@ -1,11 +1,9 @@
 import { NextResponse } from "next/server";
-import { put, del } from "@vercel/blob";
+import { put } from "@vercel/blob";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { type NextRequest } from "next/server";
 import crypto from "crypto";
-import { tmpdir } from "os";
-import { join } from "path";
 
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -49,8 +47,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Unauthorized: Admin access required" }, { status: 401 });
     }
 
-    // If BLOB storage is not configured, we'll fall back to saving into public/uploads
-    // This makes local development easier; production should configure a cloud blob provider.
 
     const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
@@ -89,28 +85,33 @@ export async function POST(request: NextRequest) {
 
     const filename = generateSafeFilename(file.type);
 
-    // Attempt to store in configured blob provider; otherwise fallback to temp directory
+    // ─── BLOB STORAGE (REQUIRED) ──────────────────────────────────────────────
+    // Vercel Blob is the only supported storage provider.
+    // BLOB_READ_WRITE_TOKEN must be set in environment variables.
+
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.error("[ERROR] BLOB_READ_WRITE_TOKEN is not set");
+      return NextResponse.json(
+        { message: "Server error: File storage is not configured" },
+        { status: 500 }
+      );
+    }
+
     let fileUrl: string;
-    let storageType: "blob" | "local" = "local";
+
     try {
-      if (process.env.BLOB_READ_WRITE_TOKEN) {
-        const blob = await put(`products/${filename}`, buffer, {
-          access: "public",
-          contentType: file.type,
-        });
-        fileUrl = blob.url;
-        storageType = "blob";
-      } else {
-        const fs = await import("fs/promises");
-        const uploadsDir = join(tmpdir(), "iyosiola-uploads");
-        await fs.mkdir(uploadsDir, { recursive: true });
-        const outPath = join(uploadsDir, filename);
-        await fs.writeFile(outPath, buffer);
-        fileUrl = `/api/uploads/${filename}`;
-      }
-    } catch (saveError) {
-      console.error("[ERROR] Save file failed:", saveError instanceof Error ? saveError.message : String(saveError));
-      return NextResponse.json({ message: "Server error: Failed to save file" }, { status: 500 });
+      const blob = await put(`products/${filename}`, buffer, {
+        access: "public",
+        contentType: file.type,
+      });
+      fileUrl = blob.url;
+    } catch (blobError) {
+      const errorMessage = blobError instanceof Error ? blobError.message : String(blobError);
+      console.error("[ERROR] Vercel Blob upload failed:", errorMessage);
+      return NextResponse.json(
+        { message: `Image upload failed: ${errorMessage}` },
+        { status: 500 }
+      );
     }
 
     try {
@@ -127,16 +128,8 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (dbError) {
-      try {
-        if (storageType === "blob") {
-          await del(fileUrl);
-        } else {
-          const fs = await import("fs/promises");
-          await fs.unlink(join(tmpdir(), "iyosiola-uploads", filename));
-        }
-      } catch {}
-      console.error("[ERROR] Failed to create upload record:", { error: dbError instanceof Error ? dbError.message : String(dbError) });
-      return NextResponse.json({ message: "Server error: Failed to save upload metadata" }, { status: 500 });
+      // Non-blocking: file was saved successfully, metadata logging is secondary
+      console.warn("[WARN] Failed to save upload record (non-blocking):", dbError instanceof Error ? dbError.message : String(dbError));
     }
 
     console.info("[AUDIT] File uploaded successfully:", {

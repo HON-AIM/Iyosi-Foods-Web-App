@@ -1,0 +1,352 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model User {
+  id                       String    @id @default(cuid())
+  name                     String?
+  email                    String?   @unique
+  emailVerified            DateTime?
+  password                String?
+  resetToken              String?   @unique
+  resetTokenExpiry        DateTime?
+  verificationToken        String?
+  verificationTokenExpires DateTime?
+  lastLogin               DateTime?
+  image                   String?
+  role                    Role      @default(USER)
+  isActive                Boolean   @default(true)
+  accounts                Account[]
+  sessions                Session[]
+  orders                  Order[]
+  addresses               Address[]
+  reviews                 Review[]
+  messages                Message[]
+  savedItems              SavedItem[]
+  loginAttempts           LoginAttempt[]
+  userActivityLogs        UserActivityLog[]
+  createdAt               DateTime  @default(now())
+  updatedAt               DateTime  @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipAddress String?
+  userAgent String?
+  success   Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([ipAddress])
+}
+
+model UserActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  action    String
+  details   String?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model PasswordResetLog {
+  id             String    @id @default(cuid())
+  userId         String
+  email          String
+  ipAddress      String?
+  userAgent      String?
+  emailSent      Boolean   @default(false)
+  resetCompleted Boolean   @default(false)
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+
+  @@index([userId])
+}
+
+model RegistrationLog {
+  id        String   @id @default(cuid())
+  userId    String
+  email     String
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Product {
+  id           String      @id @default(cuid())
+  name         String
+  description  String
+  price        Float
+  stock        Int         @default(0)
+  image        String?
+  category     Category    @default(BAKING)
+  isActive     Boolean     @default(true)
+  deactivatedAt DateTime?
+  orderItems   OrderItem[]
+  reviews      Review[]
+  savedBy      SavedItem[]
+  productAuditLogs ProductAuditLog[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+enum Category {
+  BAKING
+  WHEAT
+  ALL_PURPOSE
+  SEMOLINA
+}
+
+model ProductAuditLog {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  adminId   String?
+  changes   String?
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+model Order {
+  id           String      @id @default(cuid())
+  userId       String
+  user         User        @relation(fields: [userId], references: [id])
+  orderNumber  String?     @unique
+  status       OrderStatus @default(PENDING)
+  totalAmount  Float
+  subtotal     Float?
+  taxAmount    Float?
+  paymentRef   String?     @unique
+  items        OrderItem[]
+  shippingAddr String
+  shippingAddressData String?
+  notes        String?
+  couponCode   String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Float
+  subtotal  Float?
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model OrderLog {
+  id        String   @id @default(cuid())
+  orderId   String
+  userId    String
+  action    String
+  changes   String?
+  createdAt DateTime @default(now())
+
+  @@index([orderId])
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model Address {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  street     String
+  city       String
+  state      String
+  postalCode String?
+  country    String   @default("Nigeria")
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([productId])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subject   String
+  content   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model SavedItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+model UploadedFile {
+  id           String   @id @default(cuid())
+  filename     String   @unique
+  originalName String
+  mimeType     String
+  size         Int
+  width        Int?
+  height       Int?
+  checksum     String?
+  url          String
+  uploadedBy   String
+  ipAddress    String?
+  createdAt    DateTime @default(now())
+
+  @@index([uploadedBy])
+}
+
+model StoreSettings {
+  id               String   @id @default("global")
+  announcementText String?
+  flashSaleEndTime DateTime?
+  updatedAt        DateTime @updatedAt
+}
+
+model JobApplication {
+  id             String   @id @default(cuid())
+  firstName      String
+  lastName       String
+  email          String
+  phone          String?
+  position      String?
+  cvFilename    String
+  cvOriginalName String
+  cvMimeType    String
+  cvSize        Int
+  cvUrl         String
+  coverLetter   String?
+  status        JobAppStatus @default(NEW)
+  ipAddress     String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  @@index([email])
+  @@index([status])
+}
+
+enum JobAppStatus {
+  NEW
+  REVIEWED
+  SHORTLISTED
+  REJECTED
+  HIRED
+}
+
+model HeroBanner {
+  id          String   @id @default(cuid())
+  title       String
+  subtitle    String?
+  ctaText     String?  @default("SHOP NOW")
+  ctaLink     String?  @default("/shop")
+  badgeText   String?
+  bgColor     String?  @default("#1e3a8a")
+  textColor   String?  @default("#ffffff")
+  image       String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model PromoBanner {
+  id          String   @id @default(cuid())
+  title       String
+  subtitle    String?
+  link        String?  @default("/shop")
+  bgGradient  String?  @default("from-orange-500 to-red-500")
+  icon        String?  @default("Zap")
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
