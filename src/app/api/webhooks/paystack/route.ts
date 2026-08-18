@@ -43,9 +43,9 @@ export async function POST(request: Request) {
 
       if (updatedOrder.user.email) {
         sendOrderConfirmationEmail(updatedOrder.user.email, updatedOrder.user.name || "Customer", {
-          orderNumber: updatedOrder.orderNumber,
+          orderNumber: updatedOrder.orderNumber ?? `ORD-${orderId.slice(0, 8)}`,
           totalAmount: updatedOrder.totalAmount,
-          shippingAddr: updatedOrder.shippingAddr,
+          shippingAddr: updatedOrder.shippingAddr ?? "Not specified",
           items: updatedOrder.items.map((item) => ({
             productName: item.product.name,
             quantity: item.quantity,

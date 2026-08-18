@@ -106,7 +106,7 @@ export default function AdminProductsPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [searchTerm, router]);
+  }, [searchTerm, statusFilter, router]);
 
   useEffect(() => {
     const debounceTimer = setTimeout(() => {

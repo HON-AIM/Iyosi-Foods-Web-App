@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
-import { put } from "@vercel/blob";
+import { put, del } from "@vercel/blob";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { type NextRequest } from "next/server";
 import crypto from "crypto";
+
+// Ensure this route uses the Node.js runtime and allows up to 6MB body
+export const runtime = "nodejs";
+export const maxDuration = 30;
 
 const ALLOWED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -47,6 +51,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Unauthorized: Admin access required" }, { status: 401 });
     }
 
+    // ─── BLOB TOKEN CHECK (REQUIRED) ─────────────────────────────────────────
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!blobToken) {
+      console.error("[ERROR] BLOB_READ_WRITE_TOKEN is not configured. Available env vars with BLOB:",
+        Object.keys(process.env).filter(k => k.includes("BLOB")).join(", ") || "none"
+      );
+      return NextResponse.json(
+        { message: "Server error: File storage is not configured" },
+        { status: 503 }
+      );
+    }
 
     const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
 
@@ -85,35 +100,32 @@ export async function POST(request: NextRequest) {
 
     const filename = generateSafeFilename(file.type);
 
-    // ─── BLOB STORAGE (REQUIRED) ──────────────────────────────────────────────
-    // Vercel Blob is the only supported storage provider.
-    // BLOB_READ_WRITE_TOKEN must be set in environment variables.
-
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      console.error("[ERROR] BLOB_READ_WRITE_TOKEN is not set");
-      return NextResponse.json(
-        { message: "Server error: File storage is not configured" },
-        { status: 500 }
-      );
-    }
-
-    let fileUrl: string;
-
+    // ─── BLOB UPLOAD ─────────────────────────────────────────────────────────
+    let blob;
     try {
-      const blob = await put(`products/${filename}`, buffer, {
+      blob = await put(`products/${filename}`, buffer, {
         access: "public",
         contentType: file.type,
+        token: blobToken,
       });
-      fileUrl = blob.url;
-    } catch (blobError) {
-      const errorMessage = blobError instanceof Error ? blobError.message : String(blobError);
-      console.error("[ERROR] Vercel Blob upload failed:", errorMessage);
+    } catch (uploadError) {
+      const errorMessage = uploadError instanceof Error ? uploadError.message : String(uploadError);
+      console.error("[ERROR] Vercel Blob upload failed:", {
+        error: errorMessage,
+        stack: uploadError instanceof Error ? uploadError.stack : undefined,
+        filename,
+        size: buffer.length,
+        mimeType: file.type,
+      });
       return NextResponse.json(
         { message: `Image upload failed: ${errorMessage}` },
         { status: 500 }
       );
     }
 
+    const fileUrl = blob.url;
+
+    // ─── SAVE METADATA ───────────────────────────────────────────────────────
     try {
       await prisma.uploadedFile.create({
         data: {
@@ -128,8 +140,12 @@ export async function POST(request: NextRequest) {
         },
       });
     } catch (dbError) {
-      // Non-blocking: file was saved successfully, metadata logging is secondary
-      console.warn("[WARN] Failed to save upload record (non-blocking):", dbError instanceof Error ? dbError.message : String(dbError));
+      // If DB save fails, clean up the uploaded blob to avoid orphans
+      try {
+        await del(fileUrl);
+      } catch {}
+      console.error("[ERROR] Failed to create upload record:", { error: dbError instanceof Error ? dbError.message : String(dbError) });
+      return NextResponse.json({ message: "Server error: Failed to save upload metadata" }, { status: 500 });
     }
 
     console.info("[AUDIT] File uploaded successfully:", {
