@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import { useCart } from "@/context/CartContext";
 import { formatCurrency } from "@/lib/utils";
 import {
@@ -16,11 +17,17 @@ import {
 import toast from "react-hot-toast";
 
 export default function CheckoutPage() {
+  const { data: session } = useSession();
+  const isGuest = !session?.user;
   const { items, cartTotal, clearCart } = useCart();
   const [shippingAddress, setShippingAddress] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validating, setValidating] = useState(true);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [guestName, setGuestName] = useState("");
+  const [guestEmail, setGuestEmail] = useState("");
 
   useEffect(() => {
     async function validateCart() {
@@ -56,6 +63,17 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (isGuest) {
+      if (!guestName.trim() || guestName.trim().length < 2) {
+        toast.error("Please enter your name");
+        return;
+      }
+      if (!guestEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
+        toast.error("Please enter a valid email address");
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/user/orders", {
@@ -67,6 +85,7 @@ export default function CheckoutPage() {
             quantity: item.quantity,
           })),
           shippingAddress: shippingAddress.trim(),
+          ...(isGuest && { guestName: guestName.trim(), guestEmail: guestEmail.trim().toLowerCase() }),
         }),
       });
 
@@ -90,7 +109,8 @@ export default function CheckoutPage() {
       }
 
       clearCart();
-      window.location.href = paymentData.authorizationUrl;
+      setPaymentUrl(paymentData.authorizationUrl);
+      setOrderPlaced(true);
     } catch {
       toast.error("A network error occurred. Please try again.");
     } finally {
@@ -120,6 +140,44 @@ export default function CheckoutPage() {
           >
             Browse Shop
           </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Order Confirmation ──────────────────────────────────────────────────
+  if (orderPlaced) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-10 text-center space-y-6">
+          <div className="flex justify-center">
+            <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle2 className="h-10 w-10 text-green-600" />
+            </div>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Order Placed!</h1>
+            <p className="text-gray-500 mt-2 text-sm">
+              Redirecting you to payment…
+            </p>
+          </div>
+          {isGuest && (
+            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800 text-left">
+              <p className="font-semibold mb-1">Want to track your order?</p>
+              <p className="mb-3">Create an account to view your order history and track deliveries.</p>
+              <a href="/register" className="inline-block bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">
+                Create Account
+              </a>
+            </div>
+          )}
+          {paymentUrl && (
+            <a
+              href={paymentUrl}
+              className="inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            >
+              Continue to Payment
+            </a>
+          )}
         </div>
       </div>
     );
@@ -166,6 +224,35 @@ export default function CheckoutPage() {
             )}
 
             <form onSubmit={handlePlaceOrder} className="space-y-5">
+              {isGuest && (
+                <div className="space-y-4 mb-6 pb-6 border-b border-gray-100">
+                  <h3 className="font-semibold text-gray-800">Your Information</h3>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={guestName}
+                      onChange={e => setGuestName(e.target.value)}
+                      placeholder="e.g. Amaka Johnson"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
+                    <input
+                      type="email"
+                      required
+                      value={guestEmail}
+                      onChange={e => setGuestEmail(e.target.value)}
+                      placeholder="you@example.com"
+                      className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">Your order confirmation will be sent here.</p>
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label
                   htmlFor="shippingAddress"

@@ -41,8 +41,11 @@ export async function POST(request: Request) {
         reference: event.data.reference,
       })
 
-      if (updatedOrder.user.email) {
-        sendOrderConfirmationEmail(updatedOrder.user.email, updatedOrder.user.name || "Customer", {
+      const recipientEmail = updatedOrder.user?.email ?? updatedOrder.guestEmail
+      const recipientName = updatedOrder.user?.name ?? updatedOrder.guestName ?? "Customer"
+
+      if (recipientEmail) {
+        sendOrderConfirmationEmail(recipientEmail, recipientName, {
           orderNumber: updatedOrder.orderNumber ?? `ORD-${orderId.slice(0, 8)}`,
           totalAmount: updatedOrder.totalAmount,
           shippingAddr: updatedOrder.shippingAddr ?? "Not specified",

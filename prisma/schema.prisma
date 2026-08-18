@@ -177,8 +177,8 @@ model ProductAuditLog {
 // Order Management
 model Order {
   id           String      @id @default(cuid())
-  userId       String
-  user         User        @relation(fields: [userId], references: [id])
+  userId       String?
+  user         User?       @relation(fields: [userId], references: [id])
   orderNumber  String?     @unique
   status       OrderStatus @default(PENDING)
   totalAmount  Float
@@ -190,6 +190,8 @@ model Order {
   shippingAddressData String? @db.Text
   notes        String?
   couponCode   String?
+  guestEmail   String?
+  guestName    String?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }

@@ -18,4 +18,6 @@ export const CreateOrderSchema = z.object({
     }),
   ]),
   notes: z.string().max(1000).trim().optional().nullable(),
+  guestName: z.string().min(2).max(100).trim().optional(),
+  guestEmail: z.string().email().toLowerCase().trim().optional(),
 })

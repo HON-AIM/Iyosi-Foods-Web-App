@@ -14,6 +14,8 @@ type Order = {
   status: string;
   createdAt: string;
   user: { name: string | null; email: string | null } | null;
+  guestName: string | null;
+  guestEmail: string | null;
   items: {
     id: string;
     quantity: number;
@@ -203,7 +205,11 @@ export default function AdminOrdersPage() {
       (order.user?.name &&
         order.user.name.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (order.user?.email &&
-        order.user.email.toLowerCase().includes(searchTerm.toLowerCase()));
+        order.user.email.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (order.guestName &&
+        order.guestName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (order.guestEmail &&
+        order.guestEmail.toLowerCase().includes(searchTerm.toLowerCase()));
 
     const matchesStatus = statusFilter === "ALL" || order.status === statusFilter;
 
@@ -338,10 +344,10 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">
-                        {order.user?.name || "Guest User"}
+                        {order.user?.name || order.guestName || "Guest User"}
                       </div>
                       <div className="text-xs text-gray-500 mt-1">
-                        {order.user?.email || "no-email"}
+                        {order.user?.email || order.guestEmail || "no-email"}
                       </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">

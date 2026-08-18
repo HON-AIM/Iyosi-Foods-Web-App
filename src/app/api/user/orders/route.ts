@@ -44,10 +44,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await auth();
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ message: "Unauthorized: Please login" }, { status: 401 });
-    }
+    const isGuest = !session?.user?.id;
 
     const contentType = request.headers.get("content-type") || "";
     if (!contentType.includes("application/json")) {
@@ -67,7 +64,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Validation failed", errors }, { status: 400 });
     }
 
-    const { items, shippingAddress, notes } = parseResult.data;
+    const { items, shippingAddress, notes, guestName, guestEmail } = parseResult.data;
+
+    if (isGuest && (!guestEmail || !guestName)) {
+      return NextResponse.json({ message: "Guest name and email are required" }, { status: 400 });
+    }
 
     let order;
     try {
@@ -96,7 +97,9 @@ export async function POST(request: NextRequest) {
 
         const newOrder = await tx.order.create({
           data: {
-            userId: session.user.id,
+            userId: session?.user?.id || null,
+            guestEmail: isGuest ? guestEmail! : null,
+            guestName: isGuest ? guestName! : null,
             orderNumber: `ORD-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(4).toString("hex").toUpperCase()}`,
             items: {
               create: items.map((item) => {
@@ -133,7 +136,7 @@ export async function POST(request: NextRequest) {
       throw txError;
     }
 
-    console.info("[AUDIT] Order created:", { orderId: order.id, userId: session.user.id, itemsCount: items.length, totalAmount: order.totalAmount });
+    console.info("[AUDIT] Order created:", { orderId: order.id, userId: session?.user?.id || "guest", itemsCount: items.length, totalAmount: order.totalAmount });
 
     const response = NextResponse.json(order, { status: 201 });
     response.headers.set("Cache-Control", "private, no-cache");
