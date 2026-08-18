@@ -34,7 +34,7 @@ export default async function SavedItemsPage() {
                   </svg>
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">You haven't saved any items yet</h3>
-              <p className="text-gray-500 mb-6 max-w-sm">Found something you like? Tap on the heart shaped icon next to the item to add it to your wishlist!</p>
+               <p className="text-gray-500 mb-6 max-w-sm">Browse our shop and tap the heart icon on any product to save it here.</p>
                <Link href="/dashboard/shop" className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-md font-medium transition-colors inline-block">
                    Start Shopping
                </Link>

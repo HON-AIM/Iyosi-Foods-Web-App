@@ -174,6 +174,22 @@ export default function CheckoutPage() {
               Continue to Payment
             </a>
           )}
+
+          {/* Back to dashboard shop */}
+          <Link
+            href="/dashboard/shop"
+            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-xl text-center transition-colors"
+          >
+            Continue Shopping
+          </Link>
+
+          {/* View orders */}
+          <Link
+            href="/dashboard/orders"
+            className="flex-1 border-2 border-gray-200 hover:border-green-300 text-gray-700 font-semibold py-3 px-6 rounded-xl text-center transition-colors"
+          >
+            View My Orders
+          </Link>
         </div>
       </div>
     );
@@ -196,8 +212,8 @@ export default function CheckoutPage() {
             </p>
           </div>
           <Link
-            href="/shop"
-            className="inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
+            href="/dashboard/shop"
+            className="inline-flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
           >
             Browse Shop
           </Link>
@@ -212,8 +228,8 @@ export default function CheckoutPage() {
       <div className="max-w-5xl mx-auto px-4 py-10">
         {/* Back Link */}
         <Link
-          href="/shop"
-          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-primary-600 mb-8 transition-colors"
+          href="/dashboard/shop"
+          className="inline-flex items-center gap-1 text-sm text-gray-500 hover:text-green-600 mb-8 transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
           Back to Shop
