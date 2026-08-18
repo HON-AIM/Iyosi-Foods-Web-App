@@ -1,8 +1,46 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/db";
-import ProductCard from "@/components/shop/ProductCard";
+import ProductRevealCard from "@/components/shop/ProductRevealCard";
 import HeroBanner from "@/components/shop/HeroBanner";
 import FlashSale from "@/components/shop/FlashSale";
+
+type ProductWithRating = {
+  id: string
+  name: string
+  price: number
+  stock: number
+  image: string | null
+  description: string
+  category: string
+  avgRating: number
+  reviewCount: number
+}
+
+async function enrichWithRatings(
+  products: { id: string; name: string; price: number; stock: number; image: string | null; description: string; category: string }[]
+): Promise<ProductWithRating[]> {
+  if (products.length === 0) return []
+
+  const productIds = products.map(p => p.id)
+
+  const ratings = await prisma.review.groupBy({
+    by: ["productId"],
+    where: { productId: { in: productIds } },
+    _avg: { rating: true },
+    _count: { rating: true },
+  })
+
+  const ratingMap = new Map(ratings.map(r => [
+    r.productId,
+    { avgRating: r._avg.rating ?? 0, reviewCount: r._count.rating }
+  ]))
+
+  return products.map(p => ({
+    ...p,
+    avgRating: Math.round((ratingMap.get(p.id)?.avgRating ?? 0) * 10) / 10,
+    reviewCount: ratingMap.get(p.id)?.reviewCount ?? 0,
+  }))
+}
 
 export const dynamic = "force-dynamic";
 import CategoryStrip from "@/components/shop/CategoryStrip";
@@ -57,7 +95,7 @@ export default async function ShopHomePage({
     ? { category: activeCategory as "BAKING" | "WHEAT" | "ALL_PURPOSE" | "SEMOLINA" | "SUGAR" | "OIL" | "RICE" | "TOMATO_PASTE" }
     : {};
 
-  const [flashProducts, topProducts, recommendedProducts] = await Promise.all([
+  const [rawFlash, rawTop, rawRecommended] = await Promise.all([
     prisma.product.findMany({
       where: { stock: { gt: 0 }, isActive: true, ...categoryFilter },
       take: 8,
@@ -73,6 +111,12 @@ export default async function ShopHomePage({
       orderBy: { updatedAt: "desc" },
       take: 18,
     }).catch(() => [] as Awaited<ReturnType<typeof prisma.product.findMany>>),
+  ]);
+
+  const [flashProducts, topProducts, recommendedProducts] = await Promise.all([
+    enrichWithRatings(rawFlash),
+    enrichWithRatings(rawTop),
+    enrichWithRatings(rawRecommended),
   ]);
 
   const categories = [
@@ -185,7 +229,7 @@ export default async function ShopHomePage({
             <div className="p-3 md:p-4">
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
                 {topProducts.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductRevealCard key={product.id} product={product} />
                 ))}
               </div>
             </div>
@@ -206,7 +250,7 @@ export default async function ShopHomePage({
           <div className="p-3 md:p-4">
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
               {recommendedProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductRevealCard key={product.id} product={product} />
               ))}
             </div>
           </div>

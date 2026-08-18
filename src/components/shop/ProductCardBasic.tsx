@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 import { ShoppingCart, BadgeCheck } from "lucide-react";
 
-type ProductCardProps = {
+type ProductCardBasicProps = {
   product: {
     id: string;
     name: string;
@@ -15,7 +15,7 @@ type ProductCardProps = {
   };
 };
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCardBasic({ product }: ProductCardBasicProps) {
   const { addToCart } = useCart();
 
   const formatMoney = (amount: number) => {
