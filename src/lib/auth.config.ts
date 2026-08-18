@@ -12,7 +12,10 @@ export const authConfig = {
     authorized({ auth, request: { nextUrl } }) {
       const isLoggedIn = !!auth?.user
       const pathname = nextUrl.pathname
-      const isOnDashboard = pathname.startsWith("/dashboard")
+
+      // Only dashboard routes require login. /checkout stays public for guest checkout.
+      const protectedPaths = ["/dashboard"]
+
       const isOnAdmin = pathname.startsWith("/admin") && !pathname.startsWith("/api/admin")
 
       if (isOnAdmin) {
@@ -23,10 +26,11 @@ export const authConfig = {
         return true
       }
 
-      if (isOnDashboard) {
-        if (isLoggedIn) return true
-        return false
+      const requiresAuth = protectedPaths.some((path) => pathname.startsWith(path))
+      if (requiresAuth) {
+        return isLoggedIn
       }
+
       return true
     },
     async jwt({ token, user, account }) {

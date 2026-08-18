@@ -16,10 +16,13 @@ type Order = {
   user: { name: string | null; email: string | null } | null;
   guestName: string | null;
   guestEmail: string | null;
+  trackingNumber: string | null;
+  trackingCarrier: string | null;
+  estimatedDelivery: string | null;
   items: {
     id: string;
     quantity: number;
-    priceAtTime: number;
+    price: number;
     product: { name: string };
   }[];
   shippingAddress: string;
@@ -34,15 +37,25 @@ type PaginationMeta = {
 
 const ORDER_STATUSES = [
   "PENDING",
+  "PAID",
   "PROCESSING",
   "SHIPPED",
   "DELIVERED",
   "CANCELLED",
 ] as const;
 
+const SHIPPING_CARRIERS = [
+  "DHL",
+  "GIG Logistics",
+  "Kwik Delivery",
+  "GIGL",
+  "Red Star",
+] as const;
+
 const STATUS_COLORS: Record<string, string> = {
   DELIVERED: "bg-green-100 text-green-800",
   PENDING: "bg-yellow-100 text-yellow-800",
+  PAID: "bg-emerald-100 text-emerald-800",
   PROCESSING: "bg-blue-100 text-blue-800",
   SHIPPED: "bg-indigo-100 text-indigo-800",
   CANCELLED: "bg-red-100 text-red-800",
@@ -58,6 +71,13 @@ export default function AdminOrdersPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [shippingModal, setShippingModal] = useState<{
+    open: boolean;
+    orderId: string;
+    trackingNumber: string;
+    trackingCarrier: string;
+    estimatedDelivery: string;
+  }>({ open: false, orderId: "", trackingNumber: "", trackingCarrier: "DHL", estimatedDelivery: "" });
   const [pagination, setPagination] = useState<PaginationMeta>({
     total: 0,
     page: 1,
@@ -140,7 +160,19 @@ export default function AdminOrdersPage() {
     const order = orders.find((o) => o.id === orderId);
     if (!order) return;
 
-    // Confirm status change
+    if (newStatus === "SHIPPED") {
+      setShippingModal({
+        open: true,
+        orderId,
+        trackingNumber: order.trackingNumber || "",
+        trackingCarrier: order.trackingCarrier || "DHL",
+        estimatedDelivery: order.estimatedDelivery
+          ? new Date(order.estimatedDelivery).toISOString().split("T")[0]
+          : "",
+      });
+      return;
+    }
+
     const confirmed = window.confirm(
       `⚠️ UPDATE ORDER STATUS\n\n` +
         `Order: #${orderId.slice(-8).toUpperCase()}\n` +
@@ -193,6 +225,88 @@ export default function AdminOrdersPage() {
       console.error("[ERROR] Error updating order status:", error instanceof Error ? error.message : String(error));
       toast.error("An error occurred while updating the order");
       // Rollback optimistic update
+      setOrders(previousOrders);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const closeShippingModal = () => {
+    setShippingModal({
+      open: false,
+      orderId: "",
+      trackingNumber: "",
+      trackingCarrier: "DHL",
+      estimatedDelivery: "",
+    });
+  };
+
+  const handleShippingSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const { orderId, trackingNumber, trackingCarrier, estimatedDelivery } = shippingModal;
+
+    if (!trackingNumber.trim()) {
+      toast.error("Tracking number is required");
+      return;
+    }
+
+    const previousOrders = orders;
+    setUpdatingId(orderId);
+    closeShippingModal();
+
+    setOrders((prev) =>
+      prev.map((o) =>
+        o.id === orderId
+          ? {
+              ...o,
+              status: "SHIPPED",
+              trackingNumber: trackingNumber.trim(),
+              trackingCarrier,
+              estimatedDelivery: estimatedDelivery
+                ? new Date(estimatedDelivery).toISOString()
+                : null,
+            }
+          : o
+      )
+    );
+
+    try {
+      const response = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          status: "SHIPPED",
+          trackingNumber: trackingNumber.trim(),
+          trackingCarrier,
+          estimatedDelivery: estimatedDelivery
+            ? new Date(estimatedDelivery).toISOString()
+            : null,
+        }),
+      });
+
+      if (response.status === 401) {
+        router.push("/login");
+        setOrders(previousOrders);
+        return;
+      }
+
+      if (response.status === 403) {
+        toast.error("You do not have permission to update orders");
+        setOrders(previousOrders);
+        return;
+      }
+
+      if (response.ok) {
+        toast.success("Order marked as shipped with tracking info");
+      } else {
+        const data = await response.json();
+        toast.error(data.message || "Failed to update order status");
+        setOrders(previousOrders);
+      }
+    } catch (error) {
+      console.error("[ERROR] Error shipping order:", error instanceof Error ? error.message : String(error));
+      toast.error("An error occurred while updating the order");
       setOrders(previousOrders);
     } finally {
       setUpdatingId(null);
@@ -416,6 +530,102 @@ export default function AdminOrdersPage() {
             >
               Next
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Shipping Modal */}
+      {shippingModal.open && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="text-lg font-bold text-gray-900">Shipping Details</h3>
+              <button
+                type="button"
+                onClick={closeShippingModal}
+                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                aria-label="Close shipping modal"
+              >
+                &times;
+              </button>
+            </div>
+
+            <form onSubmit={handleShippingSubmit} className="p-6 space-y-4">
+              <p className="text-sm text-gray-500">
+                Enter tracking information for order #
+                {shippingModal.orderId.slice(-8).toUpperCase()}
+              </p>
+
+              <div>
+                <label htmlFor="trackingNumber" className="block text-sm font-medium text-gray-700 mb-1">
+                  Tracking Number
+                </label>
+                <input
+                  id="trackingNumber"
+                  type="text"
+                  required
+                  value={shippingModal.trackingNumber}
+                  onChange={(e) =>
+                    setShippingModal((prev) => ({ ...prev, trackingNumber: e.target.value }))
+                  }
+                  placeholder="e.g. DHL1234567890"
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="trackingCarrier" className="block text-sm font-medium text-gray-700 mb-1">
+                  Carrier
+                </label>
+                <select
+                  id="trackingCarrier"
+                  value={shippingModal.trackingCarrier}
+                  onChange={(e) =>
+                    setShippingModal((prev) => ({ ...prev, trackingCarrier: e.target.value }))
+                  }
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 bg-white"
+                >
+                  {SHIPPING_CARRIERS.map((carrier) => (
+                    <option key={carrier} value={carrier}>
+                      {carrier}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="estimatedDelivery" className="block text-sm font-medium text-gray-700 mb-1">
+                  Estimated Delivery Date
+                </label>
+                <input
+                  id="estimatedDelivery"
+                  type="date"
+                  value={shippingModal.estimatedDelivery}
+                  onChange={(e) =>
+                    setShippingModal((prev) => ({ ...prev, estimatedDelivery: e.target.value }))
+                  }
+                  min={new Date().toISOString().split("T")[0]}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={closeShippingModal}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={updatingId === shippingModal.orderId}
+                  className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+                >
+                  {updatingId === shippingModal.orderId ? "Saving..." : "Mark as Shipped"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

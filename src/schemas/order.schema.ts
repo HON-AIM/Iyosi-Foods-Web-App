@@ -21,3 +21,11 @@ export const CreateOrderSchema = z.object({
   guestName: z.string().min(2).max(100).trim().optional(),
   guestEmail: z.string().email().toLowerCase().trim().optional(),
 })
+
+export const UpdateOrderSchema = z.object({
+  status: z.enum(["PENDING", "PAID", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"]).optional(),
+  trackingNumber: z.string().max(100).trim().optional().nullable(),
+  trackingCarrier: z.string().max(100).trim().optional().nullable(),
+  estimatedDelivery: z.string().datetime().optional().nullable(),
+  reason: z.string().max(500).trim().optional(),
+})

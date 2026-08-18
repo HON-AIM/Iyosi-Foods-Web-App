@@ -3,6 +3,7 @@ import { prisma, TransactionClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { sendOrderStatusUpdate } from "@/lib/email";
 import { type NextRequest } from "next/server";
+import { UpdateOrderSchema } from "@/schemas/order.schema";
 
 const VALID_STATUSES = [
   "PENDING",
@@ -149,20 +150,23 @@ export async function PUT(
       );
     }
 
-    const { status } = body;
-
-    if (!status || typeof status !== "string") {
+    const parseResult = UpdateOrderSchema.safeParse(body);
+    if (!parseResult.success) {
       return NextResponse.json(
-        { message: "Bad Request: Status is required" },
+        {
+          message: "Bad Request: Invalid request body",
+          errors: parseResult.error.flatten().fieldErrors,
+        },
         { status: 400 }
       );
     }
 
-    if (!isValidStatus(status)) {
+    const { status, trackingNumber, trackingCarrier, estimatedDelivery, reason } =
+      parseResult.data;
+
+    if (!status) {
       return NextResponse.json(
-        {
-          message: `Bad Request: Invalid status. Must be one of: ${VALID_STATUSES.join(", ")}`,
-        },
+        { message: "Bad Request: Status is required" },
         { status: 400 }
       );
     }
@@ -206,6 +210,11 @@ export async function PUT(
         data: {
           status,
           updatedAt: new Date(),
+          ...(trackingNumber !== undefined && { trackingNumber: trackingNumber || null }),
+          ...(trackingCarrier !== undefined && { trackingCarrier: trackingCarrier || null }),
+          ...(estimatedDelivery !== undefined && {
+            estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : null,
+          }),
         },
         include: {
           user: { select: { name: true, email: true } },
@@ -223,7 +232,7 @@ export async function PUT(
           orderId: id,
           userId: session.user?.id || "system",
           action: "STATUS_CHANGE",
-          changes: JSON.stringify({ oldStatus: currentOrder.status, newStatus: status, reason: body.reason }),
+          changes: JSON.stringify({ oldStatus: currentOrder.status, newStatus: status, reason }),
         },
       });
 

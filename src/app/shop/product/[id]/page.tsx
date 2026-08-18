@@ -28,12 +28,16 @@ export async function generateMetadata({
     };
   }
 
-  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://iyosifoods.com";
+  const BASE_URL =
+    process.env.NEXTAUTH_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "https://iyosifoods.com";
   const categoryLabel = product.category.toLowerCase().replace("_", "-");
 
-  const metaDescription = product.description.length > 160
-    ? product.description.slice(0, 157) + "..."
-    : product.description;
+  const metaDescription =
+    product.description.length > 160
+      ? product.description.slice(0, 157) + "..."
+      : product.description;
 
   const formattedPrice = new Intl.NumberFormat("en-NG", {
     style: "currency",
@@ -42,7 +46,7 @@ export async function generateMetadata({
   }).format(product.price);
 
   return {
-    title: product.name,
+    title: `${product.name} | Iyosiola Foods`,
     description: metaDescription,
     keywords: [
       product.name,
@@ -96,7 +100,42 @@ export default async function ProductDetailPage({
     notFound();
   }
 
-  const avgRating = Math.round(ratingData._avg.rating ?? 0);
+  const avgRatingValue = ratingData._avg.rating ?? 0;
+  const avgRating = Math.round(avgRatingValue);
+
+  const baseUrl =
+    process.env.NEXTAUTH_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    "https://iyosifoods.com";
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description: product.description,
+    image: product.image || undefined,
+    brand: { "@type": "Brand", name: "Iyosiola Foods" },
+    offers: {
+      "@type": "Offer",
+      url: `${baseUrl}/shop/product/${product.id}`,
+      priceCurrency: "NGN",
+      price: product.price,
+      availability:
+        product.stock > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      seller: { "@type": "Organization", name: "Iyosiola Foods" },
+    },
+    ...(avgRatingValue > 0 && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: Number(avgRatingValue.toFixed(1)),
+        reviewCount: totalReviewCount,
+        bestRating: 5,
+        worstRating: 1,
+      },
+    }),
+  };
 
   const formatMoney = (amount: number) => {
     return new Intl.NumberFormat("en-NG", {
@@ -107,7 +146,12 @@ export default async function ProductDetailPage({
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <div className="min-h-screen bg-gray-100">
       {/* Promo Bar */}
       <div className="bg-primary-900 text-white text-center py-2 px-4 text-sm">
         <span className="font-semibold">FREE DELIVERY</span> on orders above ₦25,000
@@ -356,5 +400,6 @@ export default async function ProductDetailPage({
         </div>
       </div>
     </div>
+    </>
   );
 }

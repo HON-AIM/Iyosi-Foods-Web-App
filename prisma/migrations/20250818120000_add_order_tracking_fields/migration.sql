@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "trackingNumber" TEXT;
+ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "trackingCarrier" TEXT;
+ALTER TABLE "Order" ADD COLUMN IF NOT EXISTS "estimatedDelivery" TIMESTAMP(3);

@@ -15,6 +15,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { buildWhatsAppUrl, WHATSAPP_ICON_PATH } from "@/lib/whatsapp";
 
 export default function CheckoutPage() {
   const { data: session } = useSession();
@@ -25,6 +26,7 @@ export default function CheckoutPage() {
   const [validating, setValidating] = useState(true);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [orderPlaced, setOrderPlaced] = useState(false);
+  const [orderId, setOrderId] = useState<string | null>(null);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
@@ -108,6 +110,7 @@ export default function CheckoutPage() {
         return;
       }
 
+      setOrderId(data.id);
       clearCart();
       setPaymentUrl(paymentData.authorizationUrl);
       setOrderPlaced(true);
@@ -117,6 +120,64 @@ export default function CheckoutPage() {
       setIsSubmitting(false);
     }
   };
+
+  const orderWhatsAppUrl = orderId
+    ? buildWhatsAppUrl(
+        `Hi Iyosiola Foods! I just placed an order (ID: ${orderId.slice(-8).toUpperCase()}). Please confirm my order. Thank you!`
+      )
+    : null;
+
+  // ─── Order Confirmation ──────────────────────────────────────────────────
+  if (orderPlaced) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-10 text-center space-y-6">
+          <div className="flex justify-center">
+            <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle2 className="h-10 w-10 text-green-600" />
+            </div>
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Order Placed!</h1>
+            <p className="text-gray-500 mt-2 text-sm">
+              Redirecting you to payment…
+            </p>
+          </div>
+          {isGuest && (
+            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800 text-left">
+              <p className="font-semibold mb-1">Want to track your order?</p>
+              <p className="mb-3">Create an account to view your order history and track deliveries.</p>
+              <a href="/register" className="inline-block bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">
+                Create Account
+              </a>
+            </div>
+          )}
+          {orderWhatsAppUrl && (
+            <a
+              href={orderWhatsAppUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full py-3 bg-[#25D366] hover:bg-[#128C7E]
+                text-white font-bold rounded-lg transition-colors"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white" aria-hidden="true">
+                <path d={WHATSAPP_ICON_PATH} />
+              </svg>
+              Confirm Order on WhatsApp
+            </a>
+          )}
+          {paymentUrl && (
+            <a
+              href={paymentUrl}
+              className="inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors w-full"
+            >
+              Continue to Payment
+            </a>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   // ─── Empty Cart Redirect ──────────────────────────────────────────────────
   if (items.length === 0) {
@@ -145,44 +206,6 @@ export default function CheckoutPage() {
     );
   }
 
-  // ─── Order Confirmation ──────────────────────────────────────────────────
-  if (orderPlaced) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-10 text-center space-y-6">
-          <div className="flex justify-center">
-            <div className="h-20 w-20 bg-green-100 rounded-full flex items-center justify-center">
-              <CheckCircle2 className="h-10 w-10 text-green-600" />
-            </div>
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">Order Placed!</h1>
-            <p className="text-gray-500 mt-2 text-sm">
-              Redirecting you to payment…
-            </p>
-          </div>
-          {isGuest && (
-            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg text-sm text-green-800 text-left">
-              <p className="font-semibold mb-1">Want to track your order?</p>
-              <p className="mb-3">Create an account to view your order history and track deliveries.</p>
-              <a href="/register" className="inline-block bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors">
-                Create Account
-              </a>
-            </div>
-          )}
-          {paymentUrl && (
-            <a
-              href={paymentUrl}
-              className="inline-flex items-center justify-center gap-2 bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
-            >
-              Continue to Payment
-            </a>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   // ─── Main Checkout ────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-gray-50">
@@ -196,7 +219,17 @@ export default function CheckoutPage() {
           Back to Shop
         </Link>
 
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Checkout</h1>
+        {isGuest && (
+          <p className="text-sm text-gray-600 mb-8">
+            Checking out as a guest.{" "}
+            <Link href="/login?callbackUrl=/checkout" className="text-primary-600 font-medium hover:underline">
+              Log in
+            </Link>{" "}
+            if you already have an account.
+          </p>
+        )}
+        {!isGuest && <div className="mb-8" />}
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
           {/* ── Shipping Form ── */}
@@ -355,8 +388,9 @@ export default function CheckoutPage() {
             <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-sm text-green-700 flex gap-2">
               <CheckCircle2 className="h-4 w-4 mt-0.5 flex-shrink-0" />
               <span>
-                All orders are processed securely. You&apos;ll receive a
-                confirmation in your dashboard once placed.
+                {isGuest
+                  ? "All orders are processed securely. You'll receive confirmation by email."
+                  : "All orders are processed securely. You'll receive a confirmation in your dashboard once placed."}
               </span>
             </div>
           </div>

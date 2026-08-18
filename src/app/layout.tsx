@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Providers } from "@/components/Providers";
 import Navbar from "@/components/navigation/Navbar";
+import WhatsAppButton from "@/components/WhatsAppButton";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
@@ -47,21 +48,12 @@ export const metadata: Metadata = {
     title: "Iyosi Foods | Premium Food & Agro-Allied Products",
     description:
       "Premier Nigerian food company delivering premium flour, sugar, rice, edible oils, and tomato paste.",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Iyosi Foods - Quality You Can Trust",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "Iyosi Foods | Premium Food & Agro Products",
     description:
       "Shop premium flour, sugar, rice, and more. Quality food products delivered in Nigeria.",
-    images: ["/og-image.jpg"],
     creator: "@iyosifoods",
   },
   robots: {
@@ -237,6 +229,8 @@ export default function RootLayout({
               </span>
             </div>
           </footer>
+
+          <WhatsAppButton />
         </Providers>
       </body>
     </html>

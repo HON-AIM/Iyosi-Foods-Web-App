@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ChevronRight, Flame, Percent, TrendingUp, Sparkles } from "lucide-react";
 import { prisma } from "@/lib/db";
 import ProductRevealCard from "@/components/shop/ProductRevealCard";
 import HeroBanner from "@/components/shop/HeroBanner";
 import FlashSale from "@/components/shop/FlashSale";
+import CategoryStrip from "@/components/shop/CategoryStrip";
+import PromoBanners from "@/components/shop/PromoBanners";
+
+export const dynamic = "force-dynamic";
 
 type ProductWithRating = {
   id: string
@@ -41,12 +47,6 @@ async function enrichWithRatings(
     reviewCount: ratingMap.get(p.id)?.reviewCount ?? 0,
   }))
 }
-
-export const dynamic = "force-dynamic";
-import CategoryStrip from "@/components/shop/CategoryStrip";
-import PromoBanners from "@/components/shop/PromoBanners";
-import Link from "next/link";
-import { ChevronRight, Flame, Percent, TrendingUp, Sparkles } from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Shop Premium Flour Online | Iyosiola Foods",

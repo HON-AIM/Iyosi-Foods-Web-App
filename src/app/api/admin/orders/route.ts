@@ -161,10 +161,17 @@ export async function GET(request: NextRequest) {
           totalAmount: true,
           status: true,
           createdAt: true,
+          guestName: true,
+          guestEmail: true,
+          trackingNumber: true,
+          trackingCarrier: true,
+          estimatedDelivery: true,
           user: { select: { id: true, name: true, email: true } },
           items: {
             select: {
+              id: true,
               quantity: true,
+              price: true,
               product: { select: { name: true } },
             },
           },

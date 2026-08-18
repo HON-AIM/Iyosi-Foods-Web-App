@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from "framer-motion"
 import { buttonVariants } from "@/components/ui/button"
 import { ShoppingCart, Star, Heart, Eye, Package } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import Link from "next/link"
@@ -17,12 +17,13 @@ interface ProductRevealCardProps {
     id: string
     name: string
     price: number
+    compareAtPrice?: number | null
     stock: number
     image: string | null
     description?: string
     category?: string
-    avgRating?: number        // 0–5, pre-calculated server-side
-    reviewCount?: number      // total review count from DB
+    avgRating?: number
+    reviewCount?: number
   }
   className?: string
 }
@@ -52,32 +53,76 @@ export default function ProductRevealCard({ product, className }: ProductRevealC
   const isLowStock = product.stock > 0 && product.stock <= 5
   const avgRating = product.avgRating ?? 0
   const reviewCount = product.reviewCount ?? 0
+  const hasDiscount =
+    product.compareAtPrice != null && product.compareAtPrice > product.price
+  const discountPercent = hasDiscount
+    ? Math.round(
+        ((product.compareAtPrice! - product.price) / product.compareAtPrice!) * 100
+      )
+    : 0
+
+  useEffect(() => {
+    let cancelled = false
+    fetch("/api/user/saved")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data?.savedItems) return
+        const saved = data.savedItems.some(
+          (item: { product: { id: string } }) => item.product.id === product.id
+        )
+        setIsSaved(saved)
+      })
+      .catch(() => {})
+    return () => {
+      cancelled = true
+    }
+  }, [product.id])
 
   // ─── Animation Variants ───────────────────────────────────────────────────
 
+  const noMotionTransition = { duration: 0 }
+
   const containerVariants = {
-    rest:  { scale: 1, y: 0 },
+    rest: { scale: 1, y: 0 },
     hover: shouldAnimate
-      ? { scale: 1.03, y: -6, transition: { type: "spring" as const, stiffness: 300, damping: 28, mass: 0.8 } }
-      : {},
+      ? {
+          scale: 1.03,
+          y: -6,
+          transition: { type: "spring" as const, stiffness: 300, damping: 28, mass: 0.8 },
+        }
+      : { scale: 1, y: 0, transition: noMotionTransition },
   }
 
   const imageVariants = {
-    rest:  { scale: 1 },
-    hover: { scale: 1.08, transition: { type: "spring" as const, stiffness: 300, damping: 28 } },
+    rest: { scale: 1 },
+    hover: shouldAnimate
+      ? { scale: 1.08, transition: { type: "spring" as const, stiffness: 300, damping: 28 } }
+      : { scale: 1, transition: noMotionTransition },
   }
 
   const overlayVariants = {
-    rest:  { y: "100%", opacity: 0 },
-    hover: {
-      y: "0%", opacity: 1,
-      transition: { type: "spring" as const, stiffness: 400, damping: 28, mass: 0.6, staggerChildren: 0.07, delayChildren: 0.05 },
-    },
+    rest: { y: "100%", opacity: 0 },
+    hover: shouldAnimate
+      ? {
+          y: "0%",
+          opacity: 1,
+          transition: {
+            type: "spring" as const,
+            stiffness: 400,
+            damping: 28,
+            mass: 0.6,
+            staggerChildren: 0.07,
+            delayChildren: 0.05,
+          },
+        }
+      : { y: "100%", opacity: 0, transition: noMotionTransition },
   }
 
   const itemVariants = {
-    rest:  { opacity: 0, y: 16 },
-    hover: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 400, damping: 25 } },
+    rest: { opacity: 0, y: 16 },
+    hover: shouldAnimate
+      ? { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 400, damping: 25 } }
+      : { opacity: 0, y: 16, transition: noMotionTransition },
   }
 
   const btnMotion = {
@@ -128,7 +173,7 @@ export default function ProductRevealCard({ product, className }: ProductRevealC
   return (
     <motion.div
       initial="rest"
-      whileHover="hover"
+      whileHover={shouldAnimate ? "hover" : undefined}
       variants={containerVariants}
       className={cn(
         "relative w-full rounded-xl border border-gray-100 bg-white overflow-hidden",
@@ -176,14 +221,30 @@ export default function ProductRevealCard({ product, className }: ProductRevealC
           <Heart className={cn("w-4 h-4", isSaved && "fill-current")} />
         </motion.button>
 
+        {hasDiscount && !isOutOfStock && (
+          <div className="absolute top-3 left-3 bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded z-10">
+            -{discountPercent}%
+          </div>
+        )}
+
         {/* Stock badges */}
         {isOutOfStock && (
-          <div className="absolute top-3 left-3 bg-gray-700 text-white text-[10px] font-bold px-2 py-0.5 rounded z-10">
+          <div
+            className={cn(
+              "absolute top-3 bg-gray-700 text-white text-[10px] font-bold px-2 py-0.5 rounded z-10",
+              hasDiscount ? "left-14" : "left-3"
+            )}
+          >
             OUT OF STOCK
           </div>
         )}
         {isLowStock && !isOutOfStock && (
-          <div className="absolute top-3 left-3 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded animate-pulse z-10">
+          <div
+            className={cn(
+              "absolute top-3 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded animate-pulse z-10",
+              hasDiscount ? "left-14" : "left-3"
+            )}
+          >
             Only {product.stock} left!
           </div>
         )}
@@ -217,7 +278,14 @@ export default function ProductRevealCard({ product, className }: ProductRevealC
         </h3>
 
         {/* Price */}
-        <p className="text-base font-bold text-gray-900">{formatMoney(product.price)}</p>
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <p className="text-base font-bold text-gray-900">{formatMoney(product.price)}</p>
+          {hasDiscount && (
+            <p className="text-xs text-gray-400 line-through">
+              {formatMoney(product.compareAtPrice!)}
+            </p>
+          )}
+        </div>
 
         {/* Free delivery badge */}
         {product.price >= 25000 && (
@@ -225,9 +293,39 @@ export default function ProductRevealCard({ product, className }: ProductRevealC
             🚚 Free delivery
           </p>
         )}
+
+        {!shouldAnimate && (
+          <div className="space-y-2 pt-1">
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={isOutOfStock}
+              className={cn(
+                buttonVariants({ variant: "default" }),
+                "w-full h-9 text-xs font-bold",
+                isOutOfStock && "opacity-50 cursor-not-allowed"
+              )}
+            >
+              <ShoppingCart className="w-4 h-4 mr-1.5" />
+              {isOutOfStock ? "Out of Stock" : "Add to Cart"}
+            </button>
+            <Link href={`/shop/product/${product.id}`}>
+              <span
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  "w-full h-9 text-xs font-medium inline-flex"
+                )}
+              >
+                <Eye className="w-3.5 h-3.5 mr-1.5" />
+                View Details
+              </span>
+            </Link>
+          </div>
+        )}
       </div>
 
-      {/* ── Hover Reveal Overlay ──────────────────────────────── */}
+      {/* ── Hover Reveal Overlay (animated hover only) ─────────── */}
+      {shouldAnimate && (
       <motion.div
         variants={overlayVariants}
         className="absolute inset-0 bg-white/97 backdrop-blur-lg flex flex-col justify-end pointer-events-none group-hover:pointer-events-auto"
@@ -250,8 +348,13 @@ export default function ProductRevealCard({ product, className }: ProductRevealC
           )}
 
           {/* Price in overlay */}
-          <motion.div variants={itemVariants} className="flex items-center gap-2">
+          <motion.div variants={itemVariants} className="flex items-center gap-2 flex-wrap">
             <span className="text-lg font-extrabold text-gray-900">{formatMoney(product.price)}</span>
+            {hasDiscount && (
+              <span className="text-sm text-gray-400 line-through">
+                {formatMoney(product.compareAtPrice!)}
+              </span>
+            )}
             {product.price >= 25000 && (
               <span className="text-[10px] text-green-600 font-semibold">+ Free delivery</span>
             )}
@@ -284,7 +387,7 @@ export default function ProductRevealCard({ product, className }: ProductRevealC
                 whileTap="tap"
                 className={cn(
                   buttonVariants({ variant: "outline" }),
-                  "w-full h-9 text-xs font-medium"
+                  "w-full h-9 text-xs font-medium inline-flex"
                 )}
               >
                 <Eye className="w-3.5 h-3.5 mr-1.5" />
@@ -294,6 +397,7 @@ export default function ProductRevealCard({ product, className }: ProductRevealC
           </motion.div>
         </div>
       </motion.div>
+      )}
     </motion.div>
   )
 }

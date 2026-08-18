@@ -177,6 +177,9 @@ model Order {
   couponCode   String?
   guestEmail   String?
   guestName    String?
+  trackingNumber   String?
+  trackingCarrier  String?
+  estimatedDelivery DateTime?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }

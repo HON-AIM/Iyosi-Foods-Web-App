@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
 import { format } from "date-fns";
+import OrderTimeline from "@/components/dashboard/OrderTimeline";
 
 export const dynamic = "force-dynamic";
 
@@ -98,6 +99,17 @@ export default async function OrdersPage() {
                                   </div>
                               </div>
                           ))}
+                      </div>
+                      
+                      {/* Order Timeline */}
+                      <div className="px-4 py-4 border-t border-gray-100">
+                          <OrderTimeline
+                              status={order.status as "PENDING" | "PAID" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED"}
+                              createdAt={order.createdAt}
+                              estimatedDelivery={order.estimatedDelivery}
+                              trackingNumber={order.trackingNumber}
+                              trackingCarrier={order.trackingCarrier}
+                          />
                       </div>
                       
                       {/* Order Footer Actions */}
