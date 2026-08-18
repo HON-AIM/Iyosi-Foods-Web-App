@@ -69,3 +69,6 @@ create-admin.js
 
 # internal docs
 docs/
+
+.vercel
+.env*
