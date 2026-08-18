@@ -69,12 +69,33 @@ export default function FlashSale({ products }: { products: Product[] }) {
     return () => clearInterval(timer);
   }, [endTime]);
 
-  if (products.length === 0 || isExpired) return null;
+  if (products.length === 0) {
+    return (
+      <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-gradient-to-r from-red-600 to-orange-500 px-4 py-3 flex items-center gap-3">
+          <Zap className="h-5 w-5 text-yellow-300 fill-yellow-300 flex-shrink-0" />
+          <h3 className="font-bold text-lg text-white">Flash Sale</h3>
+          <span className="ml-auto text-white/70 text-xs">Coming soon</span>
+        </div>
+        <div className="p-6 flex flex-col items-center justify-center text-center">
+          <div className="w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center mb-3">
+            <Zap className="w-8 h-8 text-orange-400" strokeWidth={1.5} />
+          </div>
+          <p className="font-semibold text-gray-700">Flash Sale Coming Soon</p>
+          <p className="text-sm text-gray-400 mt-1 max-w-xs">
+            Check back regularly for limited-time deals on our premium products.
+          </p>
+        </div>
+      </section>
+    )
+  }
+
+  if (isExpired) return null;
 
   const pad = (n: number) => String(n).padStart(2, "0");
 
   return (
-    <section className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+    <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-red-600 to-orange-500 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-3">
@@ -106,7 +127,7 @@ export default function FlashSale({ products }: { products: Product[] }) {
 
       {/* Products - Horizontal Scroll */}
       <div className="p-3 md:p-4">
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
           {products.map((product) => (
             <div key={product.id} className="flex-shrink-0 w-[160px] md:w-[180px]">
               <ProductRevealCard product={product} />

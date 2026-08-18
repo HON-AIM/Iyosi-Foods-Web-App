@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronRight, Flame, Percent, TrendingUp, Sparkles } from "lucide-react";
+import { ChevronRight, TrendingUp, Sparkles, Wheat, FlameKindling, Layers, Coffee, Package, LayoutGrid, Tag, PackageOpen, Truck, ShieldCheck, RefreshCw, Lock } from "lucide-react";
 import { prisma } from "@/lib/db";
 import ProductRevealCard from "@/components/shop/ProductRevealCard";
 import HeroBanner from "@/components/shop/HeroBanner";
 import FlashSale from "@/components/shop/FlashSale";
 import CategoryStrip from "@/components/shop/CategoryStrip";
 import PromoBanners from "@/components/shop/PromoBanners";
+import EmptyProductGrid from "@/components/shop/EmptyProductGrid";
 
 export const dynamic = "force-dynamic";
 
@@ -120,15 +121,12 @@ export default async function ShopHomePage({
   ]);
 
   const categories = [
-    { name: "All Products", icon: "🛒", link: "/shop" },
-    { name: "Baking Flour", icon: "🧁", link: "/shop?category=BAKING" },
-    { name: "Wheat Flour", icon: "🌾", link: "/shop?category=WHEAT" },
-    { name: "All-Purpose", icon: "🍞", link: "/shop?category=ALL_PURPOSE" },
-    { name: "Semolina", icon: "🥣", link: "/shop?category=SEMOLINA" },
-    { name: "Sugar", icon: "🍬", link: "/shop?category=SUGAR" },
-    { name: "Cooking Oil", icon: "🫙", link: "/shop?category=OIL" },
-    { name: "Rice", icon: "🍚", link: "/shop?category=RICE" },
-    { name: "Tomato Paste", icon: "🍅", link: "/shop?category=TOMATO_PASTE" },
+    { name: "All Products",  icon: <LayoutGrid className="h-4 w-4" />,     link: "/shop" },
+    { name: "Baking Flour",  icon: <FlameKindling className="h-4 w-4" />,  link: "/shop?category=BAKING" },
+    { name: "Wheat Flour",   icon: <Wheat className="h-4 w-4" />,          link: "/shop?category=WHEAT" },
+    { name: "All-Purpose",   icon: <Layers className="h-4 w-4" />,         link: "/shop?category=ALL_PURPOSE" },
+    { name: "Semolina",      icon: <Coffee className="h-4 w-4" />,         link: "/shop?category=SEMOLINA" },
+    { name: "Bulk Orders",   icon: <Package className="h-4 w-4" />,        link: "/shop?category=BAKING&bulk=true" },
   ];
 
   return (
@@ -138,7 +136,7 @@ export default async function ShopHomePage({
         {/* ═══ ROW 1: Category Sidebar + Hero Carousel + Side Promos ═══ */}
         <div className="flex gap-3 h-auto md:h-[380px]">
           {/* Category Sidebar - Desktop Only */}
-          <div className="hidden md:flex flex-col w-56 bg-white rounded-lg shadow-sm border border-gray-100 shrink-0 overflow-hidden">
+          <div className="hidden md:flex flex-col w-56 bg-white rounded-xl shadow-sm border border-gray-100 shrink-0 overflow-hidden">
             <div className="bg-gray-900 text-white px-4 py-3 font-bold text-sm flex items-center gap-2">
               <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
@@ -150,15 +148,15 @@ export default async function ShopHomePage({
                 <Link
                   key={index}
                   href={cat.link}
-                  className={`px-4 py-2.5 hover:bg-orange-50 flex items-center justify-between transition-colors text-sm border-b border-gray-50 last:border-0 ${
+                  className={`px-4 py-2.5 hover:bg-green-50 flex items-center justify-between transition-colors text-sm border-b border-gray-50 last:border-0 ${
                     (cat.link === "/shop" && !activeCategory) ||
                     (activeCategory && cat.link.includes(activeCategory))
-                      ? "bg-orange-50 text-orange-600 font-semibold"
-                      : "text-gray-700 hover:text-orange-600"
+                      ? "bg-green-50 text-green-700 font-semibold"
+                      : "text-gray-700 hover:text-green-700"
                   }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-lg">{cat.icon}</span>
+                    <span className="text-green-600">{cat.icon}</span>
                     <span className="font-medium">{cat.name}</span>
                   </div>
                   <ChevronRight className="h-4 w-4 text-gray-300" />
@@ -176,23 +174,25 @@ export default async function ShopHomePage({
           <div className="hidden xl:flex flex-col w-52 gap-3 shrink-0">
             <Link
               href="/shop?category=BAKING"
-              className="flex-1 bg-gradient-to-br from-orange-500 to-red-500 rounded-lg p-4 flex flex-col justify-center items-center text-center text-white hover:shadow-lg transition-shadow group"
+              className="flex-1 bg-gradient-to-br from-orange-500 to-red-500 rounded-xl p-4 flex flex-col justify-center items-center text-center text-white hover:shadow-xl transition-all group"
             >
-              <div className="bg-white/20 p-3 rounded-full mb-2 group-hover:scale-110 transition-transform">
-                <Flame className="h-6 w-6" />
+              <div className="bg-white/20 p-3 rounded-2xl mb-3 group-hover:scale-110 transition-transform">
+                <Tag className="h-6 w-6" strokeWidth={1.8} />
               </div>
               <h4 className="font-bold text-sm">Hot Deals</h4>
               <p className="text-[11px] text-white/80 mt-1">Daily discounts on staples</p>
+              <span className="mt-2 text-[10px] bg-white/20 px-2 py-0.5 rounded-full">Shop Now →</span>
             </Link>
             <Link
               href="/shop"
-              className="flex-1 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg p-4 flex flex-col justify-center items-center text-center text-white hover:shadow-lg transition-shadow group"
+              className="flex-1 bg-gradient-to-br from-green-600 to-emerald-700 rounded-xl p-4 flex flex-col justify-center items-center text-center text-white hover:shadow-xl transition-all group"
             >
-              <div className="bg-white/20 p-3 rounded-full mb-2 group-hover:scale-110 transition-transform">
-                <Percent className="h-6 w-6" />
+              <div className="bg-white/20 p-3 rounded-2xl mb-3 group-hover:scale-110 transition-transform">
+                <PackageOpen className="h-6 w-6" strokeWidth={1.8} />
               </div>
               <h4 className="font-bold text-sm">Bulk Orders</h4>
               <p className="text-[11px] text-white/80 mt-1">Save up to 25%</p>
+              <span className="mt-2 text-[10px] bg-white/20 px-2 py-0.5 rounded-full">Order Now →</span>
             </Link>
           </div>
         </div>
@@ -202,9 +202,9 @@ export default async function ShopHomePage({
 
         {/* Active Category Indicator */}
         {activeCategory && (
-          <div className="flex items-center gap-2 bg-white rounded-lg px-4 py-2 text-sm text-gray-600 border border-gray-100">
+          <div className="flex items-center gap-2 bg-white rounded-xl px-4 py-2 text-sm text-gray-600 border border-gray-100">
             Filtering: <strong className="text-gray-900">{activeCategory.replace("_", " ")}</strong>
-            <a href="/shop" className="ml-auto text-orange-500 hover:underline text-xs">Clear ✕</a>
+            <a href="/shop" className="ml-auto text-green-600 hover:underline text-xs">Clear ✕</a>
           </div>
         )}
 
@@ -214,62 +214,195 @@ export default async function ShopHomePage({
         {/* ═══ ROW 4: Promotional Banners ═══ */}
         <PromoBanners />
 
-        {/* ═══ ROW 5: Top Selling Items ═══ */}
-        {topProducts.length > 0 && (
-          <section className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-            <div className="px-4 py-3.5 border-b border-gray-100 flex justify-between items-center">
-              <h3 className="font-bold text-lg text-gray-900 flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-orange-500" />
-                Top Selling Items
-              </h3>
-              <Link href="/shop" className="text-orange-500 text-sm hover:underline font-medium flex items-center gap-1">
-                SEE ALL <ChevronRight className="h-4 w-4" />
+        {/* ═══ Shop by Category Cards ═══ */}
+        <section className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 md:p-5">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-bold text-lg text-gray-900">Shop by Category</h3>
+            <Link href="/shop" className="text-green-600 text-sm hover:underline font-medium">
+              View All
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              {
+                name: "Baking Flour",
+                desc: "For bread, cakes & pastries",
+                link: "/shop?category=BAKING",
+                icon: <FlameKindling className="w-8 h-8" strokeWidth={1.5} />,
+                gradient: "from-orange-400 to-red-500",
+                bg: "bg-orange-50",
+                text: "text-orange-600",
+              },
+              {
+                name: "Wheat Flour",
+                desc: "Whole grain goodness",
+                link: "/shop?category=WHEAT",
+                icon: <Wheat className="w-8 h-8" strokeWidth={1.5} />,
+                gradient: "from-amber-400 to-yellow-500",
+                bg: "bg-amber-50",
+                text: "text-amber-600",
+              },
+              {
+                name: "All-Purpose",
+                desc: "Versatile everyday flour",
+                link: "/shop?category=ALL_PURPOSE",
+                icon: <Layers className="w-8 h-8" strokeWidth={1.5} />,
+                gradient: "from-blue-500 to-indigo-600",
+                bg: "bg-blue-50",
+                text: "text-blue-600",
+              },
+              {
+                name: "Semolina",
+                desc: "For tuwo, couscous & pasta",
+                link: "/shop?category=SEMOLINA",
+                icon: <Coffee className="w-8 h-8" strokeWidth={1.5} />,
+                gradient: "from-purple-500 to-violet-600",
+                bg: "bg-purple-50",
+                text: "text-purple-600",
+              },
+            ].map((cat) => (
+              <Link
+                key={cat.name}
+                href={cat.link}
+                className="group relative overflow-hidden rounded-xl border border-gray-100 hover:border-transparent hover:shadow-lg transition-all duration-300"
+              >
+                <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+                <div className="relative p-4 md:p-5 flex flex-col gap-3">
+                  <div className={`w-14 h-14 ${cat.bg} group-hover:bg-white/20 rounded-2xl flex items-center justify-center transition-colors`}>
+                    <span className={`${cat.text} group-hover:text-white transition-colors`}>{cat.icon}</span>
+                  </div>
+                  <div>
+                    <p className="font-bold text-gray-900 group-hover:text-white text-sm transition-colors">{cat.name}</p>
+                    <p className="text-xs text-gray-400 group-hover:text-white/80 mt-0.5 transition-colors">{cat.desc}</p>
+                  </div>
+                  <div className="flex items-center gap-1 text-xs font-semibold text-green-600 group-hover:text-white transition-colors">
+                    Shop now
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </div>
+                </div>
               </Link>
+            ))}
+          </div>
+        </section>
+
+        {/* ═══ ROW 5: Top Selling Items ═══ */}
+        <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="px-4 py-3.5 border-b border-gray-100 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                <TrendingUp className="h-4 w-4 text-green-700" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base text-gray-900">Top Selling Items</h3>
+                <p className="text-xs text-gray-400">Most popular with our customers</p>
+              </div>
             </div>
-            <div className="p-3 md:p-4">
+            <Link href="/shop" className="text-green-600 text-sm hover:underline font-medium flex items-center gap-1">
+              SEE ALL <ChevronRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="p-3 md:p-4">
+            {topProducts.length > 0 ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
                 {topProducts.map((product) => (
                   <ProductRevealCard key={product.id} product={product} />
                 ))}
               </div>
-            </div>
-          </section>
-        )}
+            ) : (
+              <EmptyProductGrid
+                message="Products coming soon"
+                hint="We are restocking our shelves. New products will appear here shortly."
+                showShopAllLink={false}
+              />
+            )}
+          </div>
+        </section>
 
         {/* ═══ ROW 6: Recommended For You ═══ */}
-        <section className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+        <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-4 py-3.5 border-b border-gray-100 flex justify-between items-center">
-            <h3 className="font-bold text-lg text-gray-900 flex items-center gap-2">
-              <Sparkles className="h-5 w-5 text-orange-500" />
-              Recommended For You
-            </h3>
-            <Link href="/shop" className="text-orange-500 text-sm hover:underline font-medium flex items-center gap-1">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Sparkles className="h-4 w-4 text-purple-700" />
+              </div>
+              <div>
+                <h3 className="font-bold text-base text-gray-900">Recommended For You</h3>
+                <p className="text-xs text-gray-400">Chosen based on what&apos;s trending</p>
+              </div>
+            </div>
+            <Link href="/shop" className="text-green-600 text-sm hover:underline font-medium flex items-center gap-1">
               SEE ALL <ChevronRight className="h-4 w-4" />
             </Link>
           </div>
           <div className="p-3 md:p-4">
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
-              {recommendedProducts.map((product) => (
-                <ProductRevealCard key={product.id} product={product} />
-              ))}
-            </div>
+            {recommendedProducts.length > 0 ? (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
+                {recommendedProducts.map((product) => (
+                  <ProductRevealCard key={product.id} product={product} />
+                ))}
+              </div>
+            ) : (
+              <EmptyProductGrid
+                message="No recommendations yet"
+                hint="Start shopping and we will recommend products tailored to your taste."
+              />
+            )}
           </div>
         </section>
 
-        {/* ═══ Trust Badges Footer ═══ */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        {/* ═══ Brand Stats Bar ═══ */}
+        <div className="bg-gradient-to-r from-green-700 to-green-800 rounded-xl p-5 md:p-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-center text-white">
             {[
-              { icon: "🚚", title: "Fast Delivery", desc: "1-5 business days" },
-              { icon: "✅", title: "100% Genuine", desc: "Authentic products" },
-              { icon: "↩️", title: "Easy Returns", desc: "7-day return policy" },
-              { icon: "🔒", title: "Secure Payment", desc: "SSL encrypted checkout" },
+              { value: "5,000+", label: "Happy Customers" },
+              { value: "15+", label: "Years Experience" },
+              { value: "99.8%", label: "Quality Rate" },
+              { value: "24/7", label: "Customer Support" },
+            ].map((stat, i) => (
+              <div key={i} className="flex flex-col items-center">
+                <span className="text-2xl md:text-3xl font-extrabold text-yellow-300">{stat.value}</span>
+                <span className="text-xs md:text-sm text-white/80 font-medium mt-1">{stat.label}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ═══ Trust Badges Footer ═══ */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[
+              {
+                icon: <Truck className="w-7 h-7 text-green-600" strokeWidth={1.5} />,
+                bg: "bg-green-50",
+                title: "Fast Delivery",
+                desc: "1–5 business days",
+              },
+              {
+                icon: <ShieldCheck className="w-7 h-7 text-blue-600" strokeWidth={1.5} />,
+                bg: "bg-blue-50",
+                title: "100% Genuine",
+                desc: "Authentic products",
+              },
+              {
+                icon: <RefreshCw className="w-7 h-7 text-orange-600" strokeWidth={1.5} />,
+                bg: "bg-orange-50",
+                title: "Easy Returns",
+                desc: "7-day return policy",
+              },
+              {
+                icon: <Lock className="w-7 h-7 text-purple-600" strokeWidth={1.5} />,
+                bg: "bg-purple-50",
+                title: "Secure Payment",
+                desc: "SSL encrypted",
+              },
             ].map((badge, i) => (
-              <div key={i} className="flex flex-col items-center gap-2">
-                <span className="text-3xl">{badge.icon}</span>
+              <div key={i} className="flex flex-col items-center gap-3 text-center">
+                <div className={`w-14 h-14 ${badge.bg} rounded-2xl flex items-center justify-center`}>
+                  {badge.icon}
+                </div>
                 <div>
                   <p className="font-bold text-sm text-gray-900">{badge.title}</p>
-                  <p className="text-xs text-gray-500">{badge.desc}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{badge.desc}</p>
                 </div>
               </div>
             ))}

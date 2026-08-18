@@ -46,7 +46,7 @@ export default function ProductCardBasic({ product }: ProductCardBasicProps) {
   return (
     <Link
       href={`/shop/product/${product.id}`}
-      className="group bg-white rounded-lg border border-gray-100 hover:border-orange-200 hover:shadow-lg transition-all duration-200 flex flex-col h-full overflow-hidden relative"
+      className="group bg-white rounded-xl border border-gray-100 hover:border-green-200 hover:shadow-lg transition-all duration-200 flex flex-col h-full overflow-hidden relative"
     >
       {/* Low Stock Badge */}
       {product.stock <= 5 && product.stock > 0 && (
@@ -87,7 +87,7 @@ export default function ProductCardBasic({ product }: ProductCardBasicProps) {
         </div>
 
         {/* Title */}
-        <h3 className="text-xs md:text-sm text-gray-800 line-clamp-2 mb-1.5 group-hover:text-orange-600 transition-colors leading-snug">
+        <h3 className="text-xs md:text-sm text-gray-800 line-clamp-2 mb-1.5 group-hover:text-green-700 transition-colors leading-snug">
           {product.name}
         </h3>
 
@@ -109,7 +109,7 @@ export default function ProductCardBasic({ product }: ProductCardBasicProps) {
         <button
           onClick={handleAddToCart}
           disabled={product.stock === 0}
-          className="mt-2.5 w-full bg-orange-500 hover:bg-orange-600 disabled:bg-gray-300 text-white font-bold py-2 rounded text-xs transition-all flex items-center justify-center gap-1.5 md:opacity-0 md:translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 shadow-sm"
+          className="mt-2.5 w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white font-bold py-2 rounded text-xs transition-all flex items-center justify-center gap-1.5 md:opacity-0 md:translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 shadow-sm"
         >
           <ShoppingCart className="h-3.5 w-3.5" />
           {product.stock === 0 ? "OUT OF STOCK" : "ADD TO CART"}
