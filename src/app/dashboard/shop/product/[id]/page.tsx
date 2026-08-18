@@ -1,292 +1,188 @@
-import { prisma } from "@/lib/db";
-import { notFound } from "next/navigation";
-import Image from "next/image";
-import ProductActions from "@/components/shop/ProductActions";
-import WishlistButton from "@/components/shop/WishlistButton";
-import { ShieldCheck, Truck, RotateCcw, Package, Star, Share2, Check } from "lucide-react";
-import Link from "next/link";
+import { notFound } from "next/navigation"
+import { auth } from "@/lib/auth"
+import { prisma } from "@/lib/db"
+import Link from "next/link"
+import Image from "next/image"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import DashboardProductActions from "./DashboardProductActions"
+import DashboardProductReviews from "./DashboardProductReviews"
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-dynamic"
 
-export default async function DashboardProductDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+interface PageProps {
+  params: Promise<{ id: string }>
+}
 
-  const [product, reviews, totalReviewCount, ratingData] = await Promise.all([
-    prisma.product.findUnique({ where: { id } }).catch(() => null),
+export default async function DashboardProductPage({ params }: PageProps) {
+  const { id } = await params
+  const session = await auth()
+
+  const [product, reviews, totalReviewCount, ratingData, isSaved] = await Promise.all([
+    prisma.product.findUnique({
+      where: { id, isActive: true },
+    }),
     prisma.review.findMany({
       where: { productId: id },
       include: { user: { select: { name: true } } },
       orderBy: { createdAt: "desc" },
-      take: 5,
-    }).catch(() => [] as Awaited<ReturnType<typeof prisma.review.findMany>>),
-    prisma.review.count({ where: { productId: id } }).catch(() => 0),
+      take: 10,
+    }),
+    prisma.review.count({ where: { productId: id } }),
     prisma.review.aggregate({
       where: { productId: id },
       _avg: { rating: true },
-    }).catch(() => ({ _avg: { rating: null } })),
-  ]);
+    }),
+    session?.user?.id
+      ? prisma.savedItem.findUnique({
+          where: { userId_productId: { userId: session.user.id, productId: id } },
+        }).then(Boolean)
+      : Promise.resolve(false),
+  ])
 
-  if (!product) {
-    notFound();
-  }
+  if (!product) notFound()
 
-  const avgRatingValue = ratingData._avg.rating ?? 0;
-  const avgRating = Math.round(avgRatingValue);
-
-  const formatMoney = (amount: number) => {
-    return new Intl.NumberFormat("en-NG", {
-      style: "currency",
-      currency: "NGN",
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
+  const avgRating = Math.round((ratingData._avg.rating ?? 0) * 10) / 10
+  const formatMoney = (n: number) =>
+    new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(n)
 
   return (
-    <div className="space-y-6">
-      {/* Breadcrumbs */}
-      <nav className="text-sm text-gray-500 flex gap-2 items-center bg-white px-4 py-3 rounded-lg border border-gray-100">
-        <Link href="/dashboard" className="hover:text-green-600 font-medium">Dashboard</Link>
-        <span className="text-gray-300">›</span>
-        <Link href="/dashboard/shop" className="hover:text-green-600 font-medium">Shop</Link>
-        <span className="text-gray-300">›</span>
-        <span className="capitalize text-gray-700">{product.category.toLowerCase().replace('_', ' ')}</span>
-        <span className="text-gray-300">›</span>
-        <span className="text-gray-900 line-clamp-1 font-medium">{product.name}</span>
+    <div className="space-y-4">
+
+      {/* ── Breadcrumb ─────────────────────────────────────────────── */}
+      <nav className="flex items-center gap-1 text-sm text-gray-400">
+        <Link href="/dashboard" className="hover:text-green-600 transition-colors">
+          My Account
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5" />
+        <Link href="/dashboard/shop" className="hover:text-green-600 transition-colors">
+          Shop
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5" />
+        <Link href={`/dashboard/shop?category=${product.category}`} className="hover:text-green-600 transition-colors">
+          {product.category.replace("_", " ")}
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5" />
+        <span className="text-gray-600 font-medium truncate max-w-[160px]">{product.name}</span>
       </nav>
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="flex flex-col lg:flex-row">
-          
-          {/* Left: Product Images */}
-          <div className="w-full lg:w-2/5 p-6 bg-gray-50">
-            <div className="relative">
-              <div className="relative aspect-square w-full bg-white rounded-xl flex justify-center items-center shadow-sm">
-                {product.image ? (
-                  <Image 
-                    src={product.image} 
-                    alt={product.name}
-                    fill
-                    className="object-contain p-8"
-                    priority
-                  />
-                ) : (
-                  <div className="w-40 h-40 bg-gray-100 rounded-full flex flex-col items-center justify-center text-gray-400">
-                    <Package className="h-16 w-16 mb-2" />
-                    <span className="text-sm">No Image</span>
-                  </div>
-                )}
+      {/* ── Product Card ────────────────────────────────────────────── */}
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="grid md:grid-cols-2 gap-0">
+
+          {/* Image */}
+          <div className="relative aspect-square bg-gray-50 p-6 flex items-center justify-center">
+            {product.image ? (
+              <Image
+                src={product.image}
+                alt={product.name}
+                fill
+                className="object-contain p-8 mix-blend-multiply"
+                priority
+              />
+            ) : (
+              <div className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center text-gray-300 text-sm">
+                No Image
               </div>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex gap-3 mt-4">
-              <WishlistButton productId={product.id} className="flex-1" />
-              <button className="flex-1 flex items-center justify-center gap-2 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-medium text-gray-700">
-                <Share2 className="w-5 h-5" />
-                <span className="text-sm">Share</span>
-              </button>
-            </div>
+            )}
+            {product.stock === 0 && (
+              <div className="absolute inset-0 bg-gray-900/30 flex items-center justify-center">
+                <span className="bg-gray-800 text-white text-sm font-bold px-4 py-2 rounded-lg">
+                  Out of Stock
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Center: Product Details */}
-          <div className="w-full lg:w-3/5 p-6 lg:p-8 border-t lg:border-t-0 lg:border-l border-gray-100">
-            {/* Official Badge */}
-            <div className="inline-flex items-center gap-2 bg-gray-900 text-white text-xs font-bold px-3 py-1 rounded mb-4">
-              <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-              OFFICIAL IYOSI FOODS STORE
-            </div>
+          {/* Details */}
+          <div className="p-6 md:p-8 flex flex-col gap-4">
 
-            <h1 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight mb-3">
-              {product.name}
-            </h1>
+            {/* Category + Name */}
+            <div>
+              <p className="text-xs font-bold text-green-600 uppercase tracking-wider mb-2">
+                {product.category.replace("_", " ")}
+              </p>
+              <h1 className="text-2xl font-extrabold text-gray-900 leading-tight">
+                {product.name}
+              </h1>
+            </div>
 
             {/* Rating */}
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star key={star} className={`w-4 h-4 ${star <= avgRating ? "text-yellow-400" : "text-gray-300"} fill-current`} />
-                ))}
+            {totalReviewCount > 0 && (
+              <div className="flex items-center gap-2">
+                <div className="flex">
+                  {[1,2,3,4,5].map((star) => (
+                    <svg key={star} className={`w-4 h-4 ${star <= Math.round(avgRating) ? "text-yellow-400" : "text-gray-200"} fill-current`} viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <span className="text-sm text-gray-500">
+                  {avgRating} ({totalReviewCount} review{totalReviewCount !== 1 ? "s" : ""})
+                </span>
               </div>
-              {totalReviewCount > 0
-                ? <span className="text-sm text-gray-500">({totalReviewCount} review{totalReviewCount !== 1 ? "s" : ""})</span>
-                : <span className="text-sm text-gray-400">No reviews yet</span>
-              }
-              <span className="text-gray-300">|</span>
-              <span className="text-sm text-green-600 font-medium">{product.stock > 0 ? `${product.stock} items left` : 'Out of Stock'}</span>
-            </div>
+            )}
 
-            {/* Price Block */}
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 mb-6">
-              <div className="flex items-baseline gap-3">
-                <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900">{formatMoney(product.price)}</h2>
-              </div>
-              <p className="text-sm text-gray-600 mt-2">
-                + shipping from ₦1,500 to Lagos, ₦2,500 other states
+            {/* Price */}
+            <div className="bg-green-50 rounded-xl p-4">
+              <p className="text-3xl font-extrabold text-gray-900">
+                {formatMoney(product.price)}
               </p>
+              {product.price >= 25000 && (
+                <p className="text-sm text-green-600 font-semibold mt-1">
+                  ✓ Free delivery on this order
+                </p>
+              )}
             </div>
 
-            {/* Size/Quantity selector */}
-            <div className="mb-6">
-              <h3 className="font-semibold text-gray-900 mb-3">Pack Size</h3>
-              <div className="flex flex-wrap gap-2">
-                {['1kg', '2.5kg', '5kg', '10kg', '25kg'].map((size) => (
-                  <button key={size} className={`px-4 py-2 border rounded-lg font-medium text-sm transition-colors ${
-                    size === '5kg' 
-                      ? 'border-green-600 bg-green-50 text-green-700' 
-                      : 'border-gray-200 text-gray-700 hover:border-gray-300'
-                  }`}>
-                    {size}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* Description */}
+            <p className="text-sm text-gray-600 leading-relaxed">
+              {product.description}
+            </p>
 
-            {/* Add to Cart */}
-            <ProductActions 
+            {/* Stock */}
+            <p className={`text-sm font-semibold ${product.stock > 5 ? "text-green-600" : product.stock > 0 ? "text-orange-500" : "text-red-500"}`}>
+              {product.stock > 5 ? `✓ In Stock (${product.stock} available)` :
+               product.stock > 0 ? `⚠ Only ${product.stock} left in stock` :
+               "✗ Out of Stock"}
+            </p>
+
+            {/* Add to Cart + Wishlist — client component */}
+            <DashboardProductActions
               product={{
                 id: product.id,
                 name: product.name,
                 price: product.price,
                 stock: product.stock,
-                image: product.image
-              }} 
+                image: product.image,
+              }}
+              initialSaved={isSaved}
             />
-
-            {/* Delivery Info */}
-            <div className="mt-6 pt-6 border-t border-gray-100 space-y-3">
-              <div className="flex items-center gap-3 text-sm">
-                <Truck className="w-5 h-5 text-gray-500" />
-                <span className="text-gray-600">Delivery: <span className="font-medium text-gray-900">1-2 business days (Lagos), 3-5 days (Other States)</span></span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <ShieldCheck className="w-5 h-5 text-gray-500" />
-                <span className="text-gray-600"><span className="font-medium text-gray-900">Genuine Product</span> - 100% Authentic</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <RotateCcw className="w-5 h-5 text-gray-500" />
-                <span className="text-gray-600"><span className="font-medium text-gray-900">Free Returns</span> within 7 days</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Seller Info Sidebar */}
-          <div className="hidden xl:block w-72 border-l border-gray-100 p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">Delivery</h3>
-            
-            <div className="space-y-4 mb-6">
-              <div className="flex items-start gap-3">
-                <div className="border border-gray-200 p-2 rounded bg-white">
-                  <Truck className="w-5 h-5 text-gray-600" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900 text-sm">Door Delivery</h4>
-                  <p className="text-xs text-gray-500 mt-1">1-2 days for Lagos, 3-5 days for other states</p>
-                  <p className="text-xs text-green-600 font-medium mt-1">₦1,500 - ₦2,500</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="border border-gray-200 p-2 rounded bg-white">
-                  <RotateCcw className="w-5 h-5 text-gray-600" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900 text-sm">Return Policy</h4>
-                  <p className="text-xs text-gray-500 mt-1">Free return within 7 days if item is unused</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="border-t border-gray-100 pt-4">
-              <h3 className="font-semibold text-gray-900 mb-3">Sold by</h3>
-              <div className="bg-gray-50 rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-10 h-10 bg-gray-900 rounded-full flex items-center justify-center text-white font-bold">
-                    I
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">Iyosi Foods</p>
-                    <p className="text-xs text-gray-500">Official Store</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
-                  <Check className="w-4 h-4 text-green-500" />
-                  <span>Verified Seller</span>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Product Description */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <h2 className="text-xl font-bold text-gray-900 mb-4">Product Details</h2>
-        <div className="prose max-w-none text-gray-700">
-          <p className="whitespace-pre-wrap">{product.description}</p>
-        </div>
-        
-        <div className="mt-6 pt-6 border-t border-gray-100">
-          <h3 className="font-semibold text-gray-900 mb-3">Specifications</h3>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-            <div className="flex justify-between py-2 border-b border-gray-50">
-              <span className="text-gray-500">Category</span>
-              <span className="font-medium text-gray-900">{product.category.replace('_', ' ')}</span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-gray-50">
-              <span className="text-gray-500">Stock</span>
-              <span className="font-medium text-gray-900">{product.stock} units</span>
-            </div>
-            <div className="flex justify-between py-2 border-b border-gray-50">
-              <span className="text-gray-500">Brand</span>
-              <span className="font-medium text-gray-900">Iyosi Foods</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* ── Reviews ─────────────────────────────────────────────────── */}
+      <DashboardProductReviews
+        productId={product.id}
+        reviews={reviews.map(r => ({
+          id: r.id,
+          rating: r.rating,
+          comment: r.comment,
+          createdAt: r.createdAt.toISOString(),
+          user: { name: r.user.name },
+        }))}
+        totalCount={totalReviewCount}
+        avgRating={avgRating}
+      />
 
-      {/* Reviews Section */}
-      {reviews.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Customer Reviews</h2>
-          <div className="space-y-6">
-            {reviews.map((review) => {
-              const reviewerName = "user" in review ? review.user?.name : undefined;
-              return (
-                <div key={review.id} className="border-b border-gray-100 pb-6 last:border-0">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center font-bold text-gray-600">
-                      {reviewerName?.charAt(0) || 'U'}
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">{reviewerName || 'Anonymous'}</p>
-                      <div className="flex items-center gap-2">
-                        <div className="flex">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <Star key={star} className={`w-3 h-3 ${star <= review.rating ? "text-yellow-400" : "text-gray-300"} fill-current`} />
-                          ))}
-                        </div>
-                        <span className="text-xs text-gray-500">{new Date(review.createdAt).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  </div>
-                  {review.comment && <p className="text-gray-700 ml-13">{review.comment}</p>}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Back to Shop */}
-      <div className="text-center pb-6">
-        <Link href="/dashboard/shop" className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 font-medium">
-          ← Back to Shop
-        </Link>
-      </div>
+      {/* ── Back to shop ────────────────────────────────────────────── */}
+      <Link
+        href="/dashboard/shop"
+        className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-green-600 transition-colors font-medium"
+      >
+        <ChevronLeft className="w-4 h-4" />
+        Back to Shop
+      </Link>
     </div>
-  );
+  )
 }
