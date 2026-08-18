@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 import Link from "next/link";
-import { PenSquare } from "lucide-react";
+import { PenSquare, Store, ArrowRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -12,6 +12,23 @@ export default async function DashboardPage() {
       <h1 className="text-2xl font-bold text-gray-900">Account Overview</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Quick Shop Card — first card in the grid */}
+        <div className="md:col-span-2 bg-gradient-to-r from-green-600 to-emerald-700 rounded-xl p-6 flex items-center justify-between text-white">
+          <div>
+            <p className="text-green-200 text-sm font-medium mb-1">Iyosiola Foods Store</p>
+            <h2 className="text-2xl font-bold">Ready to stock up?</h2>
+            <p className="text-green-100 text-sm mt-1">Browse premium flour, semolina, and baking essentials.</p>
+          </div>
+          <Link
+            href="/dashboard/shop"
+            className="flex-shrink-0 flex items-center gap-2 bg-white text-green-700 font-bold px-5 py-3 rounded-xl hover:bg-green-50 transition-colors shadow-lg"
+          >
+            <Store className="w-5 h-5" />
+            Shop Now
+            <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
+
         {/* Account Details Box */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden flex flex-col">
           <div className="p-4 border-b border-gray-200 flex items-center justify-between">

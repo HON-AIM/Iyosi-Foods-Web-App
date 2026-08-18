@@ -10,7 +10,8 @@ import {
   Settings, 
   LogOut,
   Clock,
-  ShoppingBag
+  ShoppingBag,
+  Store
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -43,9 +44,21 @@ export default async function DashboardLayout({ children }: { children: React.Re
             </div>
             
             <nav className="flex-1 py-2">
-              <SidebarLink href="/dashboard" icon={<User size={18} />} label="My Account" />
-              <SidebarLink href="/shop" icon={<ShoppingBag size={18} />} label="Visit Store" />
-              <SidebarLink href="/dashboard/orders" icon={<Package size={18} />} label="Orders" />
+              {/* ── STORE ──────────────────────────────────────── */}
+              <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                Store
+              </div>
+              <SidebarLink href="/dashboard/shop" icon={<Store size={18} />} label="Browse Products" />
+              <SidebarLink href="/dashboard/shop?view=saved" icon={<ShoppingBag size={18} />} label="My Wishlist" />
+
+              <div className="border-t border-gray-100 my-2" />
+
+              {/* ── ACCOUNT ─────────────────────────────────────── */}
+              <div className="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                My Account
+              </div>
+              <SidebarLink href="/dashboard" icon={<User size={18} />} label="Overview" />
+              <SidebarLink href="/dashboard/orders" icon={<Package size={18} />} label="My Orders" />
               <SidebarLink href="/dashboard/inbox" icon={<Mail size={18} />} label="Inbox" />
               <SidebarLink href="/dashboard/reviews" icon={<Heart size={18} />} label="Pending Reviews" />
               <SidebarLink href="/dashboard/saved" icon={<Heart size={18} />} label="Saved Items" />

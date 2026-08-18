@@ -49,9 +49,9 @@ export default async function OrdersPage() {
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-2">You have placed no orders yet!</h3>
               <p className="text-gray-500 mb-6 max-w-sm">All your orders will be saved here for you to access their state anytime.</p>
-              <Link href="/" className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-md font-medium transition-colors inline-block">
-                  Continue Shopping
-              </Link>
+               <Link href="/dashboard/shop" className="bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-md font-medium transition-colors inline-block">
+                   Continue Shopping
+               </Link>
           </div>
       ) : (
           <div className="space-y-4">
