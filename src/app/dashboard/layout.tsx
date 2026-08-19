@@ -1,6 +1,7 @@
 import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { SidebarLink } from "@/components/dashboard/SidebarLink";
+import DashboardTopbar from "@/components/dashboard/DashboardTopbar";
 import { 
   User, 
   Package, 
@@ -27,7 +28,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const user = session.user;
 
   return (
-    <div className="bg-gray-100 min-h-screen py-8">
+    <>
+      <DashboardTopbar userName={user.name || "User"} userEmail={user.email || ""} />
+      <div className="bg-gray-100 min-h-screen py-8">
       <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row gap-6">
         
         {/* Sidebar */}
@@ -95,6 +98,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           {children}
         </main>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
