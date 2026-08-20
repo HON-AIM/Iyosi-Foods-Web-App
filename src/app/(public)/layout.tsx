@@ -144,7 +144,7 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
             &copy; {new Date().getFullYear()} Iyosi Foods. All rights reserved.
           </span>
           <span className="text-xs">
-            Registered in Nigeria &middot; RC: 0000000
+            Registered in Nigeria &middot; RC: 9454178
           </span>
         </div>
       </footer>

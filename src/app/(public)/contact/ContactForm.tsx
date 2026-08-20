@@ -46,12 +46,12 @@ const CONTACT_INFO = {
   },
   phone: {
     title: "Phone",
-    primary: "+234 800 000 0000",
-    secondary: "+234 801 234 5678",
+    primary: "+234 814 310 2609",
+    secondary: "+234 814 310 2609",
   },
   email: {
     title: "Email",
-    address: "israelmiracle12@gmail.com",
+    address: "iyosi_foods@gmail.com",
   },
   hours: {
     title: "Business Hours",
