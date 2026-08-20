@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   Loader2,
   AlertTriangle,
+  Home,
+  PenLine,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { buildWhatsAppUrl, WHATSAPP_ICON_PATH } from "@/lib/whatsapp";
@@ -30,6 +32,34 @@ export default function CheckoutPage() {
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
+  const [defaultAddress, setDefaultAddress] = useState<string | null>(null);
+  const [addressSource, setAddressSource] = useState<"default" | "manual">("manual");
+  const [loadingAddress, setLoadingAddress] = useState(false);
+
+  useEffect(() => {
+    async function fetchDefaultAddress() {
+      if (isGuest) return;
+      setLoadingAddress(true);
+      try {
+        const res = await fetch("/api/user/address");
+        const data = await res.json();
+        if (data.address) {
+          const parts = [data.address.street, data.address.city, data.address.state];
+          if (data.address.postalCode) parts.push(data.address.postalCode);
+          parts.push(data.address.country || "Nigeria");
+          const formatted = parts.join(", ");
+          setDefaultAddress(formatted);
+          setShippingAddress(formatted);
+          setAddressSource("default");
+        }
+      } catch {
+        // Silently fail — user can still type manually
+      } finally {
+        setLoadingAddress(false);
+      }
+    }
+    fetchDefaultAddress();
+  }, [isGuest]);
 
   useEffect(() => {
     async function validateCart() {
@@ -302,27 +332,118 @@ export default function CheckoutPage() {
                 </div>
               )}
 
-              <div>
-                <label
-                  htmlFor="shippingAddress"
-                  className="block text-sm font-medium text-gray-700 mb-1.5"
-                >
-                  Delivery Address
-                </label>
-                <textarea
-                  id="shippingAddress"
-                  rows={4}
-                  value={shippingAddress}
-                  onChange={(e) => setShippingAddress(e.target.value)}
-                  placeholder="e.g. 12 Bode Thomas Street, Surulere, Lagos, Nigeria"
-                  required
-                  minLength={5}
-                  className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none transition"
-                />
-                <p className="text-xs text-gray-400 mt-1">
-                  Please provide your full address including city and state.
-                </p>
-              </div>
+              {!isGuest && (
+                <div className="space-y-3 mb-6 pb-6 border-b border-gray-100">
+                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                    Delivery Address
+                  </label>
+
+                  {loadingAddress ? (
+                    <div className="flex items-center gap-2 text-sm text-gray-500 p-3 bg-gray-50 rounded-lg">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Loading your saved address…
+                    </div>
+                  ) : defaultAddress ? (
+                    <div className="space-y-3">
+                      {/* Use default address */}
+                      <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${addressSource === "default" ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-gray-300 bg-white"}`}>
+                        <input
+                          type="radio"
+                          name="addressSource"
+                          checked={addressSource === "default"}
+                          onChange={() => { setAddressSource("default"); setShippingAddress(defaultAddress); }}
+                          className="mt-0.5 accent-green-600"
+                        />
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <Home className="h-4 w-4 text-green-600" />
+                            <span className="text-sm font-semibold text-gray-900">Use Default Address</span>
+                          </div>
+                          <p className="text-sm text-gray-600">{defaultAddress}</p>
+                        </div>
+                      </label>
+
+                      {/* Type manually */}
+                      <label className={`flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all ${addressSource === "manual" ? "border-green-500 bg-green-50" : "border-gray-200 hover:border-gray-300 bg-white"}`}>
+                        <input
+                          type="radio"
+                          name="addressSource"
+                          checked={addressSource === "manual"}
+                          onChange={() => { setAddressSource("manual"); setShippingAddress(""); }}
+                          className="mt-0.5 accent-green-600"
+                        />
+                        <div className="flex items-center gap-2">
+                          <PenLine className="h-4 w-4 text-gray-500" />
+                          <span className="text-sm font-semibold text-gray-900">Type a Different Address</span>
+                        </div>
+                      </label>
+
+                      {addressSource === "manual" && (
+                        <textarea
+                          id="shippingAddress"
+                          rows={4}
+                          value={shippingAddress}
+                          onChange={(e) => setShippingAddress(e.target.value)}
+                          placeholder="e.g. 12 Bode Thomas Street, Surulere, Lagos, Nigeria"
+                          required
+                          minLength={5}
+                          className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none transition"
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-sm text-amber-700">
+                        <p className="font-semibold mb-1">No default address found</p>
+                        <p>
+                          Add a default address in your{" "}
+                          <Link href="/dashboard/address-book" className="underline font-semibold hover:text-amber-800">
+                            Address Book
+                          </Link>{" "}
+                          to quickly fill it here next time.
+                        </p>
+                      </div>
+                      <textarea
+                        id="shippingAddress"
+                        rows={4}
+                        value={shippingAddress}
+                        onChange={(e) => setShippingAddress(e.target.value)}
+                        placeholder="e.g. 12 Bode Thomas Street, Surulere, Lagos, Nigeria"
+                        required
+                        minLength={5}
+                        className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none transition"
+                      />
+                    </div>
+                  )}
+                  <p className="text-xs text-gray-400 mt-1">
+                    Please provide your full address including city and state.
+                  </p>
+                </div>
+              )}
+
+              {isGuest && (
+                <div>
+                  <label
+                    htmlFor="shippingAddress"
+                    className="block text-sm font-medium text-gray-700 mb-1.5"
+                  >
+                    Delivery Address
+                  </label>
+                  <textarea
+                    id="shippingAddress"
+                    rows={4}
+                    value={shippingAddress}
+                    onChange={(e) => setShippingAddress(e.target.value)}
+                    placeholder="e.g. 12 Bode Thomas Street, Surulere, Lagos, Nigeria"
+                    required
+                    minLength={5}
+                    className="w-full border border-gray-200 rounded-lg px-4 py-3 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent resize-none transition"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    Please provide your full address including city and state.
+                  </p>
+                </div>
+              )}
 
               <button
                 type="submit"
