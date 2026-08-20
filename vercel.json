@@ -2,11 +2,5 @@
   "buildCommand": "npm run vercel-build",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "regions": ["iad1"],
-  "crons": [
-    {
-      "path": "/api/cron/cleanup-pending-orders",
-      "schedule": "*/15 * * * *"
-    }
-  ]
+  "regions": ["iad1"]
 }
