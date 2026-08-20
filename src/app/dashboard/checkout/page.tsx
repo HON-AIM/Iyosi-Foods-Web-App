@@ -239,7 +239,7 @@ export default function CheckoutPage() {
         {isGuest && (
           <p className="text-sm text-gray-600 mb-8">
             Checking out as a guest.{" "}
-            <Link href="/login?callbackUrl=/checkout" className="text-primary-600 font-medium hover:underline">
+            <Link href="/login?callbackUrl=/dashboard/checkout" className="text-primary-600 font-medium hover:underline">
               Log in
             </Link>{" "}
             if you already have an account.

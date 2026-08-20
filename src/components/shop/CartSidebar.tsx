@@ -148,7 +148,7 @@ export default function CartSidebar() {
               <p className="text-green-700">{formatMoney(cartTotal)}</p>
             </div>
             <Link
-              href="/checkout"
+              href="/dashboard/checkout"
               onClick={() => setIsCartOpen(false)}
               className="w-full bg-green-600 hover:bg-green-700 text-white flex justify-center items-center py-3.5 rounded-lg font-bold shadow-lg transition-colors text-sm"
             >
