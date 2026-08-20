@@ -76,7 +76,7 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     label: "View Store",
-    href: "/shop",
+    href: "/dashboard/shop",
     icon: <ExternalLink className="h-5 w-5" />,
   },
 ];

@@ -2,6 +2,7 @@ import { auth, signOut } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { SidebarLink } from "@/components/dashboard/SidebarLink";
 import DashboardTopbar from "@/components/dashboard/DashboardTopbar";
+import CartSidebar from "@/components/shop/CartSidebar";
 import { 
   User, 
   Package, 
@@ -29,6 +30,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   return (
     <>
+      <CartSidebar />
       <DashboardTopbar userName={user.name || "User"} userEmail={user.email || ""} />
       <div className="bg-gray-100 min-h-screen">
       <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 flex flex-col md:flex-row gap-6">
