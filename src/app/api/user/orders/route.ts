@@ -84,11 +84,19 @@ export async function POST(request: NextRequest) {
         }
 
         let totalAmount = 0;
+        // ✅ Check stock and decrement atomically to prevent overselling
         for (const item of items) {
           const product = products.find((p) => p.id === item.productId);
           if (!product) throw new Error("PRODUCT_NOT_FOUND");
-          if (product.stock < item.quantity) throw new Error("OUT_OF_STOCK");
+          if (product.stock < item.quantity) {
+            throw new Error(`INSUFFICIENT_STOCK:${product.name}:${product.stock}`);
+          }
           totalAmount += product.price * item.quantity;
+          // Immediately decrement stock to prevent double-booking
+          await tx.product.update({
+            where: { id: item.productId },
+            data: { stock: { decrement: item.quantity } },
+          });
         }
 
         const shippingAddr = typeof shippingAddress === "string"
@@ -117,18 +125,20 @@ export async function POST(request: NextRequest) {
           include: { items: { include: { product: { select: { id: true, name: true, price: true, image: true } } } } },
         });
 
-        for (const item of items) {
-          await tx.product.update({ where: { id: item.productId }, data: { stock: { decrement: item.quantity } } });
-        }
-
         return newOrder;
       }, { timeout: 10000 });
     } catch (txError) {
       if (txError instanceof Error) {
+        // Handle insufficient stock with specific product info
+        if (txError.message.startsWith("INSUFFICIENT_STOCK")) {
+          const [, productName, available] = txError.message.split(":");
+          return NextResponse.json({
+            message: `Sorry, only ${available} units of "${productName}" are available.`,
+          }, { status: 409 });
+        }
         const errorMap: Record<string, [string, number]> = {
           INVALID_PRODUCTS: ["One or more products are no longer available", 400],
           PRODUCT_NOT_FOUND: ["Product not found", 404],
-          OUT_OF_STOCK: ["One or more products are out of stock", 400],
         };
         const [message, status] = errorMap[txError.message] || ["Failed to create order", 500];
         return NextResponse.json({ message }, { status });

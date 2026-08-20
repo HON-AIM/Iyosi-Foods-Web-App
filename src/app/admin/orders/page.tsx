@@ -3,10 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { ShoppingCart, Search, Filter, AlertCircle, Eye } from "lucide-react";
+import { ShoppingCart, Search, Filter, AlertCircle, Eye, Package } from "lucide-react";
 import toast from "react-hot-toast";
 import { formatCurrency } from "@/lib/utils";
 import { SkeletonTable } from "@/components/admin/SkeletonTable";
+import { NIGERIAN_CARRIERS } from "@/lib/tracking";
 
 type Order = {
   id: string;
@@ -44,13 +45,7 @@ const ORDER_STATUSES = [
   "CANCELLED",
 ] as const;
 
-const SHIPPING_CARRIERS = [
-  "DHL",
-  "GIG Logistics",
-  "Kwik Delivery",
-  "GIGL",
-  "Red Star",
-] as const;
+const SHIPPING_CARRIERS = NIGERIAN_CARRIERS;
 
 const STATUS_COLORS: Record<string, string> = {
   DELIVERED: "bg-green-100 text-green-800",
@@ -77,7 +72,8 @@ export default function AdminOrdersPage() {
     trackingNumber: string;
     trackingCarrier: string;
     estimatedDelivery: string;
-  }>({ open: false, orderId: "", trackingNumber: "", trackingCarrier: "DHL", estimatedDelivery: "" });
+    generatedTrackingNumber: string | null;
+  }>({ open: false, orderId: "", trackingNumber: "", trackingCarrier: "GIG Logistics", estimatedDelivery: "", generatedTrackingNumber: null });
   const [pagination, setPagination] = useState<PaginationMeta>({
     total: 0,
     page: 1,
@@ -165,10 +161,11 @@ export default function AdminOrdersPage() {
         open: true,
         orderId,
         trackingNumber: order.trackingNumber || "",
-        trackingCarrier: order.trackingCarrier || "DHL",
+        trackingCarrier: order.trackingCarrier || "GIG Logistics",
         estimatedDelivery: order.estimatedDelivery
           ? new Date(order.estimatedDelivery).toISOString().split("T")[0]
           : "",
+        generatedTrackingNumber: null,
       });
       return;
     }
@@ -236,8 +233,9 @@ export default function AdminOrdersPage() {
       open: false,
       orderId: "",
       trackingNumber: "",
-      trackingCarrier: "DHL",
+      trackingCarrier: "GIG Logistics",
       estimatedDelivery: "",
+      generatedTrackingNumber: null,
     });
   };
 
@@ -246,22 +244,17 @@ export default function AdminOrdersPage() {
 
     const { orderId, trackingNumber, trackingCarrier, estimatedDelivery } = shippingModal;
 
-    if (!trackingNumber.trim()) {
-      toast.error("Tracking number is required");
-      return;
-    }
-
     const previousOrders = orders;
     setUpdatingId(orderId);
-    closeShippingModal();
 
+    // Optimistically update UI
     setOrders((prev) =>
       prev.map((o) =>
         o.id === orderId
           ? {
               ...o,
               status: "SHIPPED",
-              trackingNumber: trackingNumber.trim(),
+              trackingNumber: trackingNumber.trim() || o.trackingNumber,
               trackingCarrier,
               estimatedDelivery: estimatedDelivery
                 ? new Date(estimatedDelivery).toISOString()
@@ -277,7 +270,7 @@ export default function AdminOrdersPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           status: "SHIPPED",
-          trackingNumber: trackingNumber.trim(),
+          trackingNumber: trackingNumber.trim() || undefined,
           trackingCarrier,
           estimatedDelivery: estimatedDelivery
             ? new Date(estimatedDelivery).toISOString()
@@ -298,7 +291,39 @@ export default function AdminOrdersPage() {
       }
 
       if (response.ok) {
-        toast.success("Order marked as shipped with tracking info");
+        const data = await response.json();
+        const updatedOrder = data.order;
+        const finalTrackingNumber = updatedOrder?.trackingNumber || trackingNumber.trim();
+
+        // Update the order in state with the server response
+        if (updatedOrder) {
+          setOrders((prev) =>
+            prev.map((o) =>
+              o.id === orderId
+                ? {
+                    ...o,
+                    status: updatedOrder.status || "SHIPPED",
+                    trackingNumber: finalTrackingNumber || null,
+                    trackingCarrier: updatedOrder.trackingCarrier || trackingCarrier,
+                    estimatedDelivery: updatedOrder.estimatedDelivery || o.estimatedDelivery,
+                  }
+                : o
+            )
+          );
+        }
+
+        // Show tracking number in modal if auto-generated
+        if (finalTrackingNumber && !trackingNumber.trim()) {
+          setShippingModal((prev) => ({
+            ...prev,
+            open: true,
+            generatedTrackingNumber: finalTrackingNumber,
+          }));
+          toast.success("Order marked as shipped — tracking number auto-generated");
+        } else {
+          toast.success("Order marked as shipped with tracking info");
+          closeShippingModal();
+        }
       } else {
         const data = await response.json();
         toast.error(data.message || "Failed to update order status");
@@ -556,6 +581,21 @@ export default function AdminOrdersPage() {
                 {shippingModal.orderId.slice(-8).toUpperCase()}
               </p>
 
+              {/* Auto-generated tracking number display */}
+              {shippingModal.generatedTrackingNumber && (
+                <div className="p-3 bg-blue-50 rounded-lg text-sm">
+                  <p className="font-bold text-blue-700 flex items-center gap-1.5">
+                    <Package className="w-4 h-4" /> Tracking Number Generated
+                  </p>
+                  <p className="font-mono text-blue-900 text-base mt-1">
+                    {shippingModal.generatedTrackingNumber}
+                  </p>
+                  <p className="text-xs text-blue-400 mt-0.5">
+                    Share this with the customer or use it to track via your logistics partner
+                  </p>
+                </div>
+              )}
+
               <div>
                 <label htmlFor="trackingNumber" className="block text-sm font-medium text-gray-700 mb-1">
                   Tracking Number
@@ -563,14 +603,16 @@ export default function AdminOrdersPage() {
                 <input
                   id="trackingNumber"
                   type="text"
-                  required
                   value={shippingModal.trackingNumber}
                   onChange={(e) =>
                     setShippingModal((prev) => ({ ...prev, trackingNumber: e.target.value }))
                   }
-                  placeholder="e.g. DHL1234567890"
+                  placeholder="Leave blank to auto-generate (e.g. IYF-202508-A3F7K2B9)"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 font-mono"
                 />
+                <p className="text-xs text-gray-400 mt-1">
+                  Optional — a tracking number will be auto-generated if left blank
+                </p>
               </div>
 
               <div>
@@ -615,15 +657,17 @@ export default function AdminOrdersPage() {
                   onClick={closeShippingModal}
                   className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors"
                 >
-                  Cancel
+                  {shippingModal.generatedTrackingNumber ? "Done" : "Cancel"}
                 </button>
-                <button
-                  type="submit"
-                  disabled={updatingId === shippingModal.orderId}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
-                >
-                  {updatingId === shippingModal.orderId ? "Saving..." : "Mark as Shipped"}
-                </button>
+                {!shippingModal.generatedTrackingNumber && (
+                  <button
+                    type="submit"
+                    disabled={updatingId === shippingModal.orderId}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50 transition-colors"
+                  >
+                    {updatingId === shippingModal.orderId ? "Saving..." : "Mark as Shipped"}
+                  </button>
+                )}
               </div>
             </form>
           </div>

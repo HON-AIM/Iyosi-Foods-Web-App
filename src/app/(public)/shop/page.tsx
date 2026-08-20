@@ -98,9 +98,9 @@ export default async function ShopHomePage({
 
   const [rawFlash, rawTop, rawRecommended] = await Promise.all([
     prisma.product.findMany({
-      where: { stock: { gt: 0 }, isActive: true, ...categoryFilter },
-      take: 8,
-      orderBy: { createdAt: "asc" },
+      where: { isActive: true, isFlashSale: true, stock: { gt: 0 }, ...categoryFilter },
+      take: 12,
+      orderBy: { updatedAt: "desc" },
     }).catch(() => [] as Awaited<ReturnType<typeof prisma.product.findMany>>),
     prisma.product.findMany({
       where: { stock: { gt: 0 }, isActive: true, ...categoryFilter },

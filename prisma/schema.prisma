@@ -143,6 +143,9 @@ model Product {
   category     Category    @default(BAKING)
   isActive     Boolean     @default(true)
   deactivatedAt DateTime?
+  isFlashSale       Boolean   @default(false)
+  flashSalePrice    Float?
+  flashSaleEndsAt   DateTime?
   orderItems   OrderItem[]
   reviews      Review[]
   savedBy      SavedItem[]
@@ -192,10 +195,11 @@ model Order {
   couponCode   String?
   guestEmail   String?
   guestName    String?
-  trackingNumber   String?
-  trackingCarrier  String?
+  trackingNumber    String?     @unique
+  trackingCarrier   String?
   estimatedDelivery DateTime?
-  createdAt    DateTime    @default(now())
+  paymentMethod     String?     @default("PAYSTACK")
+  createdAt         DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 }
 
@@ -316,6 +320,8 @@ model StoreSettings {
   id               String   @id @default("global")
   announcementText String?
   flashSaleEndTime DateTime?
+  flashSaleTitle   String?  @default("Flash Sale")
+  flashSaleActive  Boolean  @default(false)
   updatedAt        DateTime @updatedAt
 }
 

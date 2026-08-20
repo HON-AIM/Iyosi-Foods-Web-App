@@ -15,6 +15,7 @@ type Product = {
   category: string;
   avgRating?: number;
   reviewCount?: number;
+  flashSalePrice?: number | null;
 };
 
 export default function FlashSale({ products }: { products: Product[] }) {
@@ -128,11 +129,16 @@ export default function FlashSale({ products }: { products: Product[] }) {
       {/* Products - Horizontal Scroll */}
       <div className="p-3 md:p-4">
         <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-          {products.map((product) => (
-            <div key={product.id} className="flex-shrink-0 w-[160px] md:w-[180px]">
-              <ProductRevealCard product={product} />
-            </div>
-          ))}
+          {products.map((product) => {
+            const displayProduct = product.flashSalePrice
+              ? { ...product, price: product.flashSalePrice, compareAtPrice: product.price }
+              : product
+            return (
+              <div key={product.id} className="flex-shrink-0 w-[160px] md:w-[180px]">
+                <ProductRevealCard product={displayProduct} />
+              </div>
+            )
+          })}
         </div>
       </div>
     </section>

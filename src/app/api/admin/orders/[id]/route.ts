@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma, TransactionClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { sendOrderStatusUpdate } from "@/lib/email";
+import { generateTrackingNumber } from "@/lib/tracking";
 import { type NextRequest } from "next/server";
 import { UpdateOrderSchema } from "@/schemas/order.schema";
 
@@ -177,6 +178,7 @@ export async function PUT(
       select: {
         id: true,
         status: true,
+        trackingNumber: true,
         user: { select: { email: true, name: true } },
       },
     });
@@ -203,6 +205,17 @@ export async function PUT(
       );
     }
 
+    // ✅ Auto-generate tracking number when moving to SHIPPED
+    let autoTrackingNumber: string | undefined;
+    if (
+      status === "SHIPPED" &&
+      currentOrder.status !== "SHIPPED" &&
+      !currentOrder.trackingNumber &&
+      !trackingNumber
+    ) {
+      autoTrackingNumber = generateTrackingNumber();
+    }
+
     // ✅ Update order in transaction with audit
     const updatedOrder = await prisma.$transaction(async (tx: TransactionClient) => {
       const updated = await tx.order.update({
@@ -210,11 +223,9 @@ export async function PUT(
         data: {
           status,
           updatedAt: new Date(),
-          ...(trackingNumber !== undefined && { trackingNumber: trackingNumber || null }),
-          ...(trackingCarrier !== undefined && { trackingCarrier: trackingCarrier || null }),
-          ...(estimatedDelivery !== undefined && {
-            estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : null,
-          }),
+          trackingNumber: trackingNumber || autoTrackingNumber || undefined,
+          trackingCarrier: trackingCarrier || undefined,
+          estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : undefined,
         },
         include: {
           user: { select: { name: true, email: true } },
@@ -232,7 +243,12 @@ export async function PUT(
           orderId: id,
           userId: session.user?.id || "system",
           action: "STATUS_CHANGE",
-          changes: JSON.stringify({ oldStatus: currentOrder.status, newStatus: status, reason }),
+          changes: JSON.stringify({
+            oldStatus: currentOrder.status,
+            newStatus: status,
+            reason,
+            ...(autoTrackingNumber && { autoTrackingNumber }),
+          }),
         },
       });
 
@@ -361,7 +377,7 @@ export async function DELETE(
       );
     }
 
-    // ✅ Cancel order in transaction
+    // ✅ Cancel order in transaction with stock restoration
     const cancelledOrder = await prisma.$transaction(async (tx: TransactionClient) => {
       const cancelled = await tx.order.update({
         where: { id },
@@ -369,8 +385,19 @@ export async function DELETE(
           status: "CANCELLED",
           updatedAt: new Date(),
         },
-        include: { user: { select: { name: true, email: true } } },
+        include: {
+          user: { select: { name: true, email: true } },
+          items: { select: { productId: true, quantity: true } },
+        },
       });
+
+      // ✅ Restore stock for all items in this cancelled order
+      for (const item of cancelled.items) {
+        await tx.product.update({
+          where: { id: item.productId },
+          data: { stock: { increment: item.quantity } },
+        });
+      }
 
       // ✅ Create audit log
       await tx.orderLog.create({
@@ -378,11 +405,27 @@ export async function DELETE(
           orderId: id,
           userId: session.user?.id || "system",
           action: "CANCELLED",
-          changes: JSON.stringify({ oldStatus: order.status, newStatus: "CANCELLED", reason }),
+          changes: JSON.stringify({
+            oldStatus: order.status,
+            newStatus: "CANCELLED",
+            reason,
+            stockRestored: cancelled.items.map((i) => ({
+              productId: i.productId,
+              quantity: i.quantity,
+            })),
+          }),
         },
       });
 
       return cancelled;
+    });
+
+    console.info("[AUDIT] Order cancelled by admin — stock restored:", {
+      orderId: id,
+      adminId: session.user?.id,
+      reason,
+      itemsRestored: cancelledOrder.items.length,
+      timestamp: new Date().toISOString(),
     });
 
     // ✅ Send cancellation email

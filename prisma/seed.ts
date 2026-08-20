@@ -36,7 +36,7 @@ async function main() {
       price: 18500,
       stock: 120,
       category: "BAKING" as const,
-      image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1627485937980-221c88ac04f9?w=400&h=400&fit=crop&q=80",
       isActive: true,
     },
     {
@@ -54,7 +54,7 @@ async function main() {
       price: 4200,
       stock: 60,
       category: "BAKING" as const,
-      image: "https://images.unsplash.com/photo-1556742044-3c52d6e88c62?w=400&h=400&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1486427944299-d1955d23e34d?w=400&h=400&fit=crop&q=80",
       isActive: true,
     },
     {
@@ -63,7 +63,7 @@ async function main() {
       price: 2100,
       stock: 200,
       category: "BAKING" as const,
-      image: "https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?w=400&h=400&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1587668178277-295251f900ce?w=400&h=400&fit=crop&q=80",
       isActive: true,
     },
 
@@ -74,7 +74,7 @@ async function main() {
       price: 19000,
       stock: 95,
       category: "WHEAT" as const,
-      image: "https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=400&h=400&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&h=400&fit=crop&q=80",
       isActive: true,
     },
     {
@@ -83,7 +83,7 @@ async function main() {
       price: 9500,
       stock: 45,
       category: "WHEAT" as const,
-      image: "https://images.unsplash.com/photo-1599785209707-a456fc1337bb?w=400&h=400&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&h=400&fit=crop&q=80",
       isActive: true,
     },
     {
@@ -92,7 +92,7 @@ async function main() {
       price: 3800,
       stock: 30,
       category: "WHEAT" as const,
-      image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=400&h=400&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1490885578174-acda8905c2c6?w=400&h=400&fit=crop&q=80",
       isActive: true,
     },
 
@@ -103,7 +103,7 @@ async function main() {
       price: 38000,
       stock: 55,
       category: "ALL_PURPOSE" as const,
-      image: "https://images.unsplash.com/photo-1589927986089-35812388d1f4?w=400&h=400&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop&q=80",
       isActive: true,
     },
     {
@@ -112,7 +112,7 @@ async function main() {
       price: 8200,
       stock: 180,
       category: "ALL_PURPOSE" as const,
-      image: "https://images.unsplash.com/photo-1600289031464-74d374b64991?w=400&h=400&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=400&h=400&fit=crop&q=80",
       isActive: true,
     },
     {
@@ -121,7 +121,7 @@ async function main() {
       price: 4600,
       stock: 250,
       category: "ALL_PURPOSE" as const,
-      image: "https://images.unsplash.com/photo-1603532648955-039310d9ed75?w=400&h=400&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?w=400&h=400&fit=crop&q=80",
       isActive: true,
     },
     {
@@ -130,7 +130,7 @@ async function main() {
       price: 2400,
       stock: 70,
       category: "ALL_PURPOSE" as const,
-      image: "https://images.unsplash.com/photo-1587668178277-295251f900ce?w=400&h=400&fit=crop&q=80",
+      image: "https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?w=400&h=400&fit=crop&q=80",
       isActive: true,
     },
 

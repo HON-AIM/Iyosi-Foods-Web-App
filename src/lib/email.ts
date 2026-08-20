@@ -156,6 +156,8 @@ export async function sendOrderConfirmationEmail(
   }
 ) {
   const safeName = escapeHtml(name || "Customer");
+  const safeOrderNumber = escapeHtml(order.orderNumber);
+  const safeShippingAddr = escapeHtml(order.shippingAddr);
   const formattedTotal = new Intl.NumberFormat("en-NG", {
     style: "currency",
     currency: "NGN",
@@ -166,9 +168,9 @@ export async function sendOrderConfirmationEmail(
     .map(
       (item) =>
         `<tr>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;">${escapeHtml(item.productName)}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:center;">${item.quantity}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #eee;text-align:right;">${new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(item.price * item.quantity)}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;">${escapeHtml(item.productName)}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:center;">${item.quantity}</td>
+          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:right;">${new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(item.price * item.quantity)}</td>
         </tr>`
     )
     .join("");
@@ -179,29 +181,52 @@ export async function sendOrderConfirmationEmail(
     subject: `Order Confirmed — ${order.orderNumber} | Iyosiola Foods`,
     text: `Hi ${safeName}, your order ${order.orderNumber} has been confirmed and payment received. Total: ${formattedTotal}. Shipping to: ${order.shippingAddr}. We will update you when your order is on its way.`,
     html: `
-      <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px;border:1px solid #eaeaea;border-radius:10px;">
-        <h2 style="color:#166534;">Order Confirmed ✅</h2>
-        <p style="color:#555;">Hi ${safeName}, thank you for your order. We have received your payment and are preparing your items.</p>
-        <div style="background:#f9fafb;border-radius:8px;padding:16px;margin:20px 0;">
-          <p style="margin:0 0 8px;font-size:13px;color:#888;">ORDER NUMBER</p>
-          <p style="margin:0;font-size:18px;font-weight:bold;color:#111;">${escapeHtml(order.orderNumber)}</p>
+      <!DOCTYPE html>
+      <html>
+      <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
+        <div style="background:#166534;padding:20px;border-radius:8px;text-align:center;margin-bottom:24px;">
+          <h1 style="color:white;margin:0;font-size:22px;">Order Confirmed ✅</h1>
+          <p style="color:#86efac;margin:8px 0 0;">Thank you, ${safeName}!</p>
         </div>
-        <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+
+        <p style="color:#374151;">Your order <strong>${safeOrderNumber}</strong> has been confirmed and payment received.</p>
+
+        <table style="width:100%;border-collapse:collapse;margin:20px 0;">
           <thead>
-            <tr style="background:#f3f4f6;">
-              <th style="padding:10px 12px;text-align:left;font-size:13px;color:#555;">Product</th>
-              <th style="padding:10px 12px;text-align:center;font-size:13px;color:#555;">Qty</th>
-              <th style="padding:10px 12px;text-align:right;font-size:13px;color:#555;">Amount</th>
+            <tr style="background:#f9fafb;">
+              <th style="padding:10px;text-align:left;font-size:12px;color:#6b7280;">PRODUCT</th>
+              <th style="padding:10px;text-align:center;font-size:12px;color:#6b7280;">QTY</th>
+              <th style="padding:10px;text-align:right;font-size:12px;color:#6b7280;">TOTAL</th>
             </tr>
           </thead>
           <tbody>${itemRows}</tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" style="padding:12px;text-align:right;font-weight:bold;">Order Total:</td>
+              <td style="padding:12px;text-align:right;font-weight:bold;color:#166534;">${formattedTotal}</td>
+            </tr>
+          </tfoot>
         </table>
-        <div style="text-align:right;margin-bottom:20px;">
-          <strong style="font-size:16px;">Total: ${formattedTotal}</strong>
+
+        <div style="background:#f9fafb;padding:16px;border-radius:8px;margin:20px 0;">
+          <p style="margin:0;font-size:13px;color:#6b7280;"><strong>Delivering to:</strong></p>
+          <p style="margin:4px 0 0;font-size:14px;color:#374151;">${safeShippingAddr}</p>
         </div>
-        <p style="color:#555;font-size:14px;"><strong>Shipping to:</strong> ${escapeHtml(order.shippingAddr)}</p>
-        <p style="color:#888;font-size:12px;margin-top:24px;">Questions? Contact us at ${process.env.EMAIL_FROM}</p>
-      </div>
+
+        <p style="text-align:center;margin:24px 0;">
+          <a href="${process.env.NEXTAUTH_URL}/dashboard/orders"
+             style="background:#166534;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">
+            Track Your Order
+          </a>
+        </p>
+
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
+        <p style="font-size:12px;color:#9ca3af;text-align:center;">
+          Need help? Reply to this email or WhatsApp us.<br>
+          © Iyosiola Foods. All rights reserved.
+        </p>
+      </body>
+      </html>
     `,
   });
 }
