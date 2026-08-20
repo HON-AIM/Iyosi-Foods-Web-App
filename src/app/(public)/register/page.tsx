@@ -347,7 +347,7 @@ function RegisterForm() {
         if (!res.ok) {
           if (res.status === 409) {
             setErrors({
-              email: data.message || "This email is already registered.",
+              email: data.message || "This email is already registered and verified. Please log in.",
             });
           } else if (res.status === 429) {
             setErrors({
@@ -363,9 +363,21 @@ function RegisterForm() {
           return;
         }
 
-        // ✅ Success
+        // 200 = existing unverified account, verification email resent
+        if (res.status === 200) {
+          setSuccessEmail(formData.email);
+          setSuccess(true);
+          return;
+        }
+
+        // 201 = new account created
         setSuccessEmail(formData.email);
         setSuccess(true);
+
+        // If email failed to send, warn via console (user sees success page with resend button)
+        if (data.emailSent === false) {
+          console.warn("[WARN] Verification email could not be sent. User can retry via resend button.");
+        }
 
         // ✅ Log audit event
         console.info("[AUDIT] User registered:", {

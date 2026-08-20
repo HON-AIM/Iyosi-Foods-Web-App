@@ -95,10 +95,65 @@ export async function POST(request: NextRequest) {
     } catch (txError) {
       if (txError instanceof Error && txError.message === "EMAIL_EXISTS") {
         console.warn("[WARN] Registration attempt with existing email:", { email, ip: clientIp, timestamp: new Date().toISOString() });
-        return NextResponse.json(
-          { message: "Account created successfully. Please check your email to verify your account.", userId: "hidden" },
-          { status: 201 }
-        );
+
+        // Check if the existing user is already verified
+        const existingUser = await prisma.user.findUnique({
+          where: { email },
+          select: { id: true, emailVerified: true, name: true },
+        });
+
+        if (existingUser?.emailVerified) {
+          return NextResponse.json(
+            { message: "This email is already registered and verified. Please log in." },
+            { status: 409 }
+          );
+        }
+
+        // User exists but not verified — auto-resend verification email
+        try {
+          const newToken = crypto.randomBytes(VERIFICATION_TOKEN_LENGTH).toString("hex");
+          const newTokenHash = crypto.createHash("sha256").update(newToken).digest("hex");
+          const newTokenExpiry = new Date(Date.now() + VERIFICATION_TOKEN_EXPIRY);
+
+          await prisma.$transaction(async (tx: TransactionClient) => {
+            // Delete old verification tokens for this user
+            await tx.verificationToken.deleteMany({ where: { identifier: email } });
+
+            // Store new token on User
+            await tx.user.update({
+              where: { id: existingUser!.id },
+              data: {
+                verificationToken: newTokenHash,
+                verificationTokenExpires: newTokenExpiry,
+              },
+            });
+
+            // Store new token in VerificationToken table
+            await tx.verificationToken.create({
+              data: {
+                identifier: email,
+                token: newTokenHash,
+                expires: newTokenExpiry,
+              },
+            });
+          }, { timeout: 10000 });
+
+          // Send new verification email
+          const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3001"}/verify?token=${newToken}&email=${encodeURIComponent(email)}`;
+          await sendVerificationEmail(email, existingUser!.name || "User", verificationUrl);
+          console.info("[AUDIT] Re-sent verification email for existing unverified account:", { email, ip: clientIp });
+
+          return NextResponse.json(
+            { message: "An account with this email exists but is not verified. A new verification email has been sent. Please check your inbox." },
+            { status: 200 }
+          );
+        } catch (resendError) {
+          console.error("[ERROR] Failed to resend verification email:", { email, error: resendError instanceof Error ? resendError.message : String(resendError) });
+          return NextResponse.json(
+            { message: "An account with this email exists but is not verified. We could not resend the verification email. Please try again later." },
+            { status: 500 }
+          );
+        }
       }
       throw txError;
     }
@@ -142,16 +197,24 @@ export async function POST(request: NextRequest) {
       console.error("[ERROR] Failed to create verification token:", { userId: newUser.id, error: tokenError instanceof Error ? tokenError.message : String(tokenError) });
     }
 
+    let emailSent = false;
     try {
       const verificationUrl = `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3001"}/verify?token=${token}&email=${encodeURIComponent(email)}`;
       await sendVerificationEmail(email, name, verificationUrl);
+      emailSent = true;
       console.info("[AUDIT] Registration email sent:", { userId: newUser.id, email, ip: clientIp, timestamp: new Date().toISOString() });
     } catch (emailError) {
       console.error("[ERROR] Failed to send verification email:", { userId: newUser.id, email, error: emailError instanceof Error ? emailError.message : String(emailError) });
     }
 
     const response = NextResponse.json(
-      { message: "Account created successfully. Please check your email to verify your account.", userId: newUser.id },
+      {
+        message: emailSent
+          ? "Account created successfully. Please check your email to verify your account."
+          : "Account created but we could not send the verification email. Please use the resend button on the login page.",
+        userId: newUser.id,
+        emailSent,
+      },
       { status: 201 }
     );
     response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
