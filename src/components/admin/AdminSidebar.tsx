@@ -75,9 +75,9 @@ const NAV_ITEMS: NavItem[] = [
     icon: <Settings className="h-5 w-5" />,
   },
   {
-    label: "Visit Store",
+    label: "View Store",
     href: "/shop",
-    icon: <Store className="h-5 w-5" />,
+    icon: <ExternalLink className="h-5 w-5" />,
   },
 ];
 

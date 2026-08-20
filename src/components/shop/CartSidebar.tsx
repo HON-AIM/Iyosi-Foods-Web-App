@@ -82,7 +82,7 @@ export default function CartSidebar() {
               <p className="text-sm">Browse our store and add items to your cart.</p>
               <button
                 onClick={() => setIsCartOpen(false)}
-                className="mt-4 bg-orange-500 hover:bg-orange-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm transition-colors"
+                className="mt-4 bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-bold text-sm transition-colors"
               >
                 START SHOPPING
               </button>
@@ -110,7 +110,7 @@ export default function CartSidebar() {
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>
-                      <p className="text-orange-600 font-bold text-sm mt-0.5">{formatMoney(item.price)}</p>
+                      <p className="text-green-700 font-bold text-sm mt-0.5">{formatMoney(item.price)}</p>
                     </div>
 
                     <div className="flex items-center gap-2 mt-1.5">
@@ -145,12 +145,12 @@ export default function CartSidebar() {
           <div className="border-t border-gray-200 p-5 bg-white">
             <div className="flex justify-between text-base font-bold text-gray-900 mb-4">
               <p>Subtotal</p>
-              <p className="text-orange-600">{formatMoney(cartTotal)}</p>
+              <p className="text-green-700">{formatMoney(cartTotal)}</p>
             </div>
             <Link
               href="/checkout"
               onClick={() => setIsCartOpen(false)}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white flex justify-center items-center py-3.5 rounded-lg font-bold shadow-lg transition-colors text-sm"
+              className="w-full bg-green-600 hover:bg-green-700 text-white flex justify-center items-center py-3.5 rounded-lg font-bold shadow-lg transition-colors text-sm"
             >
               CHECKOUT ({formatMoney(cartTotal)})
             </Link>

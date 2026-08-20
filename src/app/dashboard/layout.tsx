@@ -30,8 +30,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
   return (
     <>
       <DashboardTopbar userName={user.name || "User"} userEmail={user.email || ""} />
-      <div className="bg-gray-100 min-h-screen py-8">
-      <div className="max-w-7xl mx-auto px-4 md:px-8 flex flex-col md:flex-row gap-6">
+      <div className="bg-gray-100 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 md:px-8 py-6 flex flex-col md:flex-row gap-6">
         
         {/* Sidebar */}
         <aside className="w-full md:w-64 flex-shrink-0">
@@ -52,7 +52,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
                 Store
               </div>
               <SidebarLink href="/dashboard/shop" icon={<Store size={18} />} label="Browse Products" />
-              <SidebarLink href="/dashboard/shop?view=saved" icon={<ShoppingBag size={18} />} label="My Wishlist" />
+              <SidebarLink href="/dashboard/saved" icon={<ShoppingBag size={18} />} label="My Wishlist" />
 
               <div className="border-t border-gray-100 my-2" />
 
