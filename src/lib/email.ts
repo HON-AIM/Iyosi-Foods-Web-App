@@ -26,6 +26,11 @@ export const transporter = nodemailer.createTransport({
     user: process.env.EMAIL_SERVER_USER,
     pass: process.env.EMAIL_SERVER_PASSWORD,
   },
+  tls: {
+    rejectUnauthorized: false,
+  },
+  connectionTimeout: 10000,
+  greetingTimeout: 10000,
 });
 
 function escapeHtml(str: string): string {
