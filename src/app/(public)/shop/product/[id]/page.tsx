@@ -404,7 +404,7 @@ export default async function ProductDetailPage({
                           </div>
                         </div>
                       </div>
-                      {review.comment && <p className="text-gray-700 ml-13">{review.comment}</p>}
+                      {review.comment && <p className="text-gray-700 ml-[52px]">{review.comment}</p>}
                     </div>
                   );
                 })}

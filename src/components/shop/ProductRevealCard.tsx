@@ -182,7 +182,12 @@ export default function ProductRevealCard({ product, className }: ProductRevealC
       )}
     >
       {/* ── Image ─────────────────────────────────────────────── */}
-      <div className="relative overflow-hidden aspect-square bg-gray-50">
+      {/* Wrapped in a link so touch users (no hover overlay) can open the product */}
+      <Link
+        href={`/shop/product/${product.id}`}
+        className="relative block overflow-hidden aspect-square bg-gray-50"
+        aria-label={product.name}
+      >
         <motion.div variants={imageVariants} className="w-full h-full">
           {product.image ? (
             <Image
@@ -248,7 +253,7 @@ export default function ProductRevealCard({ product, className }: ProductRevealC
             Only {product.stock} left!
           </div>
         )}
-      </div>
+      </Link>
 
       {/* ── Static Card Body ──────────────────────────────────── */}
       <div className="p-3 space-y-2">
@@ -273,9 +278,11 @@ export default function ProductRevealCard({ product, className }: ProductRevealC
         )}
 
         {/* Name */}
-        <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug group-hover:text-green-700 transition-colors">
-          {product.name}
-        </h3>
+        <Link href={`/shop/product/${product.id}`} className="block">
+          <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug group-hover:text-green-700 transition-colors">
+            {product.name}
+          </h3>
+        </Link>
 
         {/* Price */}
         <div className="flex items-baseline gap-2 flex-wrap">
@@ -294,8 +301,14 @@ export default function ProductRevealCard({ product, className }: ProductRevealC
           </p>
         )}
 
-        {!shouldAnimate && (
-          <div className="space-y-2 pt-1">
+        {/* Static actions: hidden on hover-capable devices (overlay handles those),
+            always visible on touch devices where the hover overlay can't trigger */}
+        <div
+          className={cn(
+            "space-y-2 pt-1",
+            shouldAnimate && "[@media(hover:hover)_and_(pointer:fine)]:hidden"
+          )}
+        >
             <button
               type="button"
               onClick={handleAddToCart}
@@ -320,8 +333,7 @@ export default function ProductRevealCard({ product, className }: ProductRevealC
                 View Details
               </span>
             </Link>
-          </div>
-        )}
+        </div>
       </div>
 
       {/* ── Hover Reveal Overlay (animated hover only) ─────────── */}

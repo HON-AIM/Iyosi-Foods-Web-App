@@ -112,7 +112,7 @@ export default function HomePage() {
       <section className="bg-white py-16 border-b border-surface-200">
         <div className="container mx-auto px-4 md:px-8">
           <StaggerContainer
-            className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-surface-100"
+            className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center md:divide-x md:divide-surface-100"
             staggerDelay={0.12}
           >
             {stats.map((stat) => (

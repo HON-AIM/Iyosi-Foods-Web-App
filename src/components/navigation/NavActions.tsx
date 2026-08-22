@@ -87,6 +87,8 @@ export default function NavActions({ mobileMenuOpen, onMobileMenuToggle }: NavAc
           className="flex items-center gap-1.5 p-2.5 hover:bg-surface-50 rounded-lg transition-colors"
           aria-label="Account menu"
           aria-expanded={accountOpen}
+          onFocus={handleAccountEnter}
+          onBlur={handleAccountLeave}
         >
           <User className="h-5 w-5 text-surface-600" />
           <span className="hidden lg:block text-sm font-medium text-surface-700 max-w-[80px] truncate">
