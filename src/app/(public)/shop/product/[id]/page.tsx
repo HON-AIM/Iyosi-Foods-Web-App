@@ -7,7 +7,28 @@ import WishlistButton from "@/components/shop/WishlistButton";
 import { ShieldCheck, Truck, RotateCcw, Package, Star, Share2, Check } from "lucide-react";
 import Link from "next/link";
 
-export const dynamic = "force-dynamic";
+// Revalidate: rebuild the page at most every 10 minutes if visited.
+// Served from Vercel's CDN edge between rebuilds → 0 DB queries per request
+// under high traffic. Stock counts may lag reality by up to 10 minutes;
+// checkout still validates stock atomically, so overselling is impossible.
+export const revalidate = 600;
+
+// Pre-generate the 50 most recently updated product pages at build time.
+// Products outside this set are built on first request, then cached.
+// Wrapped defensively: a DB outage must never fail the deploy.
+export async function generateStaticParams() {
+  try {
+    const products = await prisma.product.findMany({
+      where: { isActive: true },
+      select: { id: true },
+      orderBy: { updatedAt: "desc" },
+      take: 50,
+    });
+    return products.map((p) => ({ id: p.id }));
+  } catch {
+    return [];
+  }
+}
 
 export async function generateMetadata({
   params,

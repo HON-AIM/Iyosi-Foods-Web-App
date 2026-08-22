@@ -3,7 +3,9 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { type NextRequest } from "next/server";
 import crypto from "crypto";
+import { Prisma } from "@prisma/client";
 import { CreateOrderSchema } from "@/schemas/order.schema";
+import { checkoutLimiter, checkLimit } from "@/lib/redis-rate-limiter";
 
 export async function GET(request: NextRequest) {
   try {
@@ -43,6 +45,20 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    // ── Rate limit checkout (abuse/spike protection) ────────────────────────
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      request.headers.get("x-real-ip") ||
+      "anon";
+    const { success: rateOk, resetAt } = await checkLimit(checkoutLimiter, ip);
+    if (!rateOk) {
+      const retry = Math.max(1, Math.ceil((resetAt - Date.now()) / 1000));
+      return NextResponse.json(
+        { message: `Too many requests. Please wait ${retry}s and try again.` },
+        { status: 429, headers: { "Retry-After": String(retry) } }
+      );
+    }
+
     const session = await auth();
     const isGuest = !session?.user?.id;
 
@@ -84,7 +100,6 @@ export async function POST(request: NextRequest) {
         }
 
         let totalAmount = 0;
-        // ✅ Check stock and decrement atomically to prevent overselling
         for (const item of items) {
           const product = products.find((p) => p.id === item.productId);
           if (!product) throw new Error("PRODUCT_NOT_FOUND");
@@ -92,11 +107,35 @@ export async function POST(request: NextRequest) {
             throw new Error(`INSUFFICIENT_STOCK:${product.name}:${product.stock}`);
           }
           totalAmount += product.price * item.quantity;
-          // Immediately decrement stock to prevent double-booking
-          await tx.product.update({
-            where: { id: item.productId },
-            data: { stock: { decrement: item.quantity } },
-          });
+        }
+
+        // Dedupe quantities per product — duplicate cart lines must not
+        // produce multiple VALUES rows matching the same target row.
+        const qtyById = new Map<string, number>();
+        for (const item of items) {
+          qtyById.set(item.productId, (qtyById.get(item.productId) ?? 0) + item.quantity);
+        }
+
+        // ── Batch stock decrement (1 statement, not N) ──────────────────────
+        // The `stock >= qty` guard makes overselling impossible under
+        // concurrent checkouts: row locks serialize writers and a losing
+        // transaction updates fewer rows than expected → we roll back.
+        const updatedRows = await tx.$executeRaw(
+          Prisma.sql`
+            UPDATE "Product" AS p
+            SET stock = p.stock - data.qty
+            FROM (VALUES ${Prisma.join(
+              Array.from(qtyById.entries()).map(([pid, qty]) =>
+                Prisma.sql`(${pid}::text, ${qty}::int)`
+              )
+            )}) AS data(id, qty)
+            WHERE p.id = data.id AND p.stock >= data.qty
+          `
+        );
+
+        if (updatedRows !== qtyById.size) {
+          // Lost a race against another checkout — rollback the whole tx
+          throw new Error("INSUFFICIENT_STOCK_RACE");
         }
 
         const shippingAddr = typeof shippingAddress === "string"
@@ -132,6 +171,11 @@ export async function POST(request: NextRequest) {
         // Handle insufficient stock with specific product info
         if (txError.message.startsWith("INSUFFICIENT_STOCK")) {
           const [, productName, available] = txError.message.split(":");
+          if (!productName) {
+            return NextResponse.json({
+              message: "Some items in your cart just sold out or no longer have enough stock. Please review your cart.",
+            }, { status: 409 });
+          }
           return NextResponse.json({
             message: `Sorry, only ${available} units of "${productName}" are available.`,
           }, { status: 409 });

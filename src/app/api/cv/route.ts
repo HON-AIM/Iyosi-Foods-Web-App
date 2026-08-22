@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 import { prisma } from "@/lib/db";
 import { type NextRequest } from "next/server";
 import crypto from "crypto";
+
+export const runtime = "nodejs";
+export const maxDuration = 30;
 
 const ALLOWED_MIME_TYPES = new Set([
   "application/pdf",
@@ -13,16 +15,28 @@ const ALLOWED_MIME_TYPES = new Set([
   "image/png",
 ]);
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads", "cv");
 
-function generateSafeFilename(originalName: string): string {
-  const ext = path.extname(originalName) || ".pdf";
-  const hash = crypto.randomBytes(16).toString("hex");
-  return `${hash}${ext}`;
+const EXT_MAP: Record<string, string> = {
+  "application/pdf": "pdf",
+  "application/msword": "doc",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": "docx",
+  "image/jpeg": "jpg",
+  "image/png": "png",
+};
+
+function generateSafeFilename(mimeType: string): string {
+  const ext = EXT_MAP[mimeType] || "pdf";
+  return `${crypto.randomUUID()}-${crypto.randomBytes(4).toString("hex")}.${ext}`;
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+    if (!blobToken) {
+      console.error("[ERROR] BLOB_READ_WRITE_TOKEN is not configured for CV uploads");
+      return NextResponse.json({ message: "Server error: File storage is not configured" }, { status: 503 });
+    }
+
     const contentType = request.headers.get("content-type") || "";
     if (!contentType.includes("multipart/form-data")) {
       return NextResponse.json({ message: "Expected multipart/form-data" }, { status: 400 });
@@ -61,11 +75,30 @@ export async function POST(request: NextRequest) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const filename = generateSafeFilename(file.name);
+    const filename = generateSafeFilename(file.type);
 
-    await mkdir(UPLOAD_DIR, { recursive: true });
-    const filePath = path.join(UPLOAD_DIR, filename);
-    await writeFile(filePath, buffer);
+    let blob;
+    try {
+      blob = await put(`cv/${filename}`, buffer, {
+        access: "public",
+        contentType: file.type,
+        token: blobToken,
+      });
+    } catch (uploadError) {
+      const errorMessage = uploadError instanceof Error ? uploadError.message : String(uploadError);
+      console.error("[ERROR] Vercel Blob CV upload failed:", {
+        error: errorMessage,
+        filename,
+        size: buffer.length,
+        mimeType: file.type,
+      });
+      return NextResponse.json(
+        { message: "CV upload failed. Please try again later." },
+        { status: 500 }
+      );
+    }
+
+    const cvUrl = blob.url;
 
     const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
                      request.headers.get("x-real-ip") ||
@@ -82,7 +115,7 @@ export async function POST(request: NextRequest) {
         cvOriginalName: file.name,
         cvMimeType: file.type,
         cvSize: buffer.length,
-        cvUrl: `/uploads/cv/${filename}`,
+        cvUrl,
         coverLetter: coverLetter || null,
         ipAddress: clientIp,
       },
@@ -95,7 +128,7 @@ export async function POST(request: NextRequest) {
         from: `"Iyosiola Careers" <${process.env.EMAIL_FROM || "israelmiracle12@gmail.com"}>`,
         to: process.env.EMAIL_FROM || "israelmiracle12@gmail.com",
         subject: `New CV Submission: ${firstName} ${lastName}${position ? ` - ${position}` : ""}`,
-        text: `New CV received:\n\nName: ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone || "N/A"}\nPosition: ${position || "Not specified"}\nCV: ${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000"}/uploads/cv/${filename}`,
+        text: `New CV received:\n\nName: ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone || "N/A"}\nPosition: ${position || "Not specified"}\nCV: ${cvUrl}`,
       });
     } catch (emailError) {
       console.error("[ERROR] Failed to notify company of CV submission:", emailError);

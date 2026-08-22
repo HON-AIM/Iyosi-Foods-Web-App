@@ -8,6 +8,8 @@ import FlashSale from "@/components/shop/FlashSale";
 import CategoryStrip from "@/components/shop/CategoryStrip";
 import PromoBanners from "@/components/shop/PromoBanners";
 import EmptyProductGrid from "@/components/shop/EmptyProductGrid";
+import ScrollReveal, { StaggerContainer, StaggerItem } from "@/components/ui/ScrollReveal";
+import { getCached, CACHE_KEYS } from "@/lib/cache";
 
 export const dynamic = "force-dynamic";
 
@@ -96,28 +98,51 @@ export default async function ShopHomePage({
     ? { category: activeCategory as "BAKING" | "WHEAT" | "ALL_PURPOSE" | "SEMOLINA" | "SUGAR" | "OIL" | "RICE" | "TOMATO_PASTE" }
     : {};
 
-  const [rawFlash, rawTop, rawRecommended] = await Promise.all([
-    prisma.product.findMany({
-      where: { isActive: true, isFlashSale: true, stock: { gt: 0 }, ...categoryFilter },
-      take: 12,
-      orderBy: { updatedAt: "desc" },
-    }).catch(() => [] as Awaited<ReturnType<typeof prisma.product.findMany>>),
-    prisma.product.findMany({
-      where: { stock: { gt: 0 }, isActive: true, ...categoryFilter },
-      take: 12,
-      orderBy: { createdAt: "desc" },
-    }).catch(() => [] as Awaited<ReturnType<typeof prisma.product.findMany>>),
-    prisma.product.findMany({
-      where: { isActive: true, ...categoryFilter },
-      orderBy: { updatedAt: "desc" },
-      take: 18,
-    }).catch(() => [] as Awaited<ReturnType<typeof prisma.product.findMany>>),
-  ]);
-
+  // Cached: product listings are read thousands of times per minute but change
+  // rarely. Redis serves repeat requests in <1ms; admin writes invalidate keys.
   const [flashProducts, topProducts, recommendedProducts] = await Promise.all([
-    enrichWithRatings(rawFlash),
-    enrichWithRatings(rawTop),
-    enrichWithRatings(rawRecommended),
+    getCached(
+      CACHE_KEYS.flashSaleProducts(),
+      async () =>
+        enrichWithRatings(
+          await prisma.product
+            .findMany({
+              where: { isActive: true, isFlashSale: true, stock: { gt: 0 }, ...categoryFilter },
+              take: 12,
+              orderBy: { updatedAt: "desc" },
+            })
+            .catch(() => [] as Awaited<ReturnType<typeof prisma.product.findMany>>)
+        ),
+      { ttl: 60 }, // Flash sale changes fast — cache 1 minute only
+    ),
+    getCached(
+      CACHE_KEYS.products(activeCategory || "all"),
+      async () =>
+        enrichWithRatings(
+          await prisma.product
+            .findMany({
+              where: { isActive: true, stock: { gt: 0 }, ...categoryFilter },
+              take: 12,
+              orderBy: { createdAt: "desc" },
+            })
+            .catch(() => [] as Awaited<ReturnType<typeof prisma.product.findMany>>)
+        ),
+      { ttl: 300 },
+    ),
+    getCached(
+      CACHE_KEYS.recommended(activeCategory || "all"),
+      async () =>
+        enrichWithRatings(
+          await prisma.product
+            .findMany({
+              where: { isActive: true, ...categoryFilter },
+              orderBy: { updatedAt: "desc" },
+              take: 18,
+            })
+            .catch(() => [] as Awaited<ReturnType<typeof prisma.product.findMany>>)
+        ),
+      { ttl: 300 },
+    ),
   ]);
 
   const categories = [
@@ -222,7 +247,7 @@ export default async function ShopHomePage({
               View All
             </Link>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StaggerContainer className="grid grid-cols-2 md:grid-cols-4 gap-3" staggerDelay={0.07}>
             {[
               {
                 name: "Baking Flour",
@@ -261,11 +286,11 @@ export default async function ShopHomePage({
                 text: "text-purple-600",
               },
             ].map((cat) => (
-              <Link
-                key={cat.name}
-                href={cat.link}
-                className="group relative overflow-hidden rounded-xl border border-gray-100 hover:border-transparent hover:shadow-lg transition-all duration-300"
-              >
+              <StaggerItem key={cat.name} direction="up">
+                <Link
+                  href={cat.link}
+                  className="group relative overflow-hidden rounded-xl border border-gray-100 hover:border-transparent hover:shadow-lg transition-all duration-300 block h-full"
+                >
                 <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
                 <div className="relative p-4 md:p-5 flex flex-col gap-3">
                   <div className={`w-14 h-14 ${cat.bg} group-hover:bg-white/20 rounded-2xl flex items-center justify-center transition-colors`}>
@@ -280,12 +305,14 @@ export default async function ShopHomePage({
                     <ChevronRight className="w-3.5 h-3.5" />
                   </div>
                 </div>
-              </Link>
+                </Link>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </section>
 
         {/* ═══ ROW 5: Top Selling Items ═══ */}
+        <ScrollReveal direction="up">
         <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-4 py-3.5 border-b border-gray-100 flex justify-between items-center">
             <div className="flex items-center gap-3">
@@ -303,11 +330,13 @@ export default async function ShopHomePage({
           </div>
           <div className="p-3 md:p-4">
             {topProducts.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
+              <StaggerContainer className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3" staggerDelay={0.05}>
                 {topProducts.map((product) => (
-                  <ProductRevealCard key={product.id} product={product} />
+                  <StaggerItem key={product.id} direction="up">
+                    <ProductRevealCard product={product} />
+                  </StaggerItem>
                 ))}
-              </div>
+              </StaggerContainer>
             ) : (
               <EmptyProductGrid
                 message="Products coming soon"
@@ -317,8 +346,10 @@ export default async function ShopHomePage({
             )}
           </div>
         </section>
+        </ScrollReveal>
 
         {/* ═══ ROW 6: Recommended For You ═══ */}
+        <ScrollReveal direction="up">
         <section className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="px-4 py-3.5 border-b border-gray-100 flex justify-between items-center">
             <div className="flex items-center gap-3">
@@ -336,11 +367,13 @@ export default async function ShopHomePage({
           </div>
           <div className="p-3 md:p-4">
             {recommendedProducts.length > 0 ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3">
+              <StaggerContainer className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-3" staggerDelay={0.05}>
                 {recommendedProducts.map((product) => (
-                  <ProductRevealCard key={product.id} product={product} />
+                  <StaggerItem key={product.id} direction="up">
+                    <ProductRevealCard product={product} />
+                  </StaggerItem>
                 ))}
-              </div>
+              </StaggerContainer>
             ) : (
               <EmptyProductGrid
                 message="No recommendations yet"
@@ -349,8 +382,10 @@ export default async function ShopHomePage({
             )}
           </div>
         </section>
+        </ScrollReveal>
 
         {/* ═══ Brand Stats Bar ═══ */}
+        <ScrollReveal direction="up">
         <div className="bg-gradient-to-r from-green-700 to-green-800 rounded-xl p-5 md:p-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 text-center text-white">
             {[
@@ -366,8 +401,10 @@ export default async function ShopHomePage({
             ))}
           </div>
         </div>
+        </ScrollReveal>
 
         {/* ═══ Trust Badges Footer ═══ */}
+        <ScrollReveal direction="up">
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
@@ -408,6 +445,7 @@ export default async function ShopHomePage({
             ))}
           </div>
         </div>
+        </ScrollReveal>
 
       </div>
     </div>

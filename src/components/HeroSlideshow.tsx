@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const slides = [
@@ -45,6 +46,7 @@ const slides = [
 
 export default function HeroSlideshow() {
   const [current, setCurrent] = useState(0);
+  const shouldReduceMotion = useReducedMotion();
 
   const next = useCallback(() => {
     setCurrent((p) => (p + 1) % slides.length);
@@ -88,24 +90,32 @@ export default function HeroSlideshow() {
       <div className="absolute inset-0 flex items-center">
         <div className="container mx-auto px-4 md:px-8">
           <div className="max-w-2xl">
-            <div className="inline-block bg-accent-500 text-white text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-5 shadow-lg">
-              Iyosi Foods — Quality You Can Trust
-            </div>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-5 leading-tight drop-shadow-lg">
-              {slide.title}
-            </h1>
-            <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-xl drop-shadow-md">
-              {slide.subtitle}
-            </p>
-            <Link
-              href={slide.href}
-              className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-bold px-8 py-4 rounded-lg shadow-xl shadow-accent-500/25 transition-all hover:translate-y-[-2px] text-lg"
+            {/* key={current} re-triggers the entrance animation on every slide change */}
+            <motion.div
+              key={current}
+              initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 20 }}
+              animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
             >
-              {slide.cta}
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </Link>
+              <div className="inline-block bg-accent-500 text-white text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full mb-5 shadow-lg">
+                Iyosi Foods — Quality You Can Trust
+              </div>
+              <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-white mb-5 leading-tight drop-shadow-lg">
+                {slide.title}
+              </h1>
+              <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-xl drop-shadow-md">
+                {slide.subtitle}
+              </p>
+              <Link
+                href={slide.href}
+                className="inline-flex items-center gap-2 bg-accent-500 hover:bg-accent-600 text-white font-bold px-8 py-4 rounded-lg shadow-xl shadow-accent-500/25 transition-all hover:translate-y-[-2px] text-lg"
+              >
+                {slide.cta}
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </Link>
+            </motion.div>
           </div>
         </div>
       </div>

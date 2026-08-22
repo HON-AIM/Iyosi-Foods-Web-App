@@ -3,6 +3,7 @@ import { prisma, TransactionClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { type NextRequest } from "next/server";
 import { checkAdminRateLimit, rateLimitResponse } from "@/lib/admin-rate-limiter";
+import { invalidateCache, CACHE_KEYS } from "@/lib/cache";
 import { ProductSchema } from "@/schemas/product.schema";
 
 const DEFAULT_LIMIT = 20;
@@ -172,6 +173,9 @@ export async function POST(request: NextRequest) {
     }, { timeout: 10000 });
 
     console.info("[AUDIT] Admin created product:", { adminId: session.user.id, productId: newProduct.id, productName: name, category, price, stock });
+
+    // New product can appear in any listing — clear the broad keys
+    await invalidateCache(CACHE_KEYS.products(), CACHE_KEYS.flashSaleProducts(), CACHE_KEYS.recommended());
 
     return NextResponse.json({ message: "Product created successfully", product: newProduct }, { status: 201 });
   } catch (error) {

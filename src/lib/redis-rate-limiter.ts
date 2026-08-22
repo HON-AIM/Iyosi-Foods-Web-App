@@ -25,6 +25,7 @@ function createLimiter(
 export const registrationLimiter = createLimiter("register", 5, "15 m")
 export const passwordResetLimiter = createLimiter("pwd_reset", 3, "1 h")
 export const adminLimiter = createLimiter("admin", 60, "15 m")
+export const checkoutLimiter = createLimiter("checkout", 5, "1 m")
 
 export async function checkLimit(limiter: Ratelimit | null, identifier: string) {
   if (!limiter) {

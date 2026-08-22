@@ -3,6 +3,7 @@ import { prisma, TransactionClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { type NextRequest } from "next/server";
 import { z } from "zod";
+import { invalidateCache, CACHE_KEYS } from "@/lib/cache";
 
 const UpdateProductSchema = z.object({
   name: z.string().min(2).max(200).trim().optional(),
@@ -136,6 +137,13 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     console.info("[AUDIT] Admin updated product:", { adminId: session.user?.id, productId: id, changesCount: Object.keys(changes).length });
 
+    await invalidateCache(
+      CACHE_KEYS.products(),
+      CACHE_KEYS.recommended(),
+      CACHE_KEYS.productDetail(id),
+      CACHE_KEYS.flashSaleProducts()
+    );
+
     return NextResponse.json({ message: "Product updated successfully", product: updatedProduct, changes: Object.keys(changes) }, { status: 200 });
   } catch (error) {
     console.error("[ERROR] Update product failed:", { error: error instanceof Error ? error.message : String(error) });
@@ -200,6 +208,13 @@ export async function DELETE(request: NextRequest, { params }: { params: Promise
     }, { timeout: 10000 });
 
     console.info("[AUDIT] Admin deleted product:", { adminId: session.user?.id, productId: id, softDeleted: result.softDeleted });
+
+    await invalidateCache(
+      CACHE_KEYS.products(),
+      CACHE_KEYS.recommended(),
+      CACHE_KEYS.productDetail(id),
+      CACHE_KEYS.flashSaleProducts()
+    );
 
     return NextResponse.json({ message: result.message, softDeleted: result.softDeleted }, { status: 200 });
   } catch (error) {
