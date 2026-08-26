@@ -439,7 +439,7 @@ function RegisterForm() {
           Create account
         </h2>
         <p className="mt-2 text-sm text-surface-600 dark:text-surface-400">
-          Join IYOSIOLA GROUP today
+          Join Iyosi Foods GROUP today
         </p>
       </div>
 

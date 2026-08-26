@@ -31,7 +31,7 @@ async function main() {
 
     // ── BAKING Category ───────────────────────────────────────────────────
     {
-      name: "[TEST] Iyosiola Premium Baking Flour 25kg",
+      name: "[TEST] Iyosi Foods Premium Baking Flour 25kg",
       description: "High-quality baking flour milled from premium wheat grains. Perfect for bread, cakes, pastries, and all baking needs. Fine texture ensures consistent results every time. Trusted by professional bakers across Nigeria.",
       price: 18500,
       stock: 120,
@@ -40,7 +40,7 @@ async function main() {
       isActive: true,
     },
     {
-      name: "[TEST] Iyosiola Bread Flour 10kg",
+      name: "[TEST] Iyosi Foods Bread Flour 10kg",
       description: "High-protein bread flour for professional and home bakers. Higher gluten content produces perfectly risen, chewy loaves with a golden crust. Ideal for artisan bread, pizza dough, and rolls.",
       price: 7800,
       stock: 85,
@@ -49,7 +49,7 @@ async function main() {
       isActive: true,
     },
     {
-      name: "[TEST] Iyosiola Pastry Flour 5kg",
+      name: "[TEST] Iyosi Foods Pastry Flour 5kg",
       description: "Finely milled low-protein flour ideal for pastries, biscuits, and delicate cakes. Produces tender, flaky results. Preferred by pastry chefs for consistently light textures.",
       price: 4200,
       stock: 60,
@@ -58,7 +58,7 @@ async function main() {
       isActive: true,
     },
     {
-      name: "[TEST] Iyosiola Self-Rising Flour 2kg",
+      name: "[TEST] Iyosi Foods Self-Rising Flour 2kg",
       description: "Convenient self-rising flour with pre-measured leavening agents. Perfect for pancakes, waffles, muffins, and quick breads. No need for separate baking powder — saves time and ensures perfect rise.",
       price: 2100,
       stock: 200,
@@ -69,7 +69,7 @@ async function main() {
 
     // ── WHEAT Category ────────────────────────────────────────────────────
     {
-      name: "[TEST] Iyosiola Whole Wheat Flour 25kg",
+      name: "[TEST] Iyosi Foods Whole Wheat Flour 25kg",
       description: "Stone-ground whole wheat flour made from 100% Nigerian wheat. Rich in fibre, vitamins, and minerals. Perfect for whole wheat bread, chapati, and healthy baking. Nutty flavour, dense nutrition.",
       price: 19000,
       stock: 95,
@@ -78,7 +78,7 @@ async function main() {
       isActive: true,
     },
     {
-      name: "[TEST] Iyosiola Durum Wheat Flour 10kg",
+      name: "[TEST] Iyosi Foods Durum Wheat Flour 10kg",
       description: "Premium durum wheat flour specifically milled for pasta making. High semolina content gives pasta its golden colour and firm texture. Also excellent for pizza bases and Mediterranean breads.",
       price: 9500,
       stock: 45,
@@ -87,7 +87,7 @@ async function main() {
       isActive: true,
     },
     {
-      name: "[TEST] Iyosiola Wheat Germ 1kg",
+      name: "[TEST] Iyosi Foods Wheat Germ 1kg",
       description: "Pure toasted wheat germ, the most nutritious part of the wheat kernel. Rich in vitamin E, folate, and essential fatty acids. Add to smoothies, yoghurt, cereals, or baked goods for a nutritional boost.",
       price: 3800,
       stock: 30,
@@ -98,7 +98,7 @@ async function main() {
 
     // ── ALL_PURPOSE Category ──────────────────────────────────────────────
     {
-      name: "[TEST] Iyosiola All-Purpose Flour 50kg",
+      name: "[TEST] Iyosi Foods All-Purpose Flour 50kg",
       description: "The workhorse of the kitchen. Versatile all-purpose flour suitable for virtually any recipe — bread, cakes, cookies, thickening sauces, coating fried foods, and more. 50kg bulk bag for restaurants and caterers.",
       price: 38000,
       stock: 55,
@@ -107,7 +107,7 @@ async function main() {
       isActive: true,
     },
     {
-      name: "[TEST] Iyosiola All-Purpose Flour 10kg",
+      name: "[TEST] Iyosi Foods All-Purpose Flour 10kg",
       description: "Our flagship all-purpose flour in a convenient 10kg bag for home bakers and small food businesses. Consistent quality batch after batch. Suitable for all cooking and baking applications.",
       price: 8200,
       stock: 180,
@@ -116,7 +116,7 @@ async function main() {
       isActive: true,
     },
     {
-      name: "[TEST] Iyosiola All-Purpose Flour 5kg",
+      name: "[TEST] Iyosi Foods All-Purpose Flour 5kg",
       description: "Perfect household size all-purpose flour. Same premium quality as our larger bags in a more manageable 5kg pack. Great for everyday cooking, thickening soups and stews, and occasional baking.",
       price: 4600,
       stock: 250,
@@ -125,7 +125,7 @@ async function main() {
       isActive: true,
     },
     {
-      name: "[TEST] Iyosiola Cake Flour 2kg",
+      name: "[TEST] Iyosi Foods Cake Flour 2kg",
       description: "Ultra-fine, low-protein cake flour for impossibly tender cakes, cupcakes, and delicate baked goods. Produces a lighter crumb and softer texture than regular flour. The secret of professional cake bakers.",
       price: 2400,
       stock: 70,
@@ -136,7 +136,7 @@ async function main() {
 
     // ── SEMOLINA Category ─────────────────────────────────────────────────
     {
-      name: "[TEST] Iyosiola Fine Semolina 10kg",
+      name: "[TEST] Iyosi Foods Fine Semolina 10kg",
       description: "Premium fine-grind semolina made from durum wheat. Perfect for Nigerian tuwo, ugali, couscous, pasta, and North African breads. Smooth texture, golden colour, rich flavour. A staple in every Nigerian kitchen.",
       price: 9200,
       stock: 110,
@@ -145,7 +145,7 @@ async function main() {
       isActive: true,
     },
     {
-      name: "[TEST] Iyosiola Coarse Semolina 5kg",
+      name: "[TEST] Iyosi Foods Coarse Semolina 5kg",
       description: "Coarse-grind semolina for traditional African porridges, puddings, and rustic bread. The larger granules create a distinctive hearty texture loved in Northern Nigeria. Also excellent for coating fried fish and meat.",
       price: 4800,
       stock: 90,
@@ -154,7 +154,7 @@ async function main() {
       isActive: true,
     },
     {
-      name: "[TEST] Iyosiola Semolina 25kg Bulk",
+      name: "[TEST] Iyosi Foods Semolina 25kg Bulk",
       description: "Restaurant and caterer-grade semolina in a 25kg bulk bag. Our most popular product for commercial kitchens, canteens, and food manufacturers. Consistent grind size for reliable results every time. Cost-effective for high-volume operations.",
       price: 22500,
       stock: 40,
@@ -163,7 +163,7 @@ async function main() {
       isActive: true,
     },
     {
-      name: "[TEST] Iyosiola Instant Semolina 1kg",
+      name: "[TEST] Iyosi Foods Instant Semolina 1kg",
       description: "Precooked instant semolina that cooks in under 5 minutes. Just add boiling water and stir. Perfect for quick weekday meals, school lunches, and office cooking. Same great taste and nutrition as traditional semolina.",
       price: 1850,
       stock: 3,
@@ -172,7 +172,7 @@ async function main() {
       isActive: true,
     },
     {
-      name: "[TEST] Iyosiola Enriched Semolina 2kg",
+      name: "[TEST] Iyosi Foods Enriched Semolina 2kg",
       description: "Nutritionally enriched semolina fortified with iron, folic acid, and vitamin B12. Recommended for growing children and families seeking extra nutrition without changing their traditional diet. Same great taste, better nutrition.",
       price: 2900,
       stock: 0,
@@ -191,13 +191,13 @@ async function main() {
   // ─── Add sample reviews to first 8 products ────────────────────────────────
   // Find or create a test reviewer user
   let reviewer = await prisma.user.findFirst({
-    where: { email: "test-reviewer@iyosiola.test" },
+    where: { email: "test-reviewer@Iyosi Foods.test" },
   })
   if (!reviewer) {
     reviewer = await prisma.user.create({
       data: {
         name: "Test Reviewer",
-        email: "test-reviewer@iyosiola.test",
+        email: "test-reviewer@Iyosi Foods.test",
         password: await bcrypt.hash("TestReviewer123!", 12),
         role: "USER",
         isActive: true,
@@ -237,41 +237,41 @@ async function main() {
     await prisma.user.create({
       data: {
         name: "Admin User",
-        email: "admin@iyosiola.test",
+        email: "admin@Iyosi Foods.test",
         password: await bcrypt.hash("Admin@123456!", 12),
         role: "ADMIN",
         isActive: true,
         emailVerified: new Date(),
       },
     })
-    console.log("✅ Created test admin: admin@iyosiola.test / Admin@123456!")
+    console.log("✅ Created test admin: admin@Iyosi Foods.test / Admin@123456!")
   } else {
     console.log("ℹ️  Admin already exists — skipping admin creation")
   }
 
   // ─── Create a test customer user (if not exists) ──────────────────────────
   const existingCustomer = await prisma.user.findFirst({
-    where: { email: "customer@iyosiola.test" },
+    where: { email: "customer@Iyosi Foods.test" },
   })
   if (!existingCustomer) {
     await prisma.user.create({
       data: {
         name: "Amaka Johnson",
-        email: "customer@iyosiola.test",
+        email: "customer@Iyosi Foods.test",
         password: await bcrypt.hash("Customer@123!", 12),
         role: "USER",
         isActive: true,
         emailVerified: new Date(),
       },
     })
-    console.log("✅ Created test customer: customer@iyosiola.test / Customer@123!")
+    console.log("✅ Created test customer: customer@Iyosi Foods.test / Customer@123!")
   }
 
   console.log("\n🎉 Seed complete!")
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
   console.log(`📦 ${created.length} test products added (names start with [TEST])`)
-  console.log("👤 Admin login: admin@iyosiola.test / Admin@123456!")
-  console.log("🛒 Customer login: customer@iyosiola.test / Customer@123!")
+  console.log("👤 Admin login: admin@Iyosi Foods.test / Admin@123456!")
+  console.log("🛒 Customer login: customer@Iyosi Foods.test / Customer@123!")
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
   console.log("🗑️  TO DELETE TEST DATA: Go to Admin → Products → filter by '[TEST]'")
   console.log("   Or run: npx prisma db execute --stdin <<< \"DELETE FROM \\\"Product\\\" WHERE name LIKE '[TEST]%'\"")

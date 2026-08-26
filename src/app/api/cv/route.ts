@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
     try {
       const { transporter } = await import("@/lib/email");
       await transporter.sendMail({
-        from: `"Iyosiola Careers" <${process.env.EMAIL_FROM || "israelmiracle12@gmail.com"}>`,
+        from: `"Iyosi Foods Careers" <${process.env.EMAIL_FROM || "israelmiracle12@gmail.com"}>`,
         to: process.env.EMAIL_FROM || "israelmiracle12@gmail.com",
         subject: `New CV Submission: ${firstName} ${lastName}${position ? ` - ${position}` : ""}`,
         text: `New CV received:\n\nName: ${firstName} ${lastName}\nEmail: ${email}\nPhone: ${phone || "N/A"}\nPosition: ${position || "Not specified"}\nCV: ${cvUrl}`,

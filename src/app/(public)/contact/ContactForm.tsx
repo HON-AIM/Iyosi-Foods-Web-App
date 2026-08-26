@@ -42,7 +42,7 @@ const CONTACT_CATEGORIES = [
 const CONTACT_INFO = {
   headquarters: {
     title: "Corporate Headquarters",
-    lines: ["Iyosiola Group Towers", "Central Business District", "Lagos, Nigeria"],
+    lines: ["Iyosi Foods Group Towers", "Central Business District", "Lagos, Nigeria"],
   },
   phone: {
     title: "Phone",

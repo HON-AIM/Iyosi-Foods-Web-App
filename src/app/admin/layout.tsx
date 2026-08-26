@@ -7,7 +7,7 @@ import AdminLayoutClient from "./AdminLayoutClient";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard | IYOSIOLA GROUP",
+  title: "Admin Dashboard | Iyosi Foods GROUP",
   description: "Manage products, orders, customers, and site content",
   robots: {
     index: false, // Don't index admin pages

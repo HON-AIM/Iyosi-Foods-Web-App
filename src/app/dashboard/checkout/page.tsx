@@ -153,7 +153,7 @@ export default function CheckoutPage() {
 
   const orderWhatsAppUrl = orderId
     ? buildWhatsAppUrl(
-        `Hi Iyosiola Foods! I just placed an order (ID: ${orderId.slice(-8).toUpperCase()}). Please confirm my order. Thank you!`
+        `Hi Iyosi Foods Foods! I just placed an order (ID: ${orderId.slice(-8).toUpperCase()}). Please confirm my order. Thank you!`
       )
     : null;
 

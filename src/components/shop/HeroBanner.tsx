@@ -19,7 +19,7 @@ const DEFAULT_BANNERS: Banner[] = [
   {
     id: "default-1",
     title: "Premium Baking Flour,\nNow 15% Off",
-    subtitle: "Stock up your bakery with Iyosiola's finest grade.",
+    subtitle: "Stock up your bakery with Iyosi Foods's finest grade.",
     ctaText: "SHOP NOW",
     ctaLink: "/shop",
     badgeText: "Flash Sale 24h Only",

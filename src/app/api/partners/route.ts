@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     try {
       const { transporter } = await import("@/lib/email");
       await transporter.sendMail({
-        from: `"Iyosiola Partnerships" <${process.env.EMAIL_FROM || "israelmiracle12@gmail.com"}>`,
+        from: `"Iyosi Foods Partnerships" <${process.env.EMAIL_FROM || "israelmiracle12@gmail.com"}>`,
         to: process.env.EMAIL_FROM || "israelmiracle12@gmail.com",
         subject: `New Partner Application: ${companyName}`,
         text: `New distributor partnership application:\n\nCompany: ${companyName}\nContact: ${contactPerson}\nEmail: ${email}\nPhone: ${phone}\nAddress: ${address}\n\nDescription:\n${description}`,

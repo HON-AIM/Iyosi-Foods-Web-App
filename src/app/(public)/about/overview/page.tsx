@@ -3,8 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Overview | Iyosiola Group",
-  description: "Iyosiola Group - A leading Food and FMCG company processing, manufacturing, and distributing food produce across Nigeria.",
+  title: "Overview | Iyosi Foods Group",
+  description: "Iyosi Foods Group - A leading Food and FMCG company processing, manufacturing, and distributing food produce across Nigeria.",
 };
 
 export default function OverviewPage() {
@@ -21,7 +21,7 @@ export default function OverviewPage() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-6">Who We Are</h2>
           <p className="text-lg text-surface-700 leading-relaxed mb-6">
-            Iyosiola Group is a leading Food and Fast-moving Consumer Goods (FMCG) business which processes, 
+            Iyosi Foods Group is a leading Food and Fast-moving Consumer Goods (FMCG) business which processes, 
             manufactures, and distributes food produce as well as packaged food. Our business operations comprise of multiple divisions, 
             including Flour, Rice, Edible Oils, and Agro-Allied products.
           </p>

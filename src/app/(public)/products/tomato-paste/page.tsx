@@ -2,7 +2,7 @@ import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Tomato Paste Products | Iyosiola Group",
+  title: "Tomato Paste Products | Iyosi Foods Group",
   description: "Premium quality tomato paste and tomato-based products for household and industrial use.",
 };
 
@@ -20,7 +20,7 @@ export default function TomatoPastePage() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-6">Our Tomato Products</h2>
           <p className="text-lg text-surface-700 leading-relaxed mb-6">
-            Iyosiola Group offers premium quality tomato paste and tomato-based products that add 
+            Iyosi Foods Group offers premium quality tomato paste and tomato-based products that add 
             authentic rich flavor to your dishes. Our tomato products are carefully processed 
             to retain the natural taste, color, and nutritional value of fresh tomatoes.
           </p>

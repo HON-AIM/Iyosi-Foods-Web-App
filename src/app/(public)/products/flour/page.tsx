@@ -2,7 +2,7 @@ import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Flour Products | Iyosiola Group",
+  title: "Flour Products | Iyosi Foods Group",
   description: "Premium quality flour for baking, food processing, and household use. State-of-the-art flour milling.",
 };
 
@@ -20,7 +20,7 @@ export default function FlourPage() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-6">State-of-the-Art Flour Milling</h2>
           <p className="text-lg text-surface-700 leading-relaxed mb-6">
-            Iyosiola Group owns state-of-the-art flour milling facilities with high efficiency specifications for 
+            Iyosi Foods Group owns state-of-the-art flour milling facilities with high efficiency specifications for 
             energy saving and waste reduction. Our flour division is involved in the processing, manufacturing, 
             and distribution of flour for large-scale and small-scale use.
           </p>

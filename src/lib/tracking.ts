@@ -1,13 +1,13 @@
 import crypto from "crypto"
 
 /**
- * Generates a unique tracking number for Iyosiola Foods orders.
+ * Generates a unique tracking number for Iyosi Foods Foods orders.
  *
  * Format: IYF-YYYYMM-XXXXXXXX
  * Example: IYF-202508-A3F7K2B9
  *
  * Components:
- *   IYF = Company prefix (Iyosiola Foods)
+ *   IYF = Company prefix (Iyosi Foods Foods)
  *   YYYYMM = Year + Month (e.g., 202508 for August 2025)
  *   XXXXXXXX = 8 cryptographically random alphanumeric characters
  *

@@ -125,7 +125,7 @@ function SuccessMessage({ email, onReset }: SuccessMessageProps) {
         <div className="mt-6 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-xs text-blue-800">
             <strong>🔒 Security:</strong> Never share your reset link with anyone.
-            IYOSIOLA GROUP will never ask for your password via email.
+            Iyosi Foods GROUP will never ask for your password via email.
           </p>
         </div>
       </div>

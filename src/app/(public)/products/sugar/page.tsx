@@ -2,7 +2,7 @@ import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Sugar Products | Iyosiola Group",
+  title: "Sugar Products | Iyosi Foods Group",
   description: "Premium quality refined sugar products for industrial and household use. Leading sugar producer in Nigeria.",
 };
 
@@ -20,7 +20,7 @@ export default function SugarPage() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-6">Sugar Refining</h2>
           <p className="text-lg text-surface-700 leading-relaxed mb-6">
-            The Sugar Division of Iyosiola Group is a leading producer of sugar in West Africa, through the processing 
+            The Sugar Division of Iyosi Foods Group is a leading producer of sugar in West Africa, through the processing 
             and refining of raw sugar. Our operations comprise the plantation and refinery segments operating across 
             the value chain of the sugar industry, including the production, milling, processing, and refining of sugar 
             and its by-products.

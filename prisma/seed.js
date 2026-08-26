@@ -7,7 +7,7 @@ async function seed() {
   try {
     // Check if admin already exists
     const existingAdmin = await prisma.user.findUnique({
-      where: { email: 'admin@iyosiola.com' },
+      where: { email: 'admin@Iyosi Foods.com' },
     });
 
     if (existingAdmin) {
@@ -22,7 +22,7 @@ async function seed() {
     const admin = await prisma.user.create({
       data: {
         name: 'Admin',
-        email: 'admin@iyosiola.com',
+        email: 'admin@Iyosi Foods.com',
         password: hashedPassword,
         emailVerified: new Date(),
         role: 'ADMIN',
@@ -31,7 +31,7 @@ async function seed() {
     });
 
     console.log('✅ Admin user created successfully');
-    console.log('📧 Email: admin@iyosiola.com');
+    console.log('📧 Email: admin@Iyosi Foods.com');
     console.log('🔐 Password: Admin@123456');
     console.log('⚠️  Please change this password after first login');
   } catch (error) {

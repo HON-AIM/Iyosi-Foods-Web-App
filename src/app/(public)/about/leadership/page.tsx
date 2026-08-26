@@ -1,8 +1,8 @@
 import { type Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Our Leadership | Iyosiola Group",
-  description: "Meet the leadership team driving Iyosiola Group's vision and mission in Nigeria's food industry.",
+  title: "Our Leadership | Iyosi Foods Group",
+  description: "Meet the leadership team driving Iyosi Foods Group's vision and mission in Nigeria's food industry.",
 };
 
 export default function LeadershipPage() {
@@ -165,7 +165,7 @@ export default function LeadershipPage() {
             Join Our Team
           </h2>
           <p className="text-surface-600 mb-6 max-w-xl mx-auto">
-            Explore career opportunities and grow with Iyosiola Group
+            Explore career opportunities and grow with Iyosi Foods Group
           </p>
           <a href="/careers" className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">
             View Careers

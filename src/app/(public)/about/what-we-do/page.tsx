@@ -2,8 +2,8 @@ import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "What We Do | Iyosiola Group",
-  description: "Discover Iyosiola Group's operations in flour, rice, edible oils, pasta, and agro-allied products.",
+  title: "What We Do | Iyosi Foods Group",
+  description: "Discover Iyosi Foods Group's operations in flour, rice, edible oils, pasta, and agro-allied products.",
 };
 
 export default function WhatWeDoPage() {
@@ -19,7 +19,7 @@ export default function WhatWeDoPage() {
       <section className="container mx-auto px-4 py-12 md:py-16">
         <div className="max-w-4xl mx-auto">
           <p className="text-lg text-surface-700 leading-relaxed mb-8">
-            At Iyosiola Group, we take our inputs and utilise our unique competitive advantages to produce and manufacture 
+            At Iyosi Foods Group, we take our inputs and utilise our unique competitive advantages to produce and manufacture 
             high quality food produce and packaged food products, which we sell to the large and growing markets we serve across Nigeria.
           </p>
           <p className="text-lg text-surface-700 leading-relaxed mb-8">
@@ -146,7 +146,7 @@ export default function WhatWeDoPage() {
       <section className="bg-primary-900 text-white py-12 px-4 text-center">
         <h2 className="text-2xl md:text-3xl font-bold mb-4">Join Our Distribution Network</h2>
         <p className="text-primary-100 mb-6 max-w-xl mx-auto">
-          Become a partner and grow your business with Iyosiola Group
+          Become a partner and grow your business with Iyosi Foods Group
         </p>
         <Link href="/contact" className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">
           Contact Us

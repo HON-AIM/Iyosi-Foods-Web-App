@@ -2,8 +2,8 @@ import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Social Impact | Iyosiola Group",
-  description: "Iyosiola Group's community development initiatives, health & safety programs, and social responsibility.",
+  title: "Social Impact | Iyosi Foods Group",
+  description: "Iyosi Foods Group's community development initiatives, health & safety programs, and social responsibility.",
 };
 
 export default function SocialPage() {

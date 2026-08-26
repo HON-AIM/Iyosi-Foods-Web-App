@@ -2,8 +2,8 @@ import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Job Vacancies | Iyosiola Group",
-  description: "Explore job openings and career opportunities at Iyosiola Group.",
+  title: "Job Vacancies | Iyosi Foods Group",
+  description: "Explore job openings and career opportunities at Iyosi Foods Group.",
 };
 
 export default function JobsPage() {

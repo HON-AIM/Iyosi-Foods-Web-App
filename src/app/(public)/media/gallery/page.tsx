@@ -1,8 +1,8 @@
 import { type Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Photo Gallery | Iyosiola Group",
-  description: "Visual highlights and event images from Iyosiola Group.",
+  title: "Photo Gallery | Iyosi Foods Group",
+  description: "Visual highlights and event images from Iyosi Foods Group.",
 };
 
 export default function GalleryPage() {
@@ -73,7 +73,7 @@ export default function GalleryPage() {
         <div className="container mx-auto max-w-4xl text-center">
           <h2 className="text-2xl font-bold text-primary-900 mb-4">Share Your Moments</h2>
           <p className="text-surface-600 mb-6">
-            Tag us on social media with #IyosiolaGroup to be featured
+            Tag us on social media with #Iyosi FoodsGroup to be featured
           </p>
         </div>
       </section>

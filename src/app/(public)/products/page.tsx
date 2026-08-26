@@ -2,8 +2,8 @@ import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Our Products | Iyosiola Group",
-  description: "Explore Iyosiola Group's premium food products including flour, sugar, rice, edible oils, and agro-allied products.",
+  title: "Our Products | Iyosi Foods Group",
+  description: "Explore Iyosi Foods Group's premium food products including flour, sugar, rice, edible oils, and agro-allied products.",
 };
 
 export default function ProductsPage() {
@@ -67,7 +67,7 @@ export default function ProductsPage() {
             Food Divisions
           </h2>
           <p className="text-lg text-surface-700 leading-relaxed mb-12 text-center">
-            Iyosiola Group is a leading Food and Fast-moving Consumer Goods (FMCG) business which processes, 
+            Iyosi Foods Group is a leading Food and Fast-moving Consumer Goods (FMCG) business which processes, 
             manufactures, and distributes food produce across Nigeria. Our product portfolio spans multiple 
             divisions to meet the diverse needs of our customers.
           </p>

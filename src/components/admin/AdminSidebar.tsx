@@ -101,7 +101,7 @@ export default function AdminSidebar() {
       {/* Mobile Header */}
       <div className="md:hidden bg-white border-b border-gray-200 sticky top-0 z-50 flex items-center justify-between p-4">
         <Link href="/admin" className="font-bold text-lg text-gray-900">
-          IYOSIOLA
+          Iyosi Foods
         </Link>
         <button
           onClick={() => setIsMobileOpen(!isMobileOpen)}
@@ -126,7 +126,7 @@ export default function AdminSidebar() {
         {/* Logo */}
         <div className="hidden md:flex items-center justify-center h-16 border-b border-gray-200">
           <Link href="/admin" className="font-bold text-xl text-gray-900">
-            IYOSIOLA
+            Iyosi Foods
           </Link>
         </div>
 

@@ -162,7 +162,7 @@ export default function LoginClient() {
         </div>
 
         <h2 className="text-center text-3xl font-extrabold text-primary-900 dark:text-white">Welcome back</h2>
-        <p className="mt-2 text-center text-sm text-surface-600 dark:text-surface-400">Sign in to your Iyosiola account</p>
+        <p className="mt-2 text-center text-sm text-surface-600 dark:text-surface-400">Sign in to your Iyosi Foods account</p>
       </div>
 
       <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
