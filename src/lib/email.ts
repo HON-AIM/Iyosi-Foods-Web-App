@@ -1,4 +1,4 @@
-import nodemailer from "nodemailer";
+﻿import nodemailer from "nodemailer";
 
 function validateEmailConfig(): void {
   const requiredEnvVars = [
@@ -114,7 +114,7 @@ export async function sendAdminDirectMessage(
         
         <hr style="border: none; border-top: 1px solid #eaeaea; margin: 20px 0;" />
         <p style="color: #999; font-size: 12px; text-align: center;">
-          This email was sent by the Iyosi Foods Group Admin. Please do not reply directly to this email unless specifically instructed.
+          This email was sent by the Iyosi Foods LTD Admin. Please do not reply directly to this email unless specifically instructed.
         </p>
       </div>
     `,

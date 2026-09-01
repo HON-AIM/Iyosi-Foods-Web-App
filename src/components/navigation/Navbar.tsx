@@ -77,23 +77,27 @@ export default function Navbar({ showAnnouncement = true, announcementText }: Na
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-[72px] gap-4">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-6">
+        <div className="flex items-center justify-between h-[80px] gap-4">
           {/* Logo */}
-          <Link href="/" className="flex items-center shrink-0">
+          <Link href="/" className="flex items-center gap-2.5 shrink-0 mr-4">
             <Image
               src="/logo.jpg"
               alt="Iyosi Foods"
-              width={48}
-              height={48}
-              className="object-contain"
+              width={64}
+              height={64}
+              className="object-contain rounded-md"
               priority
             />
+            <span className="hidden sm:block font-extrabold text-primary-900 text-lg leading-tight">
+              Iyosi<br />
+              <span className="text-accent-500">Foods</span>
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
           <nav
-            className="hidden lg:flex items-center gap-0.5"
+            className="hidden lg:flex items-center gap-0"
             role="navigation"
             aria-label="Main navigation"
           >

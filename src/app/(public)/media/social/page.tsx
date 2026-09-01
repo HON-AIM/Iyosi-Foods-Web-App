@@ -1,44 +1,44 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Social Media | Iyosi Foods Group",
-  description: "Connect with Iyosi Foods Group on social media for real-time updates and engagement.",
+  title: "Social Media | Iyosi Foods LTD",
+  description: "Connect with Iyosi Foods LTD on social media for real-time updates and engagement.",
 };
 
 export default function SocialMediaPage() {
   const platforms = [
     {
       name: "Facebook",
-      handle: "@Iyosi FoodsGroup",
+      handle: "@iyosifoods",
       description: "Follow us for company news, product updates, and community stories.",
       color: "bg-blue-600 hover:bg-blue-700",
       followers: "50K+",
     },
     {
       name: "Twitter/X",
-      handle: "@Iyosi FoodsGroup",
+      handle: "@iyosifoods",
       description: "Real-time updates, industry news, and engagement with stakeholders.",
       color: "bg-black hover:bg-gray-800",
       followers: "30K+",
     },
     {
       name: "Instagram",
-      handle: "@Iyosi Foodsgroup",
+      handle: "@iyosifoods",
       description: "Visual stories, behind-the-scenes moments, and product highlights.",
       color: "bg-pink-600 hover:bg-pink-700",
       followers: "45K+",
     },
     {
       name: "LinkedIn",
-      handle: "Iyosi Foods Group",
+      handle: "Iyosi Foods LTD",
       description: "Professional updates, career opportunities, and corporate news.",
       color: "bg-blue-700 hover:bg-blue-800",
       followers: "20K+",
     },
     {
       name: "YouTube",
-      handle: "Iyosi Foods Group Channel",
+      handle: "Iyosi Foods LTD Channel",
       description: "Videos, product demos, interviews, and corporate presentations.",
       color: "bg-red-600 hover:bg-red-700",
       subscribers: "15K+",
@@ -46,9 +46,9 @@ export default function SocialMediaPage() {
   ];
 
   const recentPosts = [
-    { platform: "Twitter", content: "Excited to announce our new flour milling facility opening in Port Harcourt! #Iyosi FoodsGroup #MadeInNigeria", time: "2 hours ago" },
-    { platform: "Instagram", content: "Behind the scenes at our rice mill in Kano 🏭 #Iyosi FoodsGroup #NigerianMade", time: "5 hours ago" },
-    { platform: "Facebook", content: "Thank you to all our employees for making this achievement possible! 🎉 #TeamIyosi Foods", time: "1 day ago" },
+    { platform: "Twitter", content: "Excited to announce our new flour milling facility opening in Port Harcourt! #IyosiFoods #MadeInNigeria", time: "2 hours ago" },
+    { platform: "Instagram", content: "Behind the scenes at our rice mill in Kano 🏭 #IyosiFoods #NigerianMade", time: "5 hours ago" },
+    { platform: "Facebook", content: "Thank you to all our employees for making this achievement possible! 🎉 #TeamIyosiFoods", time: "1 day ago" },
     { platform: "LinkedIn", content: "We're hiring! Join our team and be part of Nigeria's fastest-growing FMCG company. [Link in bio] #Jobs #Hiring", time: "2 days ago" },
   ];
 
@@ -75,7 +75,7 @@ export default function SocialMediaPage() {
       <section className="container mx-auto px-4 py-12 md:py-16">
         <div className="max-w-4xl mx-auto">
           <p className="text-lg text-surface-700 leading-relaxed mb-12 text-center">
-            Follow Iyosi Foods Group on social media for the latest updates, news, product launches, 
+            Follow Iyosi Foods LTD on social media for the latest updates, news, product launches, 
             and behind-the-scenes content. We love engaging with our community!
           </p>
 
@@ -115,7 +115,7 @@ export default function SocialMediaPage() {
       <section className="container mx-auto px-4 py-12 md:py-16 text-center">
         <h2 className="text-2xl font-bold text-primary-900 mb-4">Join Our Community</h2>
         <p className="text-surface-600 mb-6 max-w-xl mx-auto">
-          Follow, like, and share to be part of the Iyosi Foods Group community
+          Follow, like, and share to be part of the Iyosi Foods LTD community
         </p>
         <Link href="/contact" className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">
           Contact Us

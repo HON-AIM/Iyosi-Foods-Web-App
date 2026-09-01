@@ -1,8 +1,8 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Edible Oil Products | Iyosi Foods Group",
+  title: "Edible Oil Products | Iyosi Foods LTD",
   description: "Pure and refined cooking oils for household and industrial use. Premium quality edible oils.",
 };
 
@@ -20,7 +20,7 @@ export default function OilPage() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-6">Our Edible Oils</h2>
           <p className="text-lg text-surface-700 leading-relaxed mb-6">
-            The Edible Oils division of Iyosi Foods Group specializes in the conversion of crude oil 
+            The Edible Oils division of Iyosi Foods LTD specializes in the conversion of crude oil 
             into high quality oil products including palm olein, stearin, and other refined 
             oils for direct and industrial uses.
           </p>

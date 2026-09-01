@@ -1,9 +1,9 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Job Vacancies | Iyosi Foods Group",
-  description: "Explore job openings and career opportunities at Iyosi Foods Group.",
+  title: "Job Vacancies | Iyosi Foods LTD",
+  description: "Explore job openings and career opportunities at Iyosi Foods LTD.",
 };
 
 export default function JobsPage() {

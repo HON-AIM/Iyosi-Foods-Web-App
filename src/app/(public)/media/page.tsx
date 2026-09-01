@@ -1,9 +1,9 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Media & Updates | Iyosi Foods Group",
-  description: "Latest news, press releases, blog articles, and media updates from Iyosi Foods Group.",
+  title: "Media & Updates | Iyosi Foods LTD",
+  description: "Latest news, press releases, blog articles, and media updates from Iyosi Foods LTD.",
 };
 
 export default function MediaPage() {
@@ -84,7 +84,7 @@ export default function MediaPage() {
           <div className="space-y-4">
             {[
               {
-                title: "Iyosi Foods Group Reports Record Growth in 2024",
+                title: "Iyosi Foods LTD Reports Record Growth in 2024",
                 date: "March 2024",
                 category: "Corporate News",
                 excerpt: "Achieving unprecedented revenue growth and expanding our distribution network across Nigeria.",
@@ -96,7 +96,7 @@ export default function MediaPage() {
                 excerpt: "State-of-the-art facility to increase production capacity and meet growing demand.",
               },
               {
-                title: "Iyosi Foods Group Wins Industry Excellence Award",
+                title: "Iyosi Foods LTD Wins Industry Excellence Award",
                 date: "January 2024",
                 category: "Awards",
                 excerpt: "Recognized for outstanding contributions to Nigeria's food security.",

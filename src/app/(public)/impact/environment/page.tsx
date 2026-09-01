@@ -1,9 +1,9 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Environmental Impact | Iyosi Foods Group",
-  description: "Iyosi Foods Group's commitment to environmental stewardship and sustainability in operations.",
+  title: "Environmental Impact | Iyosi Foods LTD",
+  description: "Iyosi Foods LTD's commitment to environmental stewardship and sustainability in operations.",
 };
 
 export default function EnvironmentPage() {

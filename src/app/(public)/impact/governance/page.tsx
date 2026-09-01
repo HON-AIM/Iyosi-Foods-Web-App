@@ -1,9 +1,9 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Governance | Iyosi Foods Group",
-  description: "Iyosi Foods Group's corporate governance practices, ethical standards, and leadership commitment.",
+  title: "Governance | Iyosi Foods LTD",
+  description: "Iyosi Foods LTD's corporate governance practices, ethical standards, and leadership commitment.",
 };
 
 export default function GovernancePage() {

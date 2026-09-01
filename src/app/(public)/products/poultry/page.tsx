@@ -1,8 +1,8 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Poultry & Agro-Allied Products | Iyosi Foods Group",
+  title: "Poultry & Agro-Allied Products | Iyosi Foods LTD",
   description: "Premium poultry feeds, agricultural products, and farming solutions. Complete agro-allied services.",
 };
 
@@ -20,7 +20,7 @@ export default function PoultryPage() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-6">Agro-Allied Operations</h2>
           <p className="text-lg text-surface-700 leading-relaxed mb-6">
-            Iyosi Foods Group&apos;s Agro-Allied division provides comprehensive agricultural solutions to farmers 
+            Iyosi Foods LTD&apos;s Agro-Allied division provides comprehensive agricultural solutions to farmers 
             across Nigeria. We are committed to supporting Nigeria&apos;s agricultural sector through the 
             provision of high-quality feeds, inputs, and technical support.
           </p>

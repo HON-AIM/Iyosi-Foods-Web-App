@@ -1,27 +1,27 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Press Releases | Iyosi Foods Group",
-  description: "Official press releases and announcements from Iyosi Foods Group.",
+  title: "Press Releases | Iyosi Foods LTD",
+  description: "Official press releases and announcements from Iyosi Foods LTD.",
 };
 
 export default function PressPage() {
   const pressReleases = [
     {
-      title: "Iyosi Foods Group Reports Record Revenue Growth in 2024",
+      title: "Iyosi Foods LTD Reports Record Revenue Growth in 2024",
       date: "March 2024",
       category: "Financial Results",
       excerpt: "Achieving unprecedented revenue growth of over 20% and expanding our distribution network across all 36 states in Nigeria. Profit after tax rises significantly.",
     },
     {
-      title: "Iyosi Foods Group Expands Flour Milling Operations",
+      title: "Iyosi Foods LTD Expands Flour Milling Operations",
       date: "February 2024",
       category: "Expansion",
       excerpt: "Commissioning of new state-of-the-art flour milling facility in Port Harcourt to increase production capacity and meet growing market demand.",
     },
     {
-      title: "Iyosi Foods Group Wins Multiple Industry Awards",
+      title: "Iyosi Foods LTD Wins Multiple Industry Awards",
       date: "January 2024",
       category: "Awards",
       excerpt: "Recognized as Best FMCG Brand and Most Trusted Food Company at the annual Industry Excellence Awards ceremony.",
@@ -33,13 +33,13 @@ export default function PressPage() {
       excerpt: "One of Nigeria's largest rice mills now operational, supporting local farmers and food security initiatives.",
     },
     {
-      title: "Iyosi Foods Group Partners with Local Farmers",
+      title: "Iyosi Foods LTD Partners with Local Farmers",
       date: "November 2023",
       category: "Partnership",
       excerpt: "Signing of out-grower scheme agreements with over 50,000 rice farmers in Kano and Jigawa states.",
     },
     {
-      title: "Iyosi Foods Group Achieves ISO Certification",
+      title: "Iyosi Foods LTD Achieves ISO Certification",
       date: "October 2023",
       category: "Quality",
       excerpt: "Company achieves ISO 9001:2015 and FSSC 22000 certifications for quality and food safety management systems.",
@@ -70,7 +70,7 @@ export default function PressPage() {
       <section className="container mx-auto px-4 py-12 md:py-16">
         <div className="max-w-4xl mx-auto">
           <p className="text-lg text-surface-700 leading-relaxed mb-12 text-center">
-            Stay updated with the latest news, announcements, and developments from Iyosi Foods Group. 
+            Stay updated with the latest news, announcements, and developments from Iyosi Foods LTD. 
             Our press releases cover financial results, expansions, partnerships, awards, and corporate initiatives.
           </p>
 

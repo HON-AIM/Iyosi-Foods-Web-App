@@ -1,14 +1,14 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Our History | Iyosi Foods Group",
-  description: "Discover the journey of Iyosi Foods Group from humble beginnings to becoming a leader in Nigeria's food industry.",
+  title: "Our History | Iyosi Foods LTD",
+  description: "Discover the journey of Iyosi Foods LTD from humble beginnings to becoming a leader in Nigeria's food industry.",
 };
 
 export default function HistoryPage() {
   const timeline = [
-    { year: "2015", title: "Foundation", desc: "Iyosi Foods Group was established as a trading company to undertake importation of food products and agricultural produce." },
+    { year: "2015", title: "Foundation", desc: "Iyosi Foods LTD was established as a trading company to undertake importation of food products and agricultural produce." },
     { year: "2017", title: "Entry into Flour Milling", desc: "We ventured into flour milling operations, establishing state-of-the-art processing facilities." },
     { year: "2019", title: "Expansion into Rice", desc: "Incorporated Iyosi Foods Rice Limited to source and distribute premium quality rice across Nigeria." },
     { year: "2021", title: "Diversification", desc: "Expanded operations to include Edible Oils and Agro-Allied products, becoming a full-line FMCG company." },
@@ -85,7 +85,7 @@ export default function HistoryPage() {
       <section className="container mx-auto px-4 py-12 md:py-16 text-center">
         <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-4">Our Journey Continues</h2>
         <p className="text-surface-600 mb-6 max-w-2xl mx-auto">
-          Today, Iyosi Foods Group stands as a testament to resilience, innovation, and unwavering 
+          Today, Iyosi Foods LTD stands as a testament to resilience, innovation, and unwavering 
           commitment to quality. We continue to expand our reach and impact across Nigeria, 
           nourishing lives and building a sustainable future.
         </p>

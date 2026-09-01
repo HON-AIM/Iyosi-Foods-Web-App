@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback, useRef } from "react";
 import { z } from "zod";
@@ -42,7 +42,7 @@ const CONTACT_CATEGORIES = [
 const CONTACT_INFO = {
   headquarters: {
     title: "Corporate Headquarters",
-    lines: ["Iyosi Foods Group Towers", "Central Business District", "Lagos, Nigeria"],
+    lines: ["Iyosi Foods LTD Towers", "Central Business District", "Lagos, Nigeria"],
   },
   phone: {
     title: "Phone",

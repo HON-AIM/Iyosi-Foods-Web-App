@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
@@ -118,7 +118,7 @@ export default function PartnersPage() {
             Why Become a Distributor
           </h2>
           <p className="text-lg text-surface-700 leading-relaxed mb-12 text-center">
-            Partner with Iyosi Foods Group and distribute our premium products across Nigeria. 
+            Partner with Iyosi Foods LTD and distribute our premium products across Nigeria. 
             We offer attractive margins, comprehensive support, and a mutually beneficial partnership.
           </p>
 

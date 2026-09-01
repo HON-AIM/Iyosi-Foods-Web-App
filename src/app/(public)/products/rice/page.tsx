@@ -1,8 +1,8 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Rice Products | Iyosi Foods Group",
+  title: "Rice Products | Iyosi Foods LTD",
   description: "Premium quality locally sourced and processed rice. One of the largest rice mills in Nigeria.",
 };
 
@@ -20,7 +20,7 @@ export default function RicePage() {
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl md:text-3xl font-bold text-primary-900 mb-6">Rice Milling Operations</h2>
           <p className="text-lg text-surface-700 leading-relaxed mb-6">
-            Iyosi Foods Group operates state-of-the-art rice milling facilities with substantial milling capacity, 
+            Iyosi Foods LTD operates state-of-the-art rice milling facilities with substantial milling capacity, 
             making us one of the largest rice processors in Nigeria. Our rice mills are equipped with 
             modern technology for parboiling, milling, and packaging to deliver premium quality rice.
           </p>

@@ -1,9 +1,9 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Blogs & Articles | Iyosi Foods Group",
-  description: "Insights, stories, and thought pieces from Iyosi Foods Group.",
+  title: "Blogs & Articles | Iyosi Foods LTD",
+  description: "Insights, stories, and thought pieces from Iyosi Foods LTD.",
 };
 
 export default function BlogsPage() {
@@ -53,7 +53,7 @@ export default function BlogsPage() {
       author: "Technology Team",
       date: "December 2023",
       category: "Technology",
-      excerpt: "Exploring the latest technology in food processing and how Iyosi Foods Group is adopting innovation.",
+      excerpt: "Exploring the latest technology in food processing and how Iyosi Foods LTD is adopting innovation.",
       readTime: "5 min read",
     },
     {
@@ -87,7 +87,7 @@ export default function BlogsPage() {
         <div className="max-w-4xl mx-auto">
           <p className="text-lg text-surface-700 leading-relaxed mb-12 text-center">
             Explore our collection of articles covering industry insights, company stories, 
-            sustainability initiatives, and thought leadership from the Iyosi Foods Group team.
+            sustainability initiatives, and thought leadership from the Iyosi Foods LTD team.
           </p>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

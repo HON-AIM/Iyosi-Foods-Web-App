@@ -73,9 +73,9 @@ const productCategories = [
 ];
 
 const stats: { value: number | string; suffix?: string; label: string }[] = [
-  { value: 15, suffix: "+", label: "Years of Excellence" },
+  { value: 5, suffix: "+", label: "Years of Excellence" },
   { value: 6, suffix: "", label: "Product Categories" },
-  { value: 500, suffix: "+", label: "Dedicated Employees" },
+  { value: 50, suffix: "+", label: "Dedicated Employees" },
   { value: "Nationwide", label: "Operational Reach" },
 ];
 
@@ -189,11 +189,11 @@ export default function HomePage() {
           <div className="container mx-auto text-center max-w-4xl">
             <h2 className="text-3xl md:text-5xl font-extrabold mb-6 leading-tight">
               Committed to Quality &<br />
-              <span className="text-accent-400">Nourishing Nigeria</span>
+              <span className="text-accent-400">Nourishing West Africa</span>
             </h2>
             <p className="text-lg text-surface-300 mb-10 leading-relaxed max-w-2xl mx-auto">
               At Iyosi Foods, we are passionate about delivering high-quality food products that meet the highest standards.
-              From our milling facilities to your table, quality is our promise.
+              From our milling facilities to tables across West Africa, quality is our promise.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

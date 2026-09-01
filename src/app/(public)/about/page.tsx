@@ -1,22 +1,22 @@
-import { type Metadata } from "next";
+﻿import { type Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "About Iyosi Foods Group | Premium Flour & Agro-Allied Products",
-  description: "Learn about Iyosi Foods Group's legacy of excellence in Agriculture, Logistics, and Manufacturing across Africa.",
-  keywords: "Iyosi Foods Group, flour milling, logistics, agro-allied, Nigerian company",
+  title: "About Iyosi Foods LTD | Premium Flour & Agro-Allied Products",
+  description: "Learn about Iyosi Foods LTD's legacy of excellence in Agriculture, Logistics, and Manufacturing across Africa.",
+  keywords: "Iyosi Foods LTD, flour milling, logistics, agro-allied, Nigerian company",
   openGraph: {
-    title: "About Iyosi Foods Group",
+    title: "About Iyosi Foods LTD",
     description: "A legacy of excellence. Driving value across Agriculture, Logistics, and Manufacturing.",
     type: "website",
-    url: "https://Iyosi Foodsgroup.com/about",
+    url: "https://iyosifoods.com/about",
     images: [
       {
         url: "/logo.jpg",
         width: 400,
         height: 400,
-        alt: "Iyosi Foods Group Logo",
+        alt: "Iyosi Foods LTD Logo",
       },
     ],
   },
@@ -31,7 +31,7 @@ export default function AboutPage() {
         role="banner"
       >
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 text-white">
-          About Iyosi Foods Group
+          About Iyosi Foods LTD
         </h1>
         <p className="text-lg md:text-xl text-primary-100 max-w-2xl mx-auto font-light leading-relaxed">
           A legacy of excellence. Driving value across Agriculture, Logistics, and Manufacturing.
@@ -45,7 +45,7 @@ export default function AboutPage() {
           <div className="relative w-full max-w-md aspect-square">
             <Image
               src="/logo.jpg"
-              alt="Iyosi Foods Group Corporate Logo"
+              alt="Iyosi Foods LTD Corporate Logo"
               fill
               priority
               className="object-contain"
@@ -62,7 +62,7 @@ export default function AboutPage() {
 
           <div className="space-y-4 text-base md:text-lg leading-relaxed">
             <p>
-              At <strong className="text-primary-900">Iyosi Foods Group</strong>, we are driven by a singular vision: 
+              At <strong className="text-primary-900">Iyosi Foods LTD</strong>, we are driven by a singular vision: 
               to be the cornerstone of Africa's economic development through diversified and sustainable business practices. 
               From our humble beginnings in agricultural trade, we have expanded into a formidable conglomerate.
             </p>
@@ -94,7 +94,7 @@ export default function AboutPage() {
       <section className="bg-primary-50 py-12 md:py-16 px-4 md:px-8">
         <div className="container mx-auto">
           <h3 className="text-2xl md:text-3xl font-bold text-primary-900 text-center mb-8">
-            Why Choose Iyosi Foods Group?
+            Why Choose Iyosi Foods LTD?
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
             <div className="bg-white p-6 rounded-xl shadow-sm">

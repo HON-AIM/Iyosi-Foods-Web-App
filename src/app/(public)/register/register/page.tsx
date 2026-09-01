@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useCallback, useRef, useEffect, Suspense } from "react";
 import Link from "next/link";
@@ -427,7 +427,7 @@ function RegisterForm() {
           Create account
         </h2>
         <p className="mt-2 text-sm text-surface-600 dark:text-surface-400">
-          Join Iyosi Foods GROUP today
+          Join Iyosi Foods LTD today
         </p>
       </div>
 

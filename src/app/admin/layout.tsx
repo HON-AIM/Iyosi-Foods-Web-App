@@ -1,4 +1,4 @@
-import { redirect } from "next/navigation";
+﻿import { redirect } from "next/navigation";
 import { type Metadata } from "next";
 import type { Session } from "next-auth";
 import { auth } from "@/lib/auth";
@@ -7,7 +7,7 @@ import AdminLayoutClient from "./AdminLayoutClient";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Admin Dashboard | Iyosi Foods GROUP",
+  title: "Admin Dashboard | Iyosi Foods LTD",
   description: "Manage products, orders, customers, and site content",
   robots: {
     index: false, // Don't index admin pages
