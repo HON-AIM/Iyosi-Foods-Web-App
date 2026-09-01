@@ -323,6 +323,16 @@ model StoreSettings {
   flashSaleTitle   String?  @default("Flash Sale")
   flashSaleActive  Boolean  @default(false)
   updatedAt        DateTime @updatedAt
+
+  // NEW: Website content editable by admin
+  yearsExcellence    Int      @default(5)
+  productCategories  Int      @default(6)
+  dedicatedEmployees Int      @default(50)
+  operationalReach   String   @default("Nationwide")
+  ctaHeadline        String?  @default("Committed to Quality & Nourishing West Africa")
+  ctaSubtext         String?  @default("From our milling facilities to tables across West Africa, quality is our promise.")
+  vacanciesActive    Boolean  @default(false)
+  vacanciesMessage   String?  @default("No available positions for now. Check back soon for exciting opportunities.")
 }
 
 // Job Applications (CV submissions)

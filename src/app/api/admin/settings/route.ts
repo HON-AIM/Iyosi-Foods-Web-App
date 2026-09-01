@@ -63,6 +63,30 @@ const StoreSettingsSchema = z.object({
     .datetime({ message: "Invalid date format" })
     .optional()
     .nullable(),
+  yearsExcellence: z.number().int().nonnegative().optional(),
+  productCategories: z.number().int().nonnegative().optional(),
+  dedicatedEmployees: z.number().int().nonnegative().optional(),
+  operationalReach: z
+    .string()
+    .max(50, "Operational reach must be 50 characters or less")
+    .trim()
+    .optional(),
+  ctaHeadline: z
+    .string()
+    .max(200, "CTA headline must be 200 characters or less")
+    .trim()
+    .optional(),
+  ctaSubtext: z
+    .string()
+    .max(500, "CTA subtext must be 500 characters or less")
+    .trim()
+    .optional(),
+  vacanciesActive: z.boolean().optional(),
+  vacanciesMessage: z
+    .string()
+    .max(500, "Vacancies message must be 500 characters or less")
+    .trim()
+    .optional(),
 });
 
 type StoreSettings = z.infer<typeof StoreSettingsSchema>;
@@ -94,20 +118,30 @@ export async function GET(request: NextRequest) {
     if (!settings) {
       return NextResponse.json(
         {
-          id: "global",
-          announcementText: "",
-          storeName: "Iyosi Foods",
-          storeDescription: "",
-          storeEmail: "",
-          storePhone: "",
-          storeAddress: "",
-          maintenanceMode: false,
-          maintenanceMessage: "",
-          deliveryFee: 0,
-          minimumOrderAmount: 0,
-          taxPercentage: 0,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          settings: {
+            id: "global",
+            announcementText: "",
+            storeName: "Iyosi Foods",
+            storeDescription: "",
+            storeEmail: "",
+            storePhone: "",
+            storeAddress: "",
+            maintenanceMode: false,
+            maintenanceMessage: "",
+            deliveryFee: 0,
+            minimumOrderAmount: 0,
+            taxPercentage: 0,
+            yearsExcellence: 5,
+            productCategories: 6,
+            dedicatedEmployees: 50,
+            operationalReach: "Nationwide",
+            ctaHeadline: "Committed to Quality & Nourishing West Africa",
+            ctaSubtext: "From our milling facilities to tables across West Africa, quality is our promise.",
+            vacanciesActive: false,
+            vacanciesMessage: "No available positions for now. Check back soon for exciting opportunities.",
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          },
         },
         { status: 200 }
       );
@@ -118,7 +152,7 @@ export async function GET(request: NextRequest) {
       timestamp: new Date().toISOString(),
     });
 
-    return NextResponse.json(settings, { status: 200 });
+    return NextResponse.json({ settings }, { status: 200 });
   } catch (error) {
     console.error("[ERROR] Fetch settings failed:", {
       error: error instanceof Error ? error.message : String(error),

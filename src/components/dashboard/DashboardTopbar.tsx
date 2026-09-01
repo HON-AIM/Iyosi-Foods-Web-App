@@ -72,7 +72,7 @@ export default function DashboardTopbar({ userName, userEmail }: Props) {
           <div className="w-8 h-8 bg-green-700 rounded-lg flex items-center justify-center flex-shrink-0">
             <span className="text-white font-black text-xs">IF</span>
           </div>
-          <span className="font-bold text-gray-900 text-sm hidden sm:block">Iyosi Foods Foods</span>
+          <span className="font-bold text-gray-900 text-sm hidden sm:block">Iyosi Foods LTD</span>
           <span className="text-[10px] font-semibold text-green-700 bg-green-50 border border-green-200 px-2 py-0.5 rounded-full hidden sm:block">
             My Account
           </span>

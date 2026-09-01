@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Iyosi Foods Foods — Premium Food Products in Nigeria";
+export const alt = "Iyosi Foods LTD — Premium Food Products in Nigeria";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -30,7 +30,7 @@ export default function Image() {
             marginBottom: 16,
           }}
         >
-          Iyosi Foods Foods
+          Iyosi Foods LTD
         </div>
         <div
           style={{

@@ -67,14 +67,14 @@ export async function generateMetadata({
   }).format(product.price);
 
   return {
-    title: `${product.name} | Iyosi Foods Foods`,
+    title: `${product.name} | Iyosi Foods LTD`,
     description: metaDescription,
     keywords: [
       product.name,
       `${product.name} Nigeria`,
       `buy ${product.name} online`,
       categoryLabel,
-      "Iyosi Foods Foods",
+      "Iyosi Foods LTD",
       "flour Nigeria",
     ],
     openGraph: {
@@ -84,7 +84,7 @@ export async function generateMetadata({
       url: `${BASE_URL}/shop/product/${id}`,
       images: product.image
         ? [{ url: product.image, width: 800, height: 800, alt: product.name }]
-        : [{ url: "/og-shop.jpg", width: 1200, height: 630, alt: "Iyosi Foods Foods Shop" }],
+        : [{ url: "/og-shop.jpg", width: 1200, height: 630, alt: "Iyosi Foods LTD Shop" }],
     },
     twitter: {
       card: "summary_large_image",
@@ -135,7 +135,7 @@ export default async function ProductDetailPage({
     name: product.name,
     description: product.description,
     image: product.image || undefined,
-    brand: { "@type": "Brand", name: "Iyosi Foods Foods" },
+    brand: { "@type": "Brand", name: "Iyosi Foods LTD" },
     offers: {
       "@type": "Offer",
       url: `${baseUrl}/shop/product/${product.id}`,
@@ -145,7 +145,7 @@ export default async function ProductDetailPage({
         product.stock > 0
           ? "https://schema.org/InStock"
           : "https://schema.org/OutOfStock",
-      seller: { "@type": "Organization", name: "Iyosi Foods Foods" },
+      seller: { "@type": "Organization", name: "Iyosi Foods LTD" },
     },
     ...(avgRatingValue > 0 && {
       aggregateRating: {

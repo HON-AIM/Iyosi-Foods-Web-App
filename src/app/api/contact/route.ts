@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     try {
       await sendEmail({
         to: email,
-        subject: "We received your message - Iyosi Foods Foods",
+        subject: "We received your message - Iyosi Foods LTD",
         template: "contact-confirmation",
         data: { subject, message },
       });
@@ -48,8 +48,8 @@ export async function POST(request: NextRequest) {
     try {
       const { transporter } = await import("@/lib/email");
       await transporter.sendMail({
-        from: `"Iyosi Foods Foods Contact" <${process.env.EMAIL_FROM || "israelmiracle12@gmail.com"}>`,
-        to: process.env.EMAIL_FROM || "israelmiracle12@gmail.com",
+        from: `"Iyosi Foods LTD Contact" <${process.env.EMAIL_FROM}>`,
+        to: process.env.CONTACT_TO_EMAIL || process.env.EMAIL_FROM || "iyosifoods@gmail.com",
         subject: `[Contact Form] ${category} - ${subject}`,
         text: `New contact form submission:\n\nName: ${fullName}\nEmail: ${email}\nPhone: ${phone || "N/A"}\nCategory: ${category}\nSubject: ${subject}\nMessage:\n${message}`,
       });

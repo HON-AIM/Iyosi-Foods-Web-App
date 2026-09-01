@@ -26,6 +26,7 @@ interface NavItem {
   href: string;
   icon: React.ReactNode;
   requiredRole?: string[];
+  external?: boolean;
 }
 
 const NAV_ITEMS: NavItem[] = [
@@ -75,9 +76,10 @@ const NAV_ITEMS: NavItem[] = [
     icon: <Settings className="h-5 w-5" />,
   },
   {
-    label: "View Store",
-    href: "/dashboard/shop",
+    label: "View Public Store",
+    href: "/shop",
     icon: <ExternalLink className="h-5 w-5" />,
+    external: true,
   },
 ];
 
@@ -133,8 +135,24 @@ export default function AdminSidebar() {
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-4 space-y-2">
           {NAV_ITEMS.map((item) => {
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
-            return (
+            const isActive =
+              pathname === item.href || pathname.startsWith(item.href + "/");
+            return item.external ? (
+              <a
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setIsMobileOpen(false)}
+                className="flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-colors text-gray-700 hover:bg-gray-100"
+              >
+                <span className="flex-shrink-0">{item.icon}</span>
+                <span>{item.label}</span>
+                <span className="ml-auto text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
+                  ↗
+                </span>
+              </a>
+            ) : (
               <Link
                 key={item.href}
                 href={item.href}

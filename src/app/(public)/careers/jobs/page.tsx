@@ -1,12 +1,29 @@
 ﻿import { type Metadata } from "next";
 import Link from "next/link";
+import { prisma } from "@/lib/db";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Job Vacancies | Iyosi Foods LTD",
   description: "Explore job openings and career opportunities at Iyosi Foods LTD.",
 };
 
-export default function JobsPage() {
+export default async function JobsPage() {
+  const siteSettings = await prisma.storeSettings
+    .findUnique({
+      where: { id: "global" },
+      select: {
+        vacanciesActive: true,
+        vacanciesMessage: true,
+      },
+    })
+    .catch(() => null);
+
+  const vacanciesActive = siteSettings?.vacanciesActive;
+  const vacanciesMessage =
+    siteSettings?.vacanciesMessage ??
+    "No available positions for now. Check back soon for exciting opportunities.";
   const departments = [
     {
       name: "Operations",
@@ -96,6 +113,19 @@ export default function JobsPage() {
 
       <section className="container mx-auto px-4 py-12 md:py-16">
         <div className="max-w-4xl mx-auto">
+          {!vacanciesActive ? (
+            <div className="bg-white rounded-xl shadow-sm border border-surface-100 p-10 text-center">
+              <div className="text-4xl mb-4">🔒</div>
+              <h2 className="text-2xl font-bold text-primary-900 mb-2">Vacancies Currently Closed</h2>
+              <p className="text-surface-600 max-w-md mx-auto">{vacanciesMessage}</p>
+              <div className="mt-8">
+                <Link href="/careers/submit-cv" className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">
+                  Submit Your CV
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <>
           <div className="flex flex-wrap gap-4 mb-8">
             <input
               type="text"
@@ -156,8 +186,10 @@ export default function JobsPage() {
               </div>
             ))}
           </div>
+            </>
+          )}
         </div>
-      </section>
+</section>
 
       <section className="bg-primary-50 py-12 px-4">
         <div className="container mx-auto max-w-4xl text-center">

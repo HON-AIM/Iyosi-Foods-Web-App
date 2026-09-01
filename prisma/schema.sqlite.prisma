@@ -294,7 +294,18 @@ model StoreSettings {
   id               String   @id @default("global")
   announcementText String?
   flashSaleEndTime DateTime?
+  flashSaleTitle   String?  @default("Flash Sale")
+  flashSaleActive  Boolean  @default(false)
   updatedAt        DateTime @updatedAt
+
+  yearsExcellence    Int      @default(5)
+  productCategories  Int      @default(6)
+  dedicatedEmployees Int      @default(50)
+  operationalReach   String   @default("Nationwide")
+  ctaHeadline        String?  @default("Committed to Quality & Nourishing West Africa")
+  ctaSubtext         String?  @default("From our milling facilities to tables across West Africa, quality is our promise.")
+  vacanciesActive    Boolean  @default(false)
+  vacanciesMessage   String?  @default("No available positions for now. Check back soon for exciting opportunities.")
 }
 
 model JobApplication {

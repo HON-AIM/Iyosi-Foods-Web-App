@@ -7,6 +7,9 @@ import ScrollReveal, {
   StaggerItem,
   CountUp,
 } from "@/components/ui/ScrollReveal";
+import { prisma } from "@/lib/db";
+
+export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Iyosi Foods | Premium Food Products in Nigeria",
@@ -72,13 +75,6 @@ const productCategories = [
   },
 ];
 
-const stats: { value: number | string; suffix?: string; label: string }[] = [
-  { value: 5, suffix: "+", label: "Years of Excellence" },
-  { value: 6, suffix: "", label: "Product Categories" },
-  { value: 50, suffix: "+", label: "Dedicated Employees" },
-  { value: "Nationwide", label: "Operational Reach" },
-];
-
 const highlights = [
   {
     title: "Quality Assured",
@@ -103,7 +99,38 @@ const highlights = [
   },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const siteSettings = await prisma.storeSettings
+    .findUnique({
+      where: { id: "global" },
+      select: {
+        yearsExcellence: true,
+        dedicatedEmployees: true,
+        productCategories: true,
+        operationalReach: true,
+        ctaHeadline: true,
+        ctaSubtext: true,
+      },
+    })
+    .catch(() => null);
+
+  const stats: { value: number | string; suffix?: string; label: string }[] = [
+    { value: siteSettings?.yearsExcellence ?? 5, suffix: "+", label: "Years of Excellence" },
+    { value: siteSettings?.productCategories ?? 6, suffix: "", label: "Product Categories" },
+    { value: siteSettings?.dedicatedEmployees ?? 50, suffix: "+", label: "Dedicated Employees" },
+    { value: siteSettings?.operationalReach ?? "Nationwide", label: "Operational Reach" },
+  ];
+
+  const ctaHeadline =
+    siteSettings?.ctaHeadline ??
+    "Committed to Quality & Nourishing West Africa";
+  const ctaSubtext =
+    siteSettings?.ctaSubtext ??
+    "From our milling facilities to tables across West Africa, quality is our promise.";
+  const ctaHeadlineParts = ctaHeadline.split(" & ");
+  const ctaMain = ctaHeadlineParts[0] ?? ctaHeadline;
+  const ctaHighlight = ctaHeadlineParts.slice(1).join(" & ");
+
   return (
     <div className="flex flex-col min-h-screen">
       <HeroSlideshow />
@@ -188,12 +215,18 @@ export default function HomePage() {
         <section className="bg-primary-900 text-white py-20 px-4 md:px-8">
           <div className="container mx-auto text-center max-w-4xl">
             <h2 className="text-3xl md:text-5xl font-extrabold mb-6 leading-tight">
-              Committed to Quality &<br />
-              <span className="text-accent-400">Nourishing West Africa</span>
+              {ctaMain.trim()}
+              {ctaHighlight.trim() && (
+                <>
+                  {" "}
+                  <br />
+                  <span className="text-accent-400">{ctaHighlight.trim()}</span>
+                </>
+              )}
             </h2>
             <p className="text-lg text-surface-300 mb-10 leading-relaxed max-w-2xl mx-auto">
               At Iyosi Foods, we are passionate about delivering high-quality food products that meet the highest standards.
-              From our milling facilities to tables across West Africa, quality is our promise.
+              {ctaSubtext}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link

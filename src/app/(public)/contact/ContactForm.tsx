@@ -51,7 +51,7 @@ const CONTACT_INFO = {
   },
   email: {
     title: "Email",
-    address: "iyosi_foods@gmail.com",
+    address: "iyosifoods@gmail.com",
   },
   hours: {
     title: "Business Hours",

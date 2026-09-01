@@ -3,7 +3,7 @@ export const WHATSAPP_NUMBER =
   process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? "2348012345678";
 
 export const DEFAULT_WHATSAPP_MESSAGE =
-  "Hello Iyosi Foods Foods! I'd like to enquire about your products.";
+  "Hello Iyosi Foods LTD! I'd like to enquire about your products.";
 
 export function buildWhatsAppUrl(message: string): string {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;

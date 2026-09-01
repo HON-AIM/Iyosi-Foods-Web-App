@@ -52,9 +52,9 @@ async function enrichWithRatings(
 }
 
 export const metadata: Metadata = {
-  title: "Shop Premium Flour Online | Iyosi Foods Foods",
+  title: "Shop Premium Flour Online | Iyosi Foods LTD",
   description:
-    "Shop premium quality flour, semolina, wheat products, and baking essentials from Iyosi Foods Foods. Fresh products delivered to your doorstep across Nigeria.",
+    "Shop premium quality flour, semolina, wheat products, and baking essentials from Iyosi Foods LTD. Fresh products delivered to your doorstep across Nigeria.",
   keywords: [
     "buy flour online Nigeria",
     "premium flour",
@@ -65,10 +65,10 @@ export const metadata: Metadata = {
     "baking essentials Nigeria",
   ],
   openGraph: {
-    title: "Shop Premium Flour Online | Iyosi Foods Foods",
+    title: "Shop Premium Flour Online | Iyosi Foods LTD",
     description: "Shop premium quality flour, semolina, and baking essentials. Fresh products delivered across Nigeria.",
     type: "website",
-    images: [{ url: "/og-shop.jpg", width: 1200, height: 630, alt: "Iyosi Foods Foods Shop" }],
+    images: [{ url: "/og-shop.jpg", width: 1200, height: 630, alt: "Iyosi Foods LTD Shop" }],
   },
 };
 
