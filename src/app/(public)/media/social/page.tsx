@@ -11,6 +11,7 @@ export default function SocialMediaPage() {
     {
       name: "Facebook",
       handle: "@iyosifoods",
+      url: "https://www.facebook.com/iyosifoods",
       description: "Follow us for company news, product updates, and community stories.",
       color: "bg-blue-600 hover:bg-blue-700",
       followers: "50K+",
@@ -18,6 +19,7 @@ export default function SocialMediaPage() {
     {
       name: "Twitter/X",
       handle: "@iyosifoods",
+      url: "https://www.x.com/iyosifoods",
       description: "Real-time updates, industry news, and engagement with stakeholders.",
       color: "bg-black hover:bg-gray-800",
       followers: "30K+",
@@ -25,20 +27,23 @@ export default function SocialMediaPage() {
     {
       name: "Instagram",
       handle: "@iyosifoods",
+      url: "https://www.instagram.com/iyosifoods",
       description: "Visual stories, behind-the-scenes moments, and product highlights.",
-      color: "bg-pink-600 hover:bg-pink-700",
+      color: "bg-gradient-to-br from-purple-600 to-pink-500 hover:from-purple-700 hover:to-pink-600",
       followers: "45K+",
     },
     {
       name: "LinkedIn",
       handle: "Iyosi Foods LTD",
+      url: "https://www.linkedin.com/company/iyosifoods",
       description: "Professional updates, career opportunities, and corporate news.",
       color: "bg-blue-700 hover:bg-blue-800",
       followers: "20K+",
     },
     {
       name: "YouTube",
-      handle: "Iyosi Foods LTD Channel",
+      handle: "@iyosifoods",
+      url: "https://www.youtube.com/@iyosifoods",
       description: "Videos, product demos, interviews, and corporate presentations.",
       color: "bg-red-600 hover:bg-red-700",
       subscribers: "15K+",
@@ -46,8 +51,8 @@ export default function SocialMediaPage() {
   ];
 
   const recentPosts = [
-    { platform: "Twitter", content: "Excited to announce our new flour milling facility opening in Port Harcourt! #IyosiFoods #MadeInNigeria", time: "2 hours ago" },
-    { platform: "Instagram", content: "Behind the scenes at our rice mill in Kano 🏭 #IyosiFoods #NigerianMade", time: "5 hours ago" },
+    { platform: "Twitter", content: "Excited to announce our new flour milling facility opening in Port Harcourt! #IyosiFoodsLTD #MadeInNigeria", time: "2 hours ago" },
+    { platform: "Instagram", content: "Behind the scenes at our rice mill in Kano 🏭 #IyosiFoodsLTD #NigerianMade", time: "5 hours ago" },
     { platform: "Facebook", content: "Thank you to all our employees for making this achievement possible! 🎉 #TeamIyosiFoods", time: "1 day ago" },
     { platform: "LinkedIn", content: "We're hiring! Join our team and be part of Nigeria's fastest-growing FMCG company. [Link in bio] #Jobs #Hiring", time: "2 days ago" },
   ];
@@ -72,6 +77,12 @@ export default function SocialMediaPage() {
         </p>
       </section>
 
+      <div className="max-w-4xl mx-auto mt-0 mb-6 px-4">
+        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center text-sm text-blue-700">
+          📢 For live social media feeds, follow us directly on each platform using the links below.
+        </div>
+      </div>
+
       <section className="container mx-auto px-4 py-12 md:py-16">
         <div className="max-w-4xl mx-auto">
           <p className="text-lg text-surface-700 leading-relaxed mb-12 text-center">
@@ -81,15 +92,24 @@ export default function SocialMediaPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {platforms.map((platform, i) => (
-              <div key={i} className="bg-white p-6 rounded-xl shadow-sm border border-surface-100">
+              <a
+                key={i}
+                href={platform.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white p-6 rounded-xl shadow-sm border border-surface-100 hover:shadow-md hover:border-accent-300 transition-all block group"
+              >
                 <div className={`w-12 h-12 ${platform.color} rounded-full flex items-center justify-center mb-4 text-white`}>
                   <SocialIcon name={platform.name} />
                 </div>
                 <h3 className="text-lg font-bold text-primary-900 mb-1">{platform.name}</h3>
                 <p className="text-accent-600 text-sm font-medium mb-2">{platform.handle}</p>
                 <p className="text-surface-600 text-sm mb-3">{platform.description}</p>
-                <p className="text-xs text-surface-500">{platform.followers || platform.subscribers} {platform.followers ? 'followers' : 'subscribers'}</p>
-              </div>
+                <div className="mt-3 flex items-center justify-between">
+                  <p className="text-xs text-surface-500">{platform.followers || platform.subscribers} {platform.followers ? "followers" : "subscribers"}</p>
+                  <span className="text-xs font-bold text-accent-600 group-hover:text-accent-700">Follow →</span>
+                </div>
+              </a>
             ))}
           </div>
         </div>

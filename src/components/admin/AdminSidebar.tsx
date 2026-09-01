@@ -16,8 +16,8 @@ import {
   LogOut,
   ImageIcon,
   ExternalLink,
-  Store,
   Zap,
+  FileText,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 
@@ -69,6 +69,11 @@ const NAV_ITEMS: NavItem[] = [
     label: "Flash Sale",
     href: "/admin/flash-sale",
     icon: <Zap className="h-5 w-5" />,
+  },
+  {
+    label: "Blogs",
+    href: "/admin/blogs",
+    icon: <FileText className="h-5 w-5" />,
   },
   {
     label: "Settings",

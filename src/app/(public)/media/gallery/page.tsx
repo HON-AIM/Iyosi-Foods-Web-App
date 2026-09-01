@@ -8,25 +8,28 @@ export const metadata: Metadata = {
 export default function GalleryPage() {
   const categories = [
     "Corporate Events",
-    "_factory",
+    "Factory",
     "Community",
     "Awards",
     "Products",
   ];
 
+  // ⚡ TO ADD REAL PHOTOS: Replace image: null with the actual image URL
+  // Upload images via Admin → Products (upload endpoint) and paste the blob URL here
+  // Future enhancement: Move this to a DB model for full admin control
   const galleryItems = [
-    { title: "Annual General Meeting 2024", category: "Corporate Events", icon: "🏢" },
-    { title: "Port Harcourt Facility Tour", category: "Corporate Events", icon: "🏭" },
-    { title: "Flour Production Line", category: "_factory", icon: "🌾" },
-    { title: "Rice Milling Operations", category: "_factory", icon: "🍚" },
-    { title: "Sugar Refinery", category: "_factory", icon: "🧂" },
-    { title: "Community Outreach Program", category: "Community", icon: "🤝" },
-    { title: " farmers Training", category: "Community", icon: "👨‍🌾" },
-    { title: "Industry Awards Ceremony", category: "Awards", icon: "🏆" },
-    { title: "Product Showcase", category: "Products", icon: "📦" },
-    { title: "Quality Inspection", category: "Products", icon: "✅" },
-    { title: "Leadership Team", category: "Corporate Events", icon: "👔" },
-    { title: "Distribution Center", category: "_factory", icon: "🚚" },
+    { title: "Annual General Meeting 2025", category: "Corporate Events", icon: "🏢", image: null },
+    { title: "Port Harcourt Facility Tour", category: "Corporate Events", icon: "🏭", image: null },
+    { title: "Flour Production Line", category: "Factory", icon: "🌾", image: null },
+    { title: "Rice Milling Operations", category: "Factory", icon: "🍚", image: null },
+    { title: "Sugar Refinery", category: "Factory", icon: "🧂", image: null },
+    { title: "Community Outreach Program", category: "Community", icon: "🤝", image: null },
+    { title: "Farmers Training", category: "Community", icon: "👨‍🌾", image: null },
+    { title: "Industry Awards Ceremony", category: "Awards", icon: "🏆", image: null },
+    { title: "Product Showcase", category: "Products", icon: "📦", image: null },
+    { title: "Quality Inspection", category: "Products", icon: "✅", image: null },
+    { title: "Leadership Team", category: "Corporate Events", icon: "👔", image: null },
+    { title: "Distribution Center", category: "Factory", icon: "🚚", image: null },
   ];
 
   return (
@@ -39,7 +42,7 @@ export default function GalleryPage() {
       </section>
 
       <section className="container mx-auto px-4 py-12 md:py-16">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             {categories.map((cat, i) => (
               <button
@@ -55,10 +58,32 @@ export default function GalleryPage() {
             {galleryItems.map((item, i) => (
               <div
                 key={i}
-                className="aspect-square bg-white rounded-xl shadow-sm border border-surface-100 hover:shadow-lg hover:border-accent-300 transition-all cursor-pointer flex flex-col items-center justify-center"
+                className="group aspect-square bg-white rounded-xl shadow-sm border border-surface-100 hover:shadow-lg hover:border-accent-300 transition-all cursor-pointer overflow-hidden flex flex-col items-center justify-center relative"
               >
-                <span className="text-4xl mb-2">{item.icon}</span>
-                <span className="text-xs text-center text-surface-700 px-2">{item.title}</span>
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  />
+                ) : (
+                  <div className="flex flex-col items-center justify-center p-4 text-center">
+                    <span className="text-4xl mb-2">{item.icon}</span>
+                    <span className="text-xs text-surface-600 font-medium">
+                      {item.title}
+                    </span>
+                    <span className="text-[10px] text-surface-400 mt-0.5 uppercase tracking-wide">
+                      {item.category}
+                    </span>
+                  </div>
+                )}
+                {item.image && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3">
+                    <span className="text-white text-xs font-semibold">
+                      {item.title}
+                    </span>
+                  </div>
+                )}
               </div>
             ))}
           </div>
@@ -73,7 +98,7 @@ export default function GalleryPage() {
         <div className="container mx-auto max-w-4xl text-center">
           <h2 className="text-2xl font-bold text-primary-900 mb-4">Share Your Moments</h2>
           <p className="text-surface-600 mb-6">
-            Tag us on social media with #IyosiFoods to be featured
+            Tag us on social media with #IyosiFoodsLTD to be featured
           </p>
         </div>
       </section>

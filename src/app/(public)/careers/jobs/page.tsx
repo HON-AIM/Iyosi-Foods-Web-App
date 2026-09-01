@@ -1,215 +1,111 @@
-﻿import { type Metadata } from "next";
+﻿import { prisma } from "@/lib/db";
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { type Metadata } from "next";
 
-export const revalidate = 300;
+export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "Job Vacancies | Iyosi Foods LTD",
-  description: "Explore job openings and career opportunities at Iyosi Foods LTD.",
+  description: "Explore career opportunities at Iyosi Foods LTD.",
 };
 
 export default async function JobsPage() {
-  const siteSettings = await prisma.storeSettings
+  const settings = await prisma.storeSettings
     .findUnique({
       where: { id: "global" },
-      select: {
-        vacanciesActive: true,
-        vacanciesMessage: true,
-      },
+      select: { vacanciesActive: true, vacanciesMessage: true },
     })
     .catch(() => null);
 
-  const vacanciesActive = siteSettings?.vacanciesActive;
+  const vacanciesActive = settings?.vacanciesActive ?? false;
   const vacanciesMessage =
-    siteSettings?.vacanciesMessage ??
-    "No available positions for now. Check back soon for exciting opportunities.";
-  const departments = [
-    {
-      name: "Operations",
-      jobs: 5,
-      icon: "⚙️",
-    },
-    {
-      name: "Sales & Marketing",
-      jobs: 8,
-      icon: "📈",
-    },
-    {
-      name: "Finance",
-      jobs: 3,
-      icon: "💰",
-    },
-    {
-      name: "Human Resources",
-      jobs: 2,
-      icon: "👥",
-    },
-    {
-      name: "Production",
-      jobs: 12,
-      icon: "🏭",
-    },
-    {
-      name: "Logistics",
-      jobs: 6,
-      icon: "🚚",
-    },
-  ];
-
-  const recentJobs = [
-    {
-      title: "Production Manager",
-      department: "Production",
-      location: "Port Harcourt, Rivers State",
-      type: "Full-time",
-      deadline: "April 30, 2024",
-    },
-    {
-      title: "Sales Executive",
-      department: "Sales & Marketing",
-      location: "Lagos",
-      type: "Full-time",
-      deadline: "April 25, 2024",
-    },
-    {
-      title: "Finance Analyst",
-      department: "Finance",
-      location: "Lagos",
-      type: "Full-time",
-      deadline: "April 28, 2024",
-    },
-    {
-      title: "Warehouse Supervisor",
-      department: "Logistics",
-      location: "Kano",
-      type: "Full-time",
-      deadline: "April 20, 2024",
-    },
-    {
-      title: "Quality Control Officer",
-      department: "Production",
-      location: "Port Harcourt, Rivers State",
-      type: "Full-time",
-      deadline: "April 25, 2024",
-    },
-    {
-      title: "HR Manager",
-      department: "Human Resources",
-      location: "Lagos",
-      type: "Full-time",
-      deadline: "April 30, 2024",
-    },
-  ];
+    settings?.vacanciesMessage ??
+    "No available positions for now. Check back soon for exciting opportunities at Iyosi Foods LTD.";
 
   return (
     <div className="flex flex-col min-h-screen bg-surface-50">
       <section className="bg-primary-900 text-white py-16 md:py-20 px-4 md:px-8 text-center border-b-8 border-accent-500">
         <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Job Vacancies</h1>
         <p className="text-lg md:text-xl text-primary-100 max-w-2xl mx-auto font-light">
-          Explore open positions and join our team
+          Join the Iyosi Foods LTD team and be part of something great
         </p>
       </section>
 
       <section className="container mx-auto px-4 py-12 md:py-16">
         <div className="max-w-4xl mx-auto">
-          {!vacanciesActive ? (
-            <div className="bg-white rounded-xl shadow-sm border border-surface-100 p-10 text-center">
-              <div className="text-4xl mb-4">🔒</div>
-              <h2 className="text-2xl font-bold text-primary-900 mb-2">Vacancies Currently Closed</h2>
-              <p className="text-surface-600 max-w-md mx-auto">{vacanciesMessage}</p>
-              <div className="mt-8">
-                <Link href="/careers/submit-cv" className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">
+          {vacanciesActive ? (
+            // FUTURE: When admin activates vacancies, list them here from DB
+            // For now, this branch shows a placeholder
+            <div className="text-center py-12">
+              <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-4xl">📋</span>
+              </div>
+              <h2 className="text-2xl font-bold text-primary-900 mb-3">Vacancies Are Open!</h2>
+              <p className="text-surface-600 mb-6">
+                We currently have open positions. Please submit your CV to apply.
+              </p>
+              <Link
+                href="/careers/submit-cv"
+                className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+              >
+                Submit Your CV →
+              </Link>
+            </div>
+          ) : (
+            // Default state — no positions
+            <div className="bg-white rounded-2xl border border-surface-200 shadow-sm p-12 text-center">
+              <div className="w-20 h-20 bg-surface-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg
+                  className="w-10 h-10 text-surface-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={1.5}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0M12 12.75h.008v.008H12v-.008z"
+                  />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-primary-900 mb-3">
+                {vacanciesMessage}
+              </h2>
+              <p className="text-surface-600 max-w-md mx-auto mb-8">
+                We are always looking for talented individuals. Submit your CV and we will reach
+                out when a suitable opportunity arises.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href="/careers/submit-cv"
+                  className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+                >
                   Submit Your CV
+                </Link>
+                <Link
+                  href="/contact"
+                  className="inline-block border-2 border-primary-600 text-primary-600 hover:bg-primary-50 font-bold py-3 px-8 rounded-lg transition-colors"
+                >
+                  Contact HR
                 </Link>
               </div>
             </div>
-          ) : (
-            <>
-          <div className="flex flex-wrap gap-4 mb-8">
-            <input
-              type="text"
-              placeholder="Search jobs..."
-              className="flex-1 min-w-[200px] px-4 py-3 rounded-lg border border-surface-200 focus:outline-none focus:border-accent-500"
-            />
-            <select className="px-4 py-3 rounded-lg border border-surface-200 focus:outline-none focus:border-accent-500">
-              <option>All Locations</option>
-              <option>Lagos</option>
-              <option>Port Harcourt</option>
-              <option>Kano</option>
-              <option>Abuja</option>
-            </select>
-            <select className="px-4 py-3 rounded-lg border border-surface-200 focus:outline-none focus:border-accent-500">
-              <option>All Departments</option>
-              {departments.map((dept, i) => (
-                <option key={i}>{dept.name}</option>
-              ))}
-            </select>
-          </div>
-
-          <h2 className="text-lg font-bold text-primary-900 mb-4">Browse by Department</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-12">
-            {departments.map((dept, i) => (
-              <button
-                key={i}
-                className="bg-white p-4 rounded-lg shadow-sm border border-surface-100 hover:border-accent-300 transition-colors text-center"
-              >
-                <span className="text-2xl block mb-1">{dept.icon}</span>
-                <span className="text-sm font-medium text-primary-900">{dept.name}</span>
-                <span className="text-xs text-accent-600 block">({dept.jobs} jobs)</span>
-              </button>
-            ))}
-          </div>
-
-          <h2 className="text-lg font-bold text-primary-900 mb-4">Recent Openings</h2>
-          <div className="space-y-4">
-            {recentJobs.map((job, i) => (
-              <div key={i} className="bg-white p-5 rounded-xl shadow-sm border border-surface-100 hover:border-accent-300 transition-colors">
-                <div className="flex flex-wrap items-start justify-between gap-4">
-                  <div>
-                    <h3 className="text-base font-bold text-primary-900 mb-1">{job.title}</h3>
-                    <div className="flex flex-wrap items-center gap-2 text-sm text-surface-600">
-                      <span className="bg-surface-100 px-2 py-0.5 rounded">{job.department}</span>
-                      <span>•</span>
-                      <span>{job.location}</span>
-                      <span>•</span>
-                      <span>{job.type}</span>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-xs text-surface-500 mb-2">Deadline: {job.deadline}</p>
-                    <button className="bg-accent-500 hover:bg-accent-600 text-white font-bold py-2 px-4 rounded text-sm transition-colors">
-                      Apply
-                    </button>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-            </>
           )}
-        </div>
-</section>
-
-      <section className="bg-primary-50 py-12 px-4">
-        <div className="container mx-auto max-w-4xl text-center">
-          <h2 className="text-2xl font-bold text-primary-900 mb-4">Don&apos;t See the Right Role?</h2>
-          <p className="text-surface-600 mb-6">
-            Send us your CV and we&apos;ll keep you in mind for future opportunities
-          </p>
-          <Link href="/careers/submit-cv" className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">
-            Submit Your CV
-          </Link>
         </div>
       </section>
 
+      {/* Distributor / Partners CTA */}
       <section className="bg-primary-900 text-white py-12 px-4 text-center">
-        <h2 className="text-2xl font-bold mb-4">Have Questions?</h2>
-        <p className="text-primary-100 mb-6">
-          Contact our HR team for career-related inquiries
+        <h2 className="text-2xl font-bold mb-4">Interested in Becoming a Distributor?</h2>
+        <p className="text-primary-100 mb-6 max-w-xl mx-auto">
+          Partner with Iyosi Foods LTD and bring quality food products to your region.
         </p>
-        <Link href="/contact" className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-8 rounded-lg transition-colors">
-          Contact HR
+        <Link
+          href="/careers/partners"
+          className="inline-block bg-accent-500 hover:bg-accent-600 text-white font-bold py-3 px-8 rounded-lg transition-colors"
+        >
+          Apply as a Distributor →
         </Link>
       </section>
     </div>
