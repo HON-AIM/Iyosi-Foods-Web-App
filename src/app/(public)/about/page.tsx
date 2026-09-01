@@ -79,7 +79,7 @@ export default function AboutPage() {
           {/* CTA Section */}
           <div className="pt-6 border-t-2 border-surface-200">
             <Link
-              href="/contact"
+              href="/careers/partners"
               className="inline-flex items-center text-primary-600 font-bold hover:text-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-600 rounded px-2 py-1 tracking-wide uppercase text-sm transition-colors duration-200"
               aria-label="Partner With The Group"
             >
