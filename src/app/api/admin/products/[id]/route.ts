@@ -6,11 +6,11 @@ import { z } from "zod";
 import { invalidateCache, CACHE_KEYS } from "@/lib/cache";
 
 const UpdateProductSchema = z.object({
-  name: z.string().min(2).max(200).trim().optional(),
-  description: z.string().min(10).max(2000).trim().optional(),
-  price: z.number().positive().optional(),
+  name: z.string().min(1).max(200).trim().optional(),
+  description: z.string().min(1).max(2000).trim().optional(),
+  price: z.number().min(0).optional(),
   stock: z.number().int().min(0).optional(),
-  image: z.string().url().nullable().optional(),
+  image: z.string().url().or(z.literal("")).nullable().optional(),
   category: z.enum(["BAKING", "WHEAT", "ALL_PURPOSE", "SEMOLINA", "SUGAR", "OIL", "RICE", "TOMATO_PASTE"]).optional(),
 });
 
