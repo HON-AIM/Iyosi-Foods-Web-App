@@ -11,7 +11,7 @@ const UpdateProductSchema = z.object({
   price: z.number().positive().optional(),
   stock: z.number().int().min(0).optional(),
   image: z.string().url().nullable().optional(),
-  category: z.enum(["BAKING", "WHEAT", "ALL_PURPOSE", "SEMOLINA"]).optional(),
+  category: z.enum(["BAKING", "WHEAT", "ALL_PURPOSE", "SEMOLINA", "SUGAR", "OIL", "RICE", "TOMATO_PASTE"]).optional(),
 });
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
