@@ -503,26 +503,34 @@ export default function AdminOrdersPage() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <select
-                          value={order.status}
-                          onChange={(e) =>
-                            handleStatusChange(order.id, e.target.value)
-                          }
-                          disabled={updatingId === order.id}
-                          aria-label={`Update status for order ${order.id}`}
-                          className={`text-sm rounded-full px-3 py-1 font-medium border-0 focus:ring-2 focus:ring-offset-1 focus:ring-green-500 focus:border-green-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed appearance-none pr-8 ${
-                            STATUS_COLORS[order.status] ||
-                            "bg-gray-100 text-gray-800"
-                          }`}
-                        >
-                          {ORDER_STATUSES.map((status) => (
-                            <option key={status} value={status}>
-                              {status}
-                            </option>
-                          ))}
-                        </select>
+                        <div className="relative inline-flex items-center">
+                          <select
+                            value={order.status}
+                            onChange={(e) =>
+                              handleStatusChange(order.id, e.target.value)
+                            }
+                            disabled={updatingId === order.id}
+                            aria-label={`Update status for order ${order.id}`}
+                            className={`text-sm rounded-full px-3 py-1.5 pr-7 font-semibold border-0 focus:ring-2 focus:ring-offset-1 focus:ring-green-500 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed appearance-none ${
+                              STATUS_COLORS[order.status] ||
+                              "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {ORDER_STATUSES.map((status) => (
+                              <option key={status} value={status}>
+                                {status}
+                              </option>
+                            ))}
+                          </select>
+                          {/* Dropdown chevron indicator */}
+                          <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center">
+                            <svg className="w-3 h-3 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                            </svg>
+                          </span>
+                        </div>
                         {updatingId === order.id && (
-                          <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin" />
+                          <div className="w-4 h-4 border-2 border-green-500 border-t-transparent rounded-full animate-spin flex-shrink-0" />
                         )}
                       </div>
                     </td>

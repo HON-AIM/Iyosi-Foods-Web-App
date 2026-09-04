@@ -1,7 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { ShoppingCart, Bell, Store } from "lucide-react"
+import { ShoppingCart, Bell, Store, LogOut, ChevronDown, User, Settings } from "lucide-react"
+import { signOut } from "next-auth/react"
 import { useCart } from "@/context/CartContext"
 import { useState, useEffect, useRef } from "react"
 
@@ -25,12 +26,17 @@ export default function DashboardTopbar({ userName, userEmail }: Props) {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
   const notifRef = useRef<HTMLDivElement>(null)
+  const [avatarOpen, setAvatarOpen] = useState(false)
+  const avatarRef = useRef<HTMLDivElement>(null)
 
   // Close on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
         setNotifOpen(false)
+      }
+      if (avatarRef.current && !avatarRef.current.contains(e.target as Node)) {
+        setAvatarOpen(false)
       }
     }
     document.addEventListener("mousedown", handleClick)
@@ -61,6 +67,16 @@ export default function DashboardTopbar({ userName, userEmail }: Props) {
       setUnreadCount(0)
       setNotifications(prev => prev.map(n => ({ ...n, isRead: true })))
     } catch {}
+  }
+
+  const handleLogout = async () => {
+    try {
+      localStorage.clear()
+      sessionStorage.clear()
+      await signOut({ callbackUrl: "/login", redirect: true })
+    } catch {
+      window.location.href = "/login?logged_out=true"
+    }
   }
 
   return (
@@ -174,15 +190,57 @@ export default function DashboardTopbar({ userName, userEmail }: Props) {
             )}
           </div>
 
-          {/* Avatar */}
-          <div className="flex items-center gap-2 ml-1 pl-3 border-l border-gray-200">
-            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-extrabold text-sm flex-shrink-0">
-              {userName.charAt(0).toUpperCase()}
-            </div>
-            <div className="hidden md:block">
-              <p className="text-xs font-semibold text-gray-800 leading-none">{userName.split(" ")[0]}</p>
-              <p className="text-[10px] text-gray-400 leading-none mt-0.5 max-w-[120px] truncate">{userEmail}</p>
-            </div>
+          {/* Avatar with dropdown menu */}
+          <div className="relative ml-1 pl-3 border-l border-gray-200" ref={avatarRef}>
+            <button
+              onClick={() => setAvatarOpen(!avatarOpen)}
+              className="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-2 py-1.5 transition-colors"
+              aria-label="Account menu"
+              aria-expanded={avatarOpen}
+            >
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-extrabold text-sm flex-shrink-0">
+                {userName.charAt(0).toUpperCase()}
+              </div>
+              <div className="hidden md:block text-left">
+                <p className="text-xs font-semibold text-gray-800 leading-none">{userName.split(" ")[0]}</p>
+                <p className="text-[10px] text-gray-400 leading-none mt-0.5 max-w-[100px] truncate">{userEmail}</p>
+              </div>
+              <ChevronDown className={`w-3.5 h-3.5 text-gray-400 transition-transform hidden md:block ${avatarOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {avatarOpen && (
+              <div className="absolute right-0 top-12 w-52 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden py-1">
+                <div className="px-4 py-3 border-b border-gray-100 bg-gray-50">
+                  <p className="text-xs font-bold text-gray-900 truncate">{userName}</p>
+                  <p className="text-[10px] text-gray-400 truncate mt-0.5">{userEmail}</p>
+                </div>
+                <Link
+                  href="/dashboard"
+                  onClick={() => setAvatarOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <User className="w-4 h-4 text-gray-400" />
+                  My Account
+                </Link>
+                <Link
+                  href="/dashboard/settings"
+                  onClick={() => setAvatarOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  <Settings className="w-4 h-4 text-gray-400" />
+                  Settings
+                </Link>
+                <div className="border-t border-gray-100 mt-1 pt-1">
+                  <button
+                    onClick={() => { setAvatarOpen(false); handleLogout() }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Log Out
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

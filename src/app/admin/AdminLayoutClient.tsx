@@ -1,11 +1,24 @@
 "use client"
 
-import { useState } from "react"
-import { Menu, X } from "lucide-react"
+import { useState, useRef, useEffect } from "react"
+import { Menu, X, LogOut } from "lucide-react"
+import { signOut } from "next-auth/react"
 import AdminSidebar from "@/components/admin/AdminSidebar"
 
 export default function AdminLayoutClient({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false)
+  const adminMenuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (adminMenuRef.current && !adminMenuRef.current.contains(e.target as Node)) {
+        setAdminMenuOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClick)
+    return () => document.removeEventListener("mousedown", handleClick)
+  }, [])
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -50,7 +63,30 @@ export default function AdminLayoutClient({ children }: { children: React.ReactN
             <Menu className="w-6 h-6 text-gray-700" />
           </button>
           <span className="font-semibold text-sm text-gray-900">Admin Dashboard</span>
-          <div className="w-10" />
+          <div className="relative" ref={adminMenuRef}>
+            <button
+              onClick={() => setAdminMenuOpen(!adminMenuOpen)}
+              className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold text-sm hover:ring-2 hover:ring-green-300 transition-all"
+              aria-label="Admin menu"
+            >
+              A
+            </button>
+            {adminMenuOpen && (
+              <div className="absolute right-0 top-10 w-40 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden py-1">
+                <button
+                  onClick={async () => {
+                    setAdminMenuOpen(false)
+                    localStorage.clear()
+                    await signOut({ callbackUrl: "/login", redirect: true })
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Log Out
+                </button>
+              </div>
+            )}
+          </div>
         </div>
         <div className="p-4 md:p-8 max-w-full">{children}</div>
       </main>

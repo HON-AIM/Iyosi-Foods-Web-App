@@ -274,6 +274,75 @@ async function main() {
   console.log("🛒 Customer login: customer@Iyosi Foods.test / Customer@123!")
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
   console.log("🗑️  TO DELETE TEST DATA: Go to Admin → Products → filter by '[TEST]'")
+
+  // ─── Demo Press Releases ───────────────────────────────────────────────────
+  await prisma.pressRelease.deleteMany({ where: { title: { contains: "[DEMO]" } } })
+
+  const demoPressReleases = [
+    {
+      title: "[DEMO] Iyosi Foods LTD Reports Record Revenue Growth in 2025",
+      slug: "iyosi-foods-record-revenue-2025",
+      category: "Financial Results",
+      excerpt: "Iyosi Foods LTD achieves unprecedented revenue growth of over 20% and expands distribution across all 36 Nigerian states.",
+      content: "Iyosi Foods LTD is proud to announce record revenue growth in 2025...\n\nOur profit after tax rose significantly, driven by strong demand for our premium flour and semolina products.\n\nWe remain committed to quality and innovation across all product lines.",
+      published: true,
+      publishedAt: new Date("2025-03-15"),
+    },
+    {
+      title: "[DEMO] Iyosi Foods LTD Expands Flour Milling Operations to Abuja",
+      slug: "flour-milling-expansion-abuja-2025",
+      category: "Expansion",
+      excerpt: "Commissioning of new flour milling facility in Abuja to increase production capacity and serve the North-Central market.",
+      content: "Iyosi Foods LTD has commissioned a state-of-the-art flour milling facility in the Federal Capital Territory...\n\nThis expansion reflects our commitment to bringing quality products closer to every Nigerian household.\n\nThe new facility will create over 200 direct jobs.",
+      published: true,
+      publishedAt: new Date("2025-06-01"),
+    },
+    {
+      title: "[DEMO] Iyosi Foods LTD Wins Best FMCG Brand 2025",
+      slug: "best-fmcg-brand-award-2025",
+      category: "Awards",
+      excerpt: "Recognised as Best FMCG Brand and Most Trusted Food Company at the annual Industry Excellence Awards 2025.",
+      content: "Iyosi Foods LTD has been recognised as the Best FMCG Brand at the 2025 Industry Excellence Awards...\n\nThis recognition reflects the trust our customers and partners have placed in us over the years.\n\nWe dedicate this award to our hardworking team across all facilities.",
+      published: true,
+      publishedAt: new Date("2025-09-10"),
+    },
+    {
+      title: "[DEMO] Strategic Partnership with West African Agriculture Consortium",
+      slug: "west-africa-agriculture-partnership-2025",
+      category: "Partnership",
+      excerpt: "Iyosi Foods LTD signs landmark agreement with the West African Agriculture Consortium to source premium grains across the region.",
+      content: "Iyosi Foods LTD has entered into a strategic partnership with the West African Agriculture Consortium...\n\nThis partnership will strengthen our supply chain and support thousands of local farmers.\n\nThe agreement covers grain sourcing across Nigeria, Ghana, and Côte d'Ivoire.",
+      published: true,
+      publishedAt: new Date("2025-11-20"),
+    },
+    {
+      title: "[DEMO] Iyosi Foods LTD Achieves NAFDAC Recertification",
+      slug: "nafdac-recertification-2026",
+      category: "Quality",
+      excerpt: "All Iyosi Foods LTD product lines receive renewed NAFDAC certification, reaffirming our commitment to food safety.",
+      content: "Iyosi Foods LTD is pleased to announce the successful renewal of all NAFDAC certifications across our product range...\n\nThis recertification process involved rigorous inspection of all our production facilities.\n\nWe remain committed to meeting the highest standards of food safety for Nigerian consumers.",
+      published: true,
+      publishedAt: new Date("2026-01-08"),
+    },
+    {
+      title: "[DEMO] Launch of Premium Enriched Semolina Product Line",
+      slug: "enriched-semolina-launch-2026",
+      category: "Product Launch",
+      excerpt: "Iyosi Foods LTD introduces a new range of iron-fortified, vitamin-enriched semolina to combat nutritional deficiencies in West Africa.",
+      content: "Iyosi Foods LTD is proud to launch our Premium Enriched Semolina product line...\n\nFortified with iron, folic acid, and vitamin B12, this range addresses the nutritional needs of growing families.\n\nThe products are now available at leading supermarkets and distributors nationwide.",
+      published: true,
+      publishedAt: new Date("2026-03-01"),
+    },
+  ]
+
+  for (const pr of demoPressReleases) {
+    await prisma.pressRelease.upsert({
+      where: { slug: pr.slug },
+      update: pr,
+      create: pr,
+    })
+  }
+  console.log("✅ Demo press releases seeded")
   console.log("   Or run: npx prisma db execute --stdin <<< \"DELETE FROM \\\"Product\\\" WHERE name LIKE '[TEST]%'\"")
 }
 

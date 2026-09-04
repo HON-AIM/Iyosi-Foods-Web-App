@@ -58,7 +58,10 @@ export async function POST(request: NextRequest) {
         Object.keys(process.env).filter(k => k.includes("BLOB")).join(", ") || "none"
       );
       return NextResponse.json(
-        { message: "Server error: File storage is not configured" },
+        {
+          message: "Server error: File storage is not configured. Please add BLOB_READ_WRITE_TOKEN to environment variables.",
+          hint: "Vercel Dashboard → Settings → Environment Variables → add BLOB_READ_WRITE_TOKEN. For local dev, add to .env and restart the dev server.",
+        },
         { status: 503 }
       );
     }

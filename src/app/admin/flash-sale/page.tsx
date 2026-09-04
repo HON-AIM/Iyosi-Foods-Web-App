@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import { Zap, Search, Save, Clock } from "lucide-react"
 import toast from "react-hot-toast"
 import Image from "next/image"
+import ToggleSwitch from "@/components/ui/ToggleSwitch"
 
 type Product = {
   id: string; name: string; price: number; stock: number;
@@ -138,21 +139,13 @@ export default function FlashSaleManagementPage() {
           </div>
           <div className="flex flex-col">
             <label className="block text-sm font-medium text-gray-700 mb-1">Flash Sale Active</label>
-            <div className="flex items-center gap-3 mt-2">
-              <button
-                type="button"
-                onClick={() => setSettings(s => ({ ...s, flashSaleActive: !s.flashSaleActive }))}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                  settings.flashSaleActive ? "bg-green-600" : "bg-gray-300"
-                }`}
-              >
-                <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  settings.flashSaleActive ? "translate-x-6" : "translate-x-1"
-                }`} />
-              </button>
-              <span className={`text-sm font-semibold ${settings.flashSaleActive ? "text-green-600" : "text-gray-400"}`}>
-                {settings.flashSaleActive ? "LIVE" : "OFF"}
-              </span>
+            <div className="mt-2">
+              <ToggleSwitch
+                enabled={settings.flashSaleActive}
+                onChange={(val) => setSettings(s => ({ ...s, flashSaleActive: val }))}
+                label="Flash Sale Live"
+                description="Toggle to show or hide the flash sale section on the shop"
+              />
             </div>
           </div>
         </div>

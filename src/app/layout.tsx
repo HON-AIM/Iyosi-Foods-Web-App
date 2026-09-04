@@ -1,9 +1,16 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import localFont from "next/font/local";
 import { Providers } from "@/components/Providers";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], display: "swap" });
+const inter = localFont({
+  src: [
+    { path: "../../public/fonts/Inter-Regular.woff2", weight: "400", style: "normal" },
+    { path: "../../public/fonts/Inter-Bold.woff2", weight: "700", style: "normal" },
+  ],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://iyosifoods.com";
 

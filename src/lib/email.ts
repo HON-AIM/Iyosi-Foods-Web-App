@@ -169,70 +169,214 @@ export async function sendOrderConfirmationEmail(
     maximumFractionDigits: 0,
   }).format(order.totalAmount);
 
-  const itemRows = order.items
+  const formatNaira = (n: number) =>
+    new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(n);
+
+  const itemsHtml = order.items
     .map(
-      (item) =>
-        `<tr>
-          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;">${escapeHtml(item.productName)}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:center;">${item.quantity}</td>
-          <td style="padding:8px 12px;border-bottom:1px solid #f0f0f0;text-align:right;">${new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(item.price * item.quantity)}</td>
-        </tr>`
+      (item) => `
+      <tr>
+        <td style="padding:12px 16px;border-bottom:1px solid #f5f5f5;font-size:14px;color:#374151;">
+          ${escapeHtml(item.productName)}
+        </td>
+        <td style="padding:12px 16px;border-bottom:1px solid #f5f5f5;font-size:14px;color:#374151;text-align:center;">
+          x${item.quantity}
+        </td>
+        <td style="padding:12px 16px;border-bottom:1px solid #f5f5f5;font-size:14px;color:#374151;text-align:right;font-weight:bold;">
+          ${formatNaira(item.price * item.quantity)}
+        </td>
+      </tr>`
     )
     .join("");
+
+  const html = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+    <body style="margin:0;padding:0;background-color:#f9fafb;font-family:Arial,sans-serif;">
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;padding:24px 0;">
+        <tr><td align="center">
+          <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
+            
+            <!-- HEADER -->
+            <tr>
+              <td style="background:linear-gradient(135deg,#166534,#15803d);padding:32px 24px;text-align:center;">
+                <h1 style="color:white;margin:0;font-size:22px;font-weight:800;">&#10004;&#65039; Order Confirmed!</h1>
+                <p style="color:#bbf7d0;margin:8px 0 0;font-size:14px;">Thank you for shopping with Iyosi Foods LTD</p>
+              </td>
+            </tr>
+
+            <!-- ORDER DETAILS -->
+            <tr>
+              <td style="padding:24px;">
+                <p style="color:#374151;font-size:15px;margin:0 0 16px;">
+                  Hello <strong>${safeName}</strong>,
+                </p>
+                <p style="color:#6b7280;font-size:14px;line-height:1.6;margin:0 0 24px;">
+                  Great news! Your payment has been confirmed and your order is now being processed.
+                  You can track your order status at any time from your dashboard.
+                </p>
+
+                <!-- ORDER NUMBER BOX -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0fdf4;border:2px solid #bbf7d0;border-radius:10px;margin-bottom:24px;">
+                  <tr>
+                    <td style="padding:16px 20px;">
+                      <p style="margin:0;font-size:12px;color:#15803d;font-weight:700;text-transform:uppercase;letter-spacing:1px;">Order Number</p>
+                      <p style="margin:6px 0 0;font-size:22px;font-weight:800;color:#166534;font-family:monospace;">#${safeOrderNumber}</p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- ITEMS TABLE -->
+                <p style="color:#374151;font-size:14px;font-weight:700;margin:0 0 12px;text-transform:uppercase;letter-spacing:0.5px;">Items Ordered</p>
+                <table width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;margin-bottom:24px;">
+                  <thead>
+                    <tr style="background:#f9fafb;">
+                      <th style="padding:10px 16px;text-align:left;font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;">Product</th>
+                      <th style="padding:10px 16px;text-align:center;font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;">Qty</th>
+                      <th style="padding:10px 16px;text-align:right;font-size:12px;color:#6b7280;font-weight:600;text-transform:uppercase;">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>${itemsHtml}</tbody>
+                  <tfoot>
+                    <tr style="background:#f0fdf4;">
+                      <td colspan="2" style="padding:14px 16px;font-weight:800;font-size:15px;color:#166534;">Total Paid</td>
+                      <td style="padding:14px 16px;font-weight:800;font-size:15px;color:#166534;text-align:right;">${formattedTotal}</td>
+                    </tr>
+                  </tfoot>
+                </table>
+
+                <!-- SHIPPING -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="background:#f9fafb;border-radius:8px;margin-bottom:24px;">
+                  <tr>
+                    <td style="padding:16px;">
+                      <p style="margin:0 0 6px;font-size:12px;color:#6b7280;font-weight:700;text-transform:uppercase;">Delivering To</p>
+                      <p style="margin:0;font-size:14px;color:#374151;">${safeShippingAddr}</p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- TRACK ORDER BUTTON -->
+                <div style="text-align:center;margin-bottom:24px;">
+                  <a href="${process.env.NEXTAUTH_URL || "https://iyosifoods.com"}/dashboard/orders"
+                    style="display:inline-block;background:linear-gradient(135deg,#166534,#15803d);color:white;font-weight:800;font-size:15px;padding:14px 32px;border-radius:8px;text-decoration:none;">
+                    &#128230; Track Your Order &#8594;
+                  </a>
+                  <p style="margin:12px 0 0;font-size:12px;color:#9ca3af;">
+                    Log into your Iyosi Foods dashboard to track your order in real time
+                  </p>
+                </div>
+
+                <!-- WHAT'S NEXT -->
+                <table width="100%" cellpadding="0" cellspacing="0" style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;margin-bottom:8px;">
+                  <tr>
+                    <td style="padding:16px;">
+                      <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#92400e;">What happens next?</p>
+                      <p style="margin:0;font-size:13px;color:#92400e;line-height:1.6;">
+                        1. Your order is being prepared by our team<br>
+                        2. You will receive a shipping notification when dispatched<br>
+                        3. You will receive a delivery confirmation when it arrives
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- FOOTER -->
+            <tr>
+              <td style="background:#f9fafb;padding:20px 24px;border-top:1px solid #e5e7eb;text-align:center;">
+                <p style="margin:0 0 4px;font-size:12px;color:#9ca3af;">Questions? Email us at</p>
+                <a href="mailto:iyosifoods@gmail.com" style="color:#15803d;font-size:13px;font-weight:600;">iyosifoods@gmail.com</a>
+                <p style="margin:12px 0 0;font-size:11px;color:#d1d5db;">&copy; 2025 Iyosi Foods LTD. All rights reserved.</p>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+      </table>
+    </body>
+    </html>
+    `;
 
   await transporter.sendMail({
     from: `"Iyosi Foods LTD" <${process.env.EMAIL_FROM}>`,
     to: email,
-    subject: `Order Confirmed — ${order.orderNumber} | Iyosi Foods LTD`,
+    subject: `&#10004;&#65039; Order Confirmed: #${order.orderNumber} — Iyosi Foods LTD`,
     text: `Hi ${safeName}, your order ${order.orderNumber} has been confirmed and payment received. Total: ${formattedTotal}. Shipping to: ${order.shippingAddr}. We will update you when your order is on its way.`,
-    html: `
-      <!DOCTYPE html>
-      <html>
-      <body style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px;">
-        <div style="background:#166534;padding:20px;border-radius:8px;text-align:center;margin-bottom:24px;">
-          <h1 style="color:white;margin:0;font-size:22px;">Order Confirmed ✅</h1>
-          <p style="color:#86efac;margin:8px 0 0;">Thank you, ${safeName}!</p>
-        </div>
+    html,
+  });
+}
 
-        <p style="color:#374151;">Your order <strong>${safeOrderNumber}</strong> has been confirmed and payment received.</p>
+export async function sendDeliveryConfirmationEmail({
+  email,
+  name,
+  orderNumber,
+}: {
+  email: string;
+  name: string;
+  orderNumber: string;
+}) {
+  const safeName = escapeHtml(name || "Valued Customer");
+  const safeOrderNumber = escapeHtml(orderNumber);
 
-        <table style="width:100%;border-collapse:collapse;margin:20px 0;">
-          <thead>
-            <tr style="background:#f9fafb;">
-              <th style="padding:10px;text-align:left;font-size:12px;color:#6b7280;">PRODUCT</th>
-              <th style="padding:10px;text-align:center;font-size:12px;color:#6b7280;">QTY</th>
-              <th style="padding:10px;text-align:right;font-size:12px;color:#6b7280;">TOTAL</th>
-            </tr>
-          </thead>
-          <tbody>${itemRows}</tbody>
-          <tfoot>
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <body style="font-family:Arial,sans-serif;background:#f9fafb;padding:24px 0;margin:0;">
+      <table width="100%" cellpadding="0" cellspacing="0">
+        <tr><td align="center">
+          <table width="600" style="max-width:600px;background:white;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);">
             <tr>
-              <td colspan="2" style="padding:12px;text-align:right;font-weight:bold;">Order Total:</td>
-              <td style="padding:12px;text-align:right;font-weight:bold;color:#166534;">${formattedTotal}</td>
+              <td style="background:linear-gradient(135deg,#166534,#15803d);padding:32px 24px;text-align:center;">
+                <h1 style="color:white;margin:0;font-size:24px;">&#127881; Your Order Has Arrived!</h1>
+                <p style="color:#bbf7d0;margin:8px 0 0;font-size:14px;">Order successfully delivered</p>
+              </td>
             </tr>
-          </tfoot>
-        </table>
+            <tr>
+              <td style="padding:32px 24px;">
+                <p style="color:#374151;font-size:15px;">Hello <strong>${safeName}</strong>,</p>
+                <p style="color:#6b7280;font-size:14px;line-height:1.6;">
+                  Great news! Your order <strong style="color:#166534;">#${safeOrderNumber}</strong> has been successfully delivered. 
+                  We hope you love your Iyosi Foods products!
+                </p>
+                <div style="background:#f0fdf4;border:2px solid #bbf7d0;border-radius:10px;padding:20px;margin:20px 0;text-align:center;">
+                  <p style="margin:0;font-size:32px;">&#127806;</p>
+                  <p style="margin:8px 0 0;font-size:16px;font-weight:700;color:#166534;">Delivered Successfully</p>
+                  <p style="margin:4px 0 0;font-size:13px;color:#15803d;">Order #${safeOrderNumber}</p>
+                </div>
+                <p style="color:#374151;font-size:14px;line-height:1.6;">
+                  Enjoyed your purchase? We would love to hear from you! 
+                  Leave a review from your dashboard to help other customers.
+                </p>
+                <div style="text-align:center;margin:24px 0;">
+                  <a href="${process.env.NEXTAUTH_URL || "https://iyosifoods.com"}/dashboard/orders"
+                    style="display:inline-block;background:#166534;color:white;font-weight:700;padding:14px 28px;border-radius:8px;text-decoration:none;font-size:14px;">
+                    View Order History
+                  </a>
+                </div>
+                <p style="color:#9ca3af;font-size:12px;text-align:center;">
+                  Need help? <a href="mailto:iyosifoods@gmail.com" style="color:#15803d;">iyosifoods@gmail.com</a>
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#f9fafb;padding:16px 24px;border-top:1px solid #e5e7eb;text-align:center;">
+                <p style="margin:0;font-size:11px;color:#d1d5db;">&copy; 2025 Iyosi Foods LTD. All rights reserved.</p>
+              </td>
+            </tr>
+          </table>
+        </td></tr>
+      </table>
+    </body>
+    </html>
+  `;
 
-        <div style="background:#f9fafb;padding:16px;border-radius:8px;margin:20px 0;">
-          <p style="margin:0;font-size:13px;color:#6b7280;"><strong>Delivering to:</strong></p>
-          <p style="margin:4px 0 0;font-size:14px;color:#374151;">${safeShippingAddr}</p>
-        </div>
-
-        <p style="text-align:center;margin:24px 0;">
-          <a href="${process.env.NEXTAUTH_URL}/dashboard/orders"
-             style="background:#166534;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;">
-            Track Your Order
-          </a>
-        </p>
-
-        <hr style="border:none;border-top:1px solid #e5e7eb;margin:24px 0;">
-        <p style="font-size:12px;color:#9ca3af;text-align:center;">
-          Need help? Reply to this email or WhatsApp us.<br>
-          © Iyosi Foods LTD. All rights reserved.
-        </p>
-      </body>
-      </html>
-    `,
+  await transporter.sendMail({
+    from: `"Iyosi Foods LTD" <${process.env.EMAIL_FROM || "iyosifoods@gmail.com"}>`,
+    to: email,
+    subject: `&#127881; Delivered: Your Iyosi Foods Order #${orderNumber}`,
+    text: `Hello ${safeName}, your order #${safeOrderNumber} has been successfully delivered. We hope you love your Iyosi Foods products! View your order history at ${process.env.NEXTAUTH_URL || "https://iyosifoods.com"}/dashboard/orders`,
+    html,
   });
 }
 

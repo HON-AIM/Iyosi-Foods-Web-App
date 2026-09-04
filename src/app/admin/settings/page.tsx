@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Save, Megaphone } from "lucide-react";
 import toast from "react-hot-toast";
+import ToggleSwitch from "@/components/ui/ToggleSwitch";
 
 export default function AdminSettingsPage() {
   const [announcementText, setAnnouncementText] = useState("");
@@ -216,14 +217,13 @@ export default function AdminSettingsPage() {
           {/* Vacancies Section */}
           <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
             <h2 className="font-bold text-gray-900 mb-4">Job Vacancies</h2>
-            <div className="flex items-center gap-3 mb-3">
-              <label className="text-sm font-medium text-gray-700">Vacancies Active</label>
-              <button type="button" onClick={() => setVacanciesActive(!vacanciesActive)}>
-                {vacanciesActive
-                  ? <span className="text-green-600 font-bold">ON ✅</span>
-                  : <span className="text-gray-400 font-bold">OFF ❌</span>
-                }
-              </button>
+            <div className="flex items-start gap-4 mb-3">
+              <ToggleSwitch
+                enabled={vacanciesActive}
+                onChange={setVacanciesActive}
+                label="Job Vacancies Active"
+                description="When ON — the careers page shows an open vacancies message"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

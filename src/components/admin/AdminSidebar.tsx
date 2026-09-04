@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -19,7 +19,7 @@ import {
   Zap,
   FileText,
 } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 interface NavItem {
   label: string;
@@ -76,6 +76,11 @@ const NAV_ITEMS: NavItem[] = [
     icon: <FileText className="h-5 w-5" />,
   },
   {
+    label: "Press Releases",
+    href: "/admin/press",
+    icon: <FileText className="h-5 w-5" />,
+  },
+  {
     label: "Settings",
     href: "/admin/settings",
     icon: <Settings className="h-5 w-5" />,
@@ -92,14 +97,31 @@ export default function AdminSidebar() {
   const pathname = usePathname();
   const { data: session } = useSession();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false);
+  const adminMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (adminMenuRef.current && !adminMenuRef.current.contains(e.target as Node)) {
+        setAdminMenuOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
 
   const handleLogout = async () => {
     const confirmed = window.confirm("Are you sure you want to logout?");
-    if (confirmed) {
-      // Call logout endpoint
-      await fetch("/api/auth/logout", { method: "POST" });
-      // Redirect will be handled by middleware
-      window.location.href = "/login";
+    if (!confirmed) return;
+    try {
+      localStorage.clear();
+      sessionStorage.clear();
+      await signOut({
+        callbackUrl: "/login",
+        redirect: true,
+      });
+    } catch {
+      window.location.href = "/login?logged_out=true";
     }
   };
 
@@ -131,10 +153,35 @@ export default function AdminSidebar() {
         } fixed md:static inset-y-0 left-0 z-40 w-64 bg-white border-r border-gray-200 flex flex-col transition-transform duration-300 md:transition-none`}
       >
         {/* Logo */}
-        <div className="hidden md:flex items-center justify-center h-16 border-b border-gray-200">
-          <Link href="/admin" className="font-bold text-xl text-gray-900">
+        <div className="hidden md:flex items-center justify-between h-16 px-4 border-b border-gray-200">
+          <Link href="/admin" className="font-bold text-lg text-gray-900">
             Iyosi Foods
           </Link>
+          {/* Quick logout button in header */}
+          <div className="relative" ref={adminMenuRef}>
+            <button
+              onClick={() => setAdminMenuOpen(!adminMenuOpen)}
+              className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-700 font-bold text-sm hover:ring-2 hover:ring-green-300 transition-all"
+              aria-label="Admin menu"
+            >
+              A
+            </button>
+            {adminMenuOpen && (
+              <div className="absolute right-0 top-10 w-40 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden py-1">
+                <button
+                  onClick={async () => {
+                    setAdminMenuOpen(false);
+                    localStorage.clear();
+                    await signOut({ callbackUrl: "/login", redirect: true });
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Log Out
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Navigation */}

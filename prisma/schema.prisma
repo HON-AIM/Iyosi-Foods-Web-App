@@ -415,3 +415,20 @@ model BlogPost {
 
   @@index([published, publishedAt])
 }
+
+// Press Releases (admin-managed announcements)
+model PressRelease {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  category    String    @default("Corporate News")
+  excerpt     String
+  content     String
+  coverImage  String?
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([published, publishedAt])
+}

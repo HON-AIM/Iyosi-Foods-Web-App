@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma, TransactionClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { sendOrderStatusUpdate } from "@/lib/email";
+import { sendOrderStatusUpdate, sendDeliveryConfirmationEmail } from "@/lib/email";
 import { generateTrackingNumber } from "@/lib/tracking";
 import { type NextRequest } from "next/server";
 import { UpdateOrderSchema } from "@/schemas/order.schema";
@@ -271,6 +271,20 @@ export async function PUT(
           error: emailError instanceof Error ? emailError.message : String(emailError),
         });
         // Don't fail the entire request if email fails
+      }
+
+      // ✅ Send delivery confirmation email when order is delivered
+      if (status === "DELIVERED") {
+        const customerEmail = currentOrder.user?.email;
+        if (customerEmail) {
+          sendDeliveryConfirmationEmail({
+            email: customerEmail,
+            name: currentOrder.user?.name || "Customer",
+            orderNumber: id.slice(-8).toUpperCase(),
+          }).catch((err) =>
+            console.error("[ERROR] Delivery confirmation email failed:", err instanceof Error ? err.message : String(err))
+          );
+        }
       }
     }
 
