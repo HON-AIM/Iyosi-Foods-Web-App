@@ -3,6 +3,7 @@ import { prisma, TransactionClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { sendOrderStatusUpdate, sendDeliveryConfirmationEmail } from "@/lib/email";
 import { generateTrackingNumber } from "@/lib/tracking";
+import { refundTransaction } from "@/lib/paystack";
 import { type NextRequest } from "next/server";
 import { UpdateOrderSchema } from "@/schemas/order.schema";
 
@@ -115,6 +116,8 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
+
   try {
     const session = await auth();
 
@@ -133,7 +136,6 @@ export async function PUT(
       );
     }
 
-    const { id } = await params;
     const body = await request.json().catch(() => null);
 
     // ✅ Validate required fields
@@ -216,10 +218,10 @@ export async function PUT(
       autoTrackingNumber = generateTrackingNumber();
     }
 
-    // ✅ Update order in transaction with audit
+    // ✅ Update order in transaction with audit (compare-and-set against the status we read)
     const updatedOrder = await prisma.$transaction(async (tx: TransactionClient) => {
-      const updated = await tx.order.update({
-        where: { id },
+      const updatedCount = await tx.order.updateMany({
+        where: { id, status: currentOrder.status as OrderStatus },
         data: {
           status,
           updatedAt: new Date(),
@@ -227,6 +229,12 @@ export async function PUT(
           trackingCarrier: trackingCarrier || undefined,
           estimatedDelivery: estimatedDelivery ? new Date(estimatedDelivery) : undefined,
         },
+      });
+
+      if (updatedCount.count !== 1) throw new Error("ORDER_STATUS_RACE");
+
+      const updated = await tx.order.findUnique({
+        where: { id },
         include: {
           user: { select: { name: true, email: true } },
           items: {
@@ -236,6 +244,8 @@ export async function PUT(
           },
         },
       });
+
+      if (!updated) throw new Error("ORDER_STATUS_RACE");
 
       // ✅ Create audit log entry
       await tx.orderLog.create({
@@ -306,6 +316,16 @@ export async function PUT(
       { status: 200 }
     );
   } catch (error) {
+    if (error instanceof Error && error.message === "ORDER_STATUS_RACE") {
+      console.warn("[WARN] Order status race detected:", { orderId: id });
+      return NextResponse.json(
+        {
+          message: "Order status was changed by another action. Refresh and try again.",
+        },
+        { status: 409 }
+      );
+    }
+
     console.error("[ERROR] Update order status failed:", {
       error: error instanceof Error ? error.message : String(error),
       stack: error instanceof Error ? error.stack : undefined,
@@ -334,6 +354,8 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
+
   try {
     const session = await auth();
 
@@ -351,8 +373,6 @@ export async function DELETE(
       );
     }
 
-    const { id } = await params;
-
     if (!id || typeof id !== "string" || id.trim().length === 0) {
       return NextResponse.json(
         { message: "Bad Request: Invalid order ID" },
@@ -369,6 +389,9 @@ export async function DELETE(
       select: {
         id: true,
         status: true,
+        paymentRef: true,
+        totalAmount: true,
+        refundStatus: true,
         user: { select: { email: true, name: true } },
       },
     });
@@ -381,7 +404,7 @@ export async function DELETE(
     }
 
     // ✅ Prevent cancelling already delivered/cancelled orders
-    const cancelableStatuses = ["PENDING", "PAID", "PROCESSING"];
+    const cancelableStatuses: OrderStatus[] = ["PENDING", "PAID", "PROCESSING"];
     if (!cancelableStatuses.includes(order.status)) {
       return NextResponse.json(
         {
@@ -391,19 +414,31 @@ export async function DELETE(
       );
     }
 
-    // ✅ Cancel order in transaction with stock restoration
+    // ✅ Was payment received before this cancellation?
+    const wasPaid = order.status === "PAID" || order.status === "PROCESSING";
+
+    // ✅ Cancel order in transaction with stock restoration (compare-and-set)
     const cancelledOrder = await prisma.$transaction(async (tx: TransactionClient) => {
-      const cancelled = await tx.order.update({
-        where: { id },
+      const cancelledCount = await tx.order.updateMany({
+        where: { id, status: { in: cancelableStatuses } },
         data: {
           status: "CANCELLED",
+          ...(wasPaid ? { refundStatus: "PENDING" } : {}),
           updatedAt: new Date(),
         },
+      });
+
+      if (cancelledCount.count !== 1) throw new Error("ORDER_STATUS_RACE");
+
+      const cancelled = await tx.order.findUnique({
+        where: { id },
         include: {
           user: { select: { name: true, email: true } },
           items: { select: { productId: true, quantity: true } },
         },
       });
+
+      if (!cancelled) throw new Error("ORDER_STATUS_RACE");
 
       // ✅ Restore stock for all items in this cancelled order
       for (const item of cancelled.items) {
@@ -433,6 +468,37 @@ export async function DELETE(
 
       return cancelled;
     });
+
+    // ✅ Initiate refund AFTER the transaction commits — a Paystack failure must
+    //    never roll back the cancellation or the stock restoration.
+    if (wasPaid && order.paymentRef && cancelledOrder.refundStatus === "PENDING") {
+      try {
+        const refund = await refundTransaction(order.paymentRef, Math.round(order.totalAmount * 100));
+        await prisma.order.update({
+          where: { id },
+          data: { refundStatus: "SUCCEEDED", refundId: String(refund.id) },
+        });
+        await prisma.orderLog.create({
+          data: {
+            orderId: id,
+            userId: session.user?.id || "system",
+            action: "REFUND_INITIATED",
+            changes: JSON.stringify({ reference: order.paymentRef, refundId: refund.id, status: refund.status }),
+          },
+        });
+        console.info("[AUDIT] Refund initiated for cancelled order:", { orderId: id, refundId: refund.id });
+      } catch (refundError) {
+        await prisma.order.update({
+          where: { id },
+          data: { refundStatus: "FAILED" },
+        }).catch(() => {});
+        console.error("[ERROR] Refund initiation failed — admin must process manually:", {
+          orderId: id,
+          reference: order.paymentRef,
+          error: refundError instanceof Error ? refundError.message : String(refundError),
+        });
+      }
+    }
 
     console.info("[AUDIT] Order cancelled by admin — stock restored:", {
       orderId: id,
@@ -474,6 +540,16 @@ export async function DELETE(
       { status: 200 }
     );
   } catch (error) {
+    if (error instanceof Error && error.message === "ORDER_STATUS_RACE") {
+      console.warn("[WARN] Cancel race detected — order status already changed:", { orderId: id });
+      return NextResponse.json(
+        {
+          message: "Order status was changed by another action. Refresh and try again.",
+        },
+        { status: 409 }
+      );
+    }
+
     console.error("[ERROR] Cancel order failed:", {
       error: error instanceof Error ? error.message : String(error),
     });

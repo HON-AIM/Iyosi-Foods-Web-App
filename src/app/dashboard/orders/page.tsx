@@ -1,8 +1,10 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import Link from "next/link";
+import { Suspense } from "react";
 import { format } from "date-fns";
 import OrderTimeline from "@/components/dashboard/OrderTimeline";
+import PaymentVerifyBanner from "@/components/dashboard/PaymentVerifyBanner";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +38,9 @@ export default async function OrdersPage() {
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 min-h-[400px]">
+      <Suspense fallback={null}>
+        <PaymentVerifyBanner />
+      </Suspense>
       <div className="border-b border-gray-100 pb-4 mb-6">
          <h1 className="text-2xl font-bold text-gray-900">My Orders</h1>
       </div>

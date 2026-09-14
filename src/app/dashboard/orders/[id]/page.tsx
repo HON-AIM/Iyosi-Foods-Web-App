@@ -60,6 +60,12 @@ export default async function OrderDetailPage({ params }: PageProps) {
 
   if (!order || order.userId !== session.user.id) notFound()
 
+  const orderLogs = await prisma.orderLog.findMany({
+    where: { orderId: order.id },
+    orderBy: { createdAt: "desc" },
+    select: { id: true, action: true, changes: true, createdAt: true },
+  })
+
   const currentStatusIndex = STATUS_ORDER.indexOf(order.status)
   const isCancelled = order.status === "CANCELLED"
 
@@ -285,6 +291,48 @@ export default async function OrderDetailPage({ params }: PageProps) {
           </div>
         </div>
       </div>
+
+      {/* Order Activity */}
+      {orderLogs.length > 0 && (
+        <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+          <h2 className="font-bold text-gray-900 mb-4 text-sm uppercase tracking-wide">Order Activity</h2>
+          <div className="space-y-0">
+            {orderLogs.map((log, index) => (
+              <div key={log.id} className="flex gap-3 relative pb-4 last:pb-0">
+                {index < orderLogs.length - 1 && (
+                  <div className="absolute left-[7px] top-5 bottom-0 w-px bg-gray-200" />
+                )}
+                <div className="w-[15px] h-[15px] bg-gray-100 border-2 border-gray-300 rounded-full flex-shrink-0 mt-0.5 z-10" />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-gray-800">{log.action.replace(/_/g, " ")}</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {format(new Date(log.createdAt), "MMM d, yyyy 'at' h:mm a")}
+                  </p>
+                  {log.changes && (() => {
+                    try {
+                      const changes = JSON.parse(log.changes);
+                      const entries = Object.entries(changes).filter(([k]) => k !== "itemsRestored" && k !== "stockRestored");
+                      if (entries.length === 0) return null;
+                      return (
+                        <div className="mt-1.5 text-xs text-gray-500 space-y-0.5">
+                          {entries.map(([key, value]) => (
+                            <p key={key}>
+                              <span className="font-medium text-gray-600">{key.replace(/([A-Z])/g, " $1")}: </span>
+                              {typeof value === "string" ? value : JSON.stringify(value)}
+                            </p>
+                          ))}
+                        </div>
+                      );
+                    } catch {
+                      return null;
+                    }
+                  })()}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3">

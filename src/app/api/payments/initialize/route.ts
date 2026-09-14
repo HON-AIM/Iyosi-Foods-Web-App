@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   const session = await auth()
   const isGuest = !session?.user?.id
 
-  const { orderId } = await request.json().catch(() => ({}))
+  const { orderId, orderToken } = await request.json().catch(() => ({}))
   if (!orderId) return NextResponse.json({ message: "Missing orderId" }, { status: 400 })
 
   const order = await prisma.order.findUnique({
@@ -16,9 +16,15 @@ export async function POST(request: Request) {
 
   if (!order) return NextResponse.json({ message: "Order not found" }, { status: 404 })
 
-  // Logged-in users can only pay for their own orders; guests can pay for any order without a userId
+  // Logged-in users can only pay for their own orders.
   if (!isGuest && order.userId && order.userId !== session.user.id)
     return NextResponse.json({ message: "Order not found" }, { status: 404 })
+
+  // Guests can only pay for guest orders they created — proven with the order token.
+  if (isGuest) {
+    const tokenOk = order.userId === null && !!order.orderToken && order.orderToken === orderToken
+    if (!tokenOk) return NextResponse.json({ message: "Order not found" }, { status: 404 })
+  }
 
   if (order.status !== "PENDING")
     return NextResponse.json({ message: "Order is not in a payable state" }, { status: 400 })

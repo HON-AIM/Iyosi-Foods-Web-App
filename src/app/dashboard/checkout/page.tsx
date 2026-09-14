@@ -29,6 +29,7 @@ export default function CheckoutPage() {
   const [validationError, setValidationError] = useState<string | null>(null);
   const [orderPlaced, setOrderPlaced] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [orderToken, setOrderToken] = useState<string | null>(null);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
@@ -131,7 +132,7 @@ export default function CheckoutPage() {
       const paymentRes = await fetch("/api/payments/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId: data.id }),
+        body: JSON.stringify({ orderId: data.id, ...(data.orderToken ? { orderToken: data.orderToken } : {}) }),
       });
       const paymentData = await paymentRes.json();
 
@@ -141,6 +142,13 @@ export default function CheckoutPage() {
       }
 
       setOrderId(data.id);
+      setOrderToken(data.orderToken ?? null);
+      if (typeof window !== "undefined" && data.orderToken) {
+        sessionStorage.setItem(
+          "iyosi_pending_order",
+          JSON.stringify({ id: data.id, token: data.orderToken })
+        );
+      }
       clearCart();
       setPaymentUrl(paymentData.authorizationUrl);
       setOrderPlaced(true);

@@ -148,6 +148,7 @@ export async function POST(request: NextRequest) {
             guestEmail: isGuest ? guestEmail! : null,
             guestName: isGuest ? guestName! : null,
             orderNumber: `ORD-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(4).toString("hex").toUpperCase()}`,
+            orderToken: crypto.randomBytes(32).toString("hex"),
             items: {
               create: items.map((item) => {
                 const product = products.find((p) => p.id === item.productId)!;

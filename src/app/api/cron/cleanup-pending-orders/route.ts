@@ -17,6 +17,7 @@ export async function GET(request: Request) {
   const stalePendingOrders = await prisma.order.findMany({
     where: {
       status: "PENDING",
+      paymentRef: null,
       createdAt: { lt: thirtyMinutesAgo },
     },
     include: {
@@ -28,11 +29,15 @@ export async function GET(request: Request) {
   for (const order of stalePendingOrders) {
     try {
       await prisma.$transaction(async (tx) => {
-        // Cancel the order
-        await tx.order.update({
-          where: { id: order.id },
+        // Cancel the order atomically — only when still PENDING and payment never started.
+        // If the webhook confirmed payment (or the order changed) first, this matches 0 rows.
+        const cancelled = await tx.order.updateMany({
+          where: { id: order.id, status: "PENDING", paymentRef: null },
           data: { status: "CANCELLED" },
         })
+
+        if (cancelled.count !== 1) return
+
         // Restore stock
         for (const item of order.items) {
           await tx.product.update({
@@ -47,7 +52,7 @@ export async function GET(request: Request) {
             userId: "system",
             action: "AUTO_CANCELLED",
             changes: JSON.stringify({
-              reason: "Payment timeout — order was PENDING for over 30 minutes",
+              reason: "Payment timeout — order was PENDING without payment for over 30 minutes",
               itemsRestored: order.items.map((i) => ({
                 productId: i.productId,
                 quantity: i.quantity,
